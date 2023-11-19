@@ -1,10 +1,10 @@
 import { SwapCard } from "@/components/swapcard";
 
-export default function Home() {
+export default function Home({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
 	return (
 		<main className="flex flex-col items-center py-2 mt-8">
 			<div className="flex flex-col md:flex-row max-w-screen-xl w-full">
-				<SwapCard />
+				<SwapCard chain={searchParams["chain"]} />
 				<div className="flex flex-col justify-center items-center md:w-8/12">
 					World
 				</div>
