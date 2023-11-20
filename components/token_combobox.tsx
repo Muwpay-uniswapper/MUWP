@@ -39,23 +39,28 @@ export function TokenCombobox({
     index?: number,
     tokenList: Token[]
 }) {
+    let Container;
+    let ContainerTrigger;
+    let ContainerContent;
+
     const [open, setOpen] = React.useState(false)
-    const [search, setSearch] = React.useState("")
-    const { inputTokens, setInputToken } = useSwapStore()
+
     const { isAboveMd } = useBreakpoint("md")
 
-    const value = inputTokens[index ?? 0]
+    const { inputTokens, setInputToken } = useSwapStore()
 
-    let Container = (props: any) => <Drawer.Root {...props} shouldScaleBackground />
-    let ContainerTrigger = Drawer.Trigger
-    let ContainerContent = (props: any) => (
-        <Drawer.Portal><Drawer.Overlay className="fixed inset-0 bg-black/40" /><Drawer.Content {...props} /></Drawer.Portal>
-    )
+    const value = inputTokens[index ?? 0]
 
     if (isAboveMd) {
         Container = Popover
         ContainerTrigger = PopoverTrigger
         ContainerContent = PopoverContent
+    } else {
+        Container = (props: any) => <Drawer.Root {...props} shouldScaleBackground />
+        ContainerTrigger = Drawer.Trigger
+        ContainerContent = (props: any) => (
+            <Drawer.Portal><Drawer.Overlay className="fixed inset-0 bg-black/40" /><Drawer.Content {...props} /></Drawer.Portal>
+        )
     }
 
     return (
@@ -75,42 +80,58 @@ export function TokenCombobox({
                         </div>}
                 </Button>
             </ContainerTrigger>
-            <ContainerContent side="right" className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 vaul-dragging md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0">
-                <Command
-                    filter={(value: string, search) => {
-                        if (value.includes(search.toLowerCase())) return 1
-                        return 0
-                    }}
-                >
-                    <CommandInput placeholder="Search token..." value={search} onValueChange={setSearch} />
-                    <CommandEmpty>No token found.</CommandEmpty>
-                    <CommandGroup>
-                        {tokenList
-                            .filter((token) => token.label.toLowerCase().includes(search.toLowerCase()) && !(inputTokens.includes(token) && token !== value))
-                            .slice(0, 10)
-                            .map((token) => (
-                                <CommandItem
-                                    key={token.value}
-                                    value={token.label}
-                                    onSelect={(currentValue) => {
-                                        const token = tokenList.find((token) => token.label.toLowerCase() === currentValue.toLowerCase())
-                                        if (token) setInputToken(token, index ?? 0)
-                                        setOpen(false)
-                                    }}
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 h-4 w-4",
-                                            value?.label.toLowerCase?.() === token.label.toLowerCase() ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                    <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
-                                    {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
-                                </CommandItem>
-                            ))}
-                    </CommandGroup>
-                </Command>
+            <ContainerContent side="right" className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0">
+                <TokenListContent index={index} tokenList={tokenList} setOpen={setOpen} />
             </ContainerContent>
         </Container>
     )
 }
+function TokenListContent({
+    index,
+    tokenList,
+    setOpen
+}: {
+    index?: number,
+    tokenList: Token[],
+    setOpen: (open: boolean) => void
+}) {
+    const [search, setSearch] = React.useState("")
+    const { inputTokens, setInputToken } = useSwapStore()
+
+    const value = inputTokens[index ?? 0]
+
+    return <Command
+        filter={(value: string, search) => {
+            if (value.includes(search.toLowerCase())) return 1;
+            return 0;
+        }}
+    >
+        <CommandInput placeholder="Search token..." value={search} onValueChange={setSearch} />
+        <CommandEmpty>No token found.</CommandEmpty>
+        <CommandGroup>
+            {tokenList
+                .filter((token) => token.label.toLowerCase().includes(search.toLowerCase()) && !(inputTokens.includes(token) && token !== value))
+                .slice(0, 10)
+                .map((token) => (
+                    <CommandItem
+                        key={token.value}
+                        value={token.label}
+                        onSelect={(currentValue) => {
+                            const token = tokenList.find((token) => token.label.toLowerCase() === currentValue.toLowerCase());
+                            if (token) setInputToken(token, index ?? 0);
+                            setOpen(false);
+                        }}
+                    >
+                        <Check
+                            className={cn(
+                                "mr-2 h-4 w-4",
+                                value?.label.toLowerCase?.() === token.label.toLowerCase() ? "opacity-100" : "opacity-0"
+                            )} />
+                        <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
+                        {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
+                    </CommandItem>
+                ))}
+        </CommandGroup>
+    </Command>;
+}
+
