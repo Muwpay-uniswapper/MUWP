@@ -6,7 +6,8 @@ type SwapStore = {
     outputToken: Token | null;
     outputChain: number | null;
     setInputToken: (token: Token, index?: number) => void;
-    setOutputToken: (token: Token) => void;
+    removeInputToken: (index?: number) => void;
+    setOutputToken: (token: Token | null) => void;
     setOutputChain: (chain: number) => void;
 };
 
@@ -24,6 +25,11 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
         }
         return { inputTokens: tokens };
     }),
-    setOutputToken: (token: Token) => set({ outputToken: token }),
+    removeInputToken: (index?: number) => set((state: SwapStore) => {
+        const tokens = [...state.inputTokens];
+        tokens.splice(index ?? 0, 1);
+        return { inputTokens: tokens };
+    }),
+    setOutputToken: (token: Token | null) => set({ outputToken: token }),
     setOutputChain: (chain: number) => set({ outputChain: chain }),
 }));

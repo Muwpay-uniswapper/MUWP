@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronDown } from "lucide-react"
-import { useNetwork } from "wagmi"
+import { Check, ChevronDown, Loader2 } from "lucide-react"
+import { useNetwork, useSwitchNetwork } from "wagmi"
 import { Drawer } from 'vaul';
 import { cn } from "@/lib/front/utils"
 import { Button } from "@/components/ui/button"
@@ -24,10 +24,12 @@ import { useBreakpoint } from "@/lib/front/media-query";
 
 export function ChainCombobox({
     index,
-    chainList
+    chainList,
+    mode
 }: {
     index?: number,
-    chainList: Chain[]
+    chainList: Chain[],
+    mode: "input" | "output"
 }) {
     let Container;
     let ContainerTrigger;
@@ -38,8 +40,17 @@ export function ChainCombobox({
     const { isAboveMd } = useBreakpoint("md")
 
     const { chain } = useNetwork()
+    const { pendingChainId, isLoading, reset, switchNetwork } = useSwitchNetwork({
+        onSettled: () => {
+            reset(); // reset mutation variables (eg. pendingChainId, error
+        },
+    })
 
-    const value = chainList.find(_chain => chain?.id == _chain.chainId)
+    const value = chainList.find(_chain =>
+        isLoading
+            ? (pendingChainId == _chain.chainId)
+            : (chain?.id == _chain.chainId)
+    )
 
     if (isAboveMd) {
         Container = Popover
@@ -66,7 +77,8 @@ export function ChainCombobox({
                     }}
                 >
                     {value
-                        ? <div className="flex flex-row items-center p-2">
+                        ? <div className="flex flex-row items-center p-2 relative">
+                            {isLoading && <Loader2 className="h-10 w-10 animate-spin absolute left-1 text-blue-500" />}
                             <img src={value.logoURI} alt={value.label} className="mr-2 h-8 w-8 rounded-full" />
                             <div className="">{value.label}</div>
                             <ChevronDown />
@@ -78,7 +90,7 @@ export function ChainCombobox({
                 </Button>
             </ContainerTrigger>
             <ContainerContent side="right" className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0">
-                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} />
+                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={switchNetwork} />
             </ContainerContent>
         </Container>
     )
@@ -86,13 +98,18 @@ export function ChainCombobox({
 function ChainListContent({
     value,
     tokenList: chainList,
-    setOpen
+    setOpen,
+    mode,
+    switchNetwork
 }: {
     value?: Chain,
     tokenList: Chain[],
-    setOpen: (open: boolean) => void
+    setOpen: (open: boolean) => void,
+    mode: "input" | "output",
+    switchNetwork?: (chainId: number | undefined) => void
 }) {
     const [search, setSearch] = React.useState("")
+
 
     return <Command
         filter={(value: string, search) => {
@@ -101,28 +118,30 @@ function ChainListContent({
         }}
     >
         <CommandInput placeholder="Search chain..." value={search} onValueChange={setSearch} />
-        <CommandEmpty>No token found.</CommandEmpty>
+        <CommandEmpty>No chain found.</CommandEmpty>
         <CommandGroup>
             {chainList
                 .filter((chain) => chain.label.toLowerCase().includes(search.toLowerCase()) || chain === value)
                 .slice(0, 10)
-                .map((token) => (
+                .map((chain) => (
                     <CommandItem
-                        key={token.value}
-                        value={token.label}
+                        key={chain.value}
+                        value={chain.label}
                         onSelect={(currentValue) => {
-                            // const token = chainList.find((token) => token.label.toLowerCase() === currentValue.toLowerCase());
-                            // if (token) setInputToken(token, index ?? 0);
+                            const chain = chainList.find(a => a.label.toLowerCase() == currentValue)
+                            if (mode == "input") {
+                                switchNetwork?.(chain?.chainId)
+                            }
                             setOpen(false);
                         }}
                     >
                         <Check
                             className={cn(
                                 "mr-2 h-4 w-4",
-                                value?.label.toLowerCase?.() === token.label.toLowerCase() ? "opacity-100" : "opacity-0"
+                                value?.label.toLowerCase?.() === chain.label.toLowerCase() ? "opacity-100" : "opacity-0"
                             )} />
-                        <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
-                        {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
+                        <img src={chain.logoURI} alt="logo" className="mr-2 h-4 w-4" />
+                        {chain.label.length > 20 ? `${chain.label.substring(0, 20)}...` : chain.label}
                     </CommandItem>
                 ))}
         </CommandGroup>

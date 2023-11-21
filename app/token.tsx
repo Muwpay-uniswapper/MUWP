@@ -39,7 +39,11 @@ export async function TokenSelector({
     return <TokenCombobox tokenList={tokenList} mode={mode} />
 }
 
-export async function ChainSelector() {
+export async function ChainSelector({
+    mode
+}: {
+    mode: "input" | "output"
+}) {
     const chains = await fetch(`https://backend.muwp.xyz/api/v1/lifi/chains?isTestnet=false`)
     const chainsJson = await chains.json()
     /* Example of chainsJson.chains:
@@ -66,5 +70,5 @@ export async function ChainSelector() {
         }
     })
 
-    return <ChainCombobox chainList={chainList} />
+    return <ChainCombobox chainList={chainList} mode={mode} />
 }

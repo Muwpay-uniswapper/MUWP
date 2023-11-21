@@ -104,9 +104,9 @@ function TokenListContent({
     mode: "input" | "output"
 }) {
     const [search, setSearch] = React.useState("")
-    const { inputTokens, setInputToken, setOutputToken } = useSwapStore()
+    const { inputTokens, setInputToken, outputToken, setOutputToken, removeInputToken } = useSwapStore()
 
-    const value = inputTokens[index ?? 0]
+    const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
 
     return <Command
         filter={(value: string, search) => {
@@ -125,9 +125,14 @@ function TokenListContent({
                         key={token.value}
                         value={token.label}
                         onSelect={(currentValue) => {
-                            const token = tokenList.find((token) => token.label.toLowerCase() === currentValue.toLowerCase());
-                            if (token && mode == "input") setInputToken(token, index ?? 0);
-                            else if (token && mode == "output") setOutputToken(token);
+                            if (value?.label.toLowerCase() == currentValue) {
+                                if (mode == "input") removeInputToken(index);
+                                else setOutputToken(null)
+                            } else {
+                                const token = tokenList.find((token) => token.label.toLowerCase() === currentValue.toLowerCase());
+                                if (token && mode == "input") setInputToken(token, index ?? 0);
+                                else if (token && mode == "output") setOutputToken(token);
+                            }
                             setOpen(false);
                         }}
                     >

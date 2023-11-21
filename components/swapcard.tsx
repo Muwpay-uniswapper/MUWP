@@ -22,7 +22,7 @@ export function SwapCard({ chain }: { chain?: number }) {
         </CardHeader>
         <CardContent>
             <div className="flex flex-row">
-                <ChainSelector />
+                <ChainSelector mode="input" />
                 <ConnectButton />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full mt-8">
@@ -32,7 +32,7 @@ export function SwapCard({ chain }: { chain?: number }) {
                 <ArrowDown className="text-white -translate-y-1/2 bg-card" />
             </Separator>
             <div className="grid grid-cols-1 gap-4 w-full mt-8">
-                <ChainSelector />
+                <ChainSelector mode="output" />
                 <TokenSelector id='to-token' chain={chain} mode="output" />
             </div>
         </CardContent>
