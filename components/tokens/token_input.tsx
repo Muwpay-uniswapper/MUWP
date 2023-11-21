@@ -1,15 +1,17 @@
 import React from "react";
-import { Token } from "@/lib/front/model/Token"
+import { Token } from "@/lib/front/model/CellLike"
 
 export function TokenInput({
-    token
+    token,
+    mode
 }: {
-    token: Token
+    token: Token,
+    mode: "input" | "output"
 }) {
     const [amount, setAmount] = React.useState(0)
-    return <div className="w-full bg-white dark:bg-zinc-800">
+    return <div className="w-full bg-zinc-800">
         <div className="flex flex-wrap items-center justify-between bg-blue-50 dark:bg-blue-800 p-4 rounded">
-            <div className="flex flex-col  items-start w-9/12">
+            <div className="flex flex-col  items-start w-full">
                 <div className="flex items-center space-x-2">
                     <img
                         alt="Token Symbol"
@@ -23,9 +25,11 @@ export function TokenInput({
                     />
                     <input
                         aria-label="Token amount"
-                        className="text-2xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none"
+                        className="text-2xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-black"
                         value={amount}
+                        disabled={mode == 'output'}
                         onChange={(e) => {
+                            if (mode == "output") return
                             let n = Number(e.target.value)
                             if (isNaN(n)) n = 0
                             setAmount(n)
@@ -35,13 +39,13 @@ export function TokenInput({
                     />
                 </div>
             </div>
-            <div className="text-xl font-semibold text-blue-700 dark:text-blue-300 text-right">{token.label}</div>
+            <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div>
             <div className="text-sm font-normal text-gray-500 w-full text-left">≈{token.priceUSD * amount} $</div>
         </div>
 
         <div className="text-left p-4">
             <div className="text-base font-semibold">{token.label} Token</div>
-            <div className="text-sm text-zinc-500 dark:text-zinc-400">{token.address}</div>
+            <div className="text-sm text-zinc-400">{token.address}</div>
         </div>
     </div>
 }

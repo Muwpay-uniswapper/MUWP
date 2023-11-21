@@ -1,5 +1,5 @@
 import { create, StoreApi } from 'zustand';
-import { Token } from '@/lib/front/model/Token';
+import { Token } from '@/lib/front/model/CellLike';
 
 type SwapStore = {
     inputTokens: Token[];

@@ -18,7 +18,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { TokenInput } from "./token_input"
-import { Token } from "@/lib/front/model/Token"
+import { Token } from "@/lib/front/model/CellLike"
 import { useSwapStore } from "@/lib/front/data/swapStore"
 import { useBreakpoint } from "@/lib/front/media-query";
 
@@ -27,17 +27,19 @@ export function TokenComboboxes({ tokenList }: { tokenList: Token[] }) {
 
     return <>
         {Array.from(Array(tokenCount + 1).keys()).map((index) => {
-            return <TokenCombobox index={index} tokenList={tokenList} />
+            return <TokenCombobox index={index} tokenList={tokenList} mode="input" />
         })}
     </>
 }
 
 export function TokenCombobox({
     index,
-    tokenList
+    tokenList,
+    mode
 }: {
     index?: number,
-    tokenList: Token[]
+    tokenList: Token[],
+    mode: "input" | "output"
 }) {
     let Container;
     let ContainerTrigger;
@@ -47,9 +49,9 @@ export function TokenCombobox({
 
     const { isAboveMd } = useBreakpoint("md")
 
-    const { inputTokens, setInputToken } = useSwapStore()
+    const { inputTokens, setInputToken, outputToken, setOutputToken } = useSwapStore()
 
-    const value = inputTokens[index ?? 0]
+    const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
 
     if (isAboveMd) {
         Container = Popover
@@ -70,10 +72,14 @@ export function TokenCombobox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={cn("w-full border h-auto", value ? "p-0 overflow-clip" : "border-dashed border-gray-300 rounded-md p-2")}
+                    className={cn(
+                        "w-full border h-auto",
+                        value ? "p-0 overflow-clip" : "border-dashed border-gray-300 rounded-md p-2",
+                        !value && (inputTokens.length % 2 == 0) ? "col-span-full" : ""
+                    )}
                 >
                     {value
-                        ? <TokenInput token={value} />
+                        ? <TokenInput token={value} mode={mode} />
                         : <div className="grid gap-2 place-items-center">
                             <img src="/icons/plus.diamond.fill.svg" alt="plus" className="mr-2 h-8 w-8 opacity-50" />
                             <div className="opacity-50">Select Token</div>
@@ -81,7 +87,7 @@ export function TokenCombobox({
                 </Button>
             </ContainerTrigger>
             <ContainerContent side="right" className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0">
-                <TokenListContent index={index} tokenList={tokenList} setOpen={setOpen} />
+                <TokenListContent index={index} tokenList={tokenList} setOpen={setOpen} mode={mode} />
             </ContainerContent>
         </Container>
     )
@@ -89,14 +95,16 @@ export function TokenCombobox({
 function TokenListContent({
     index,
     tokenList,
-    setOpen
+    setOpen,
+    mode
 }: {
     index?: number,
     tokenList: Token[],
-    setOpen: (open: boolean) => void
+    setOpen: (open: boolean) => void,
+    mode: "input" | "output"
 }) {
     const [search, setSearch] = React.useState("")
-    const { inputTokens, setInputToken } = useSwapStore()
+    const { inputTokens, setInputToken, setOutputToken } = useSwapStore()
 
     const value = inputTokens[index ?? 0]
 
@@ -118,7 +126,8 @@ function TokenListContent({
                         value={token.label}
                         onSelect={(currentValue) => {
                             const token = tokenList.find((token) => token.label.toLowerCase() === currentValue.toLowerCase());
-                            if (token) setInputToken(token, index ?? 0);
+                            if (token && mode == "input") setInputToken(token, index ?? 0);
+                            else if (token && mode == "output") setOutputToken(token);
                             setOpen(false);
                         }}
                     >
@@ -134,4 +143,3 @@ function TokenListContent({
         </CommandGroup>
     </Command>;
 }
-

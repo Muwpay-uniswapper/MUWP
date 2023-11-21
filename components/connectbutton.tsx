@@ -5,11 +5,15 @@ import { useAccount } from 'wagmi'
 export function ConnectButton({
     not = false,
     asChild = false,
-    className = ""
+    className = "",
+    accountStatus = "avatar",
+    chainStatus = "none"
 }: {
-    not: boolean,
-    asChild: boolean,
-    className: string
+    not?: boolean,
+    asChild?: boolean,
+    className?: string,
+    accountStatus?: string,
+    chainStatus?: string
 }) {
     const { isConnected } = useAccount();
     if (asChild) {
@@ -21,6 +25,10 @@ export function ConnectButton({
     }
 
     return <>
-        {isConnected ^ not ? <ConnectRainbow {...arguments} /> : ""}
+        {isConnected ^ not ? <ConnectRainbow
+            accountStatus={accountStatus as any}
+            chainStatus={chainStatus as any}
+            showBalance={false}
+        /> : ""}
     </>
 }
