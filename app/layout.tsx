@@ -5,6 +5,8 @@ import { cn } from '@/lib/front/utils'
 import { Viewport, Metadata } from 'next'
 import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
+import { VercelToolbar } from '@vercel/toolbar/next';
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,6 +31,9 @@ export default function RootLayout({
 					<div className="bg-home-gradient font-poppins min-h-100vh bg-50 bg-cover bg-no-repeat">
 						<Navbar />
 						{children}
+						<Suspense>
+							<VercelToolbar />
+						</Suspense>
 					</div>
 				</Providers>
 			</body>

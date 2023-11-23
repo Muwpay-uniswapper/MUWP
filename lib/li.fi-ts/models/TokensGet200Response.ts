@@ -17,14 +17,14 @@ export class TokensGet200Response {
     /**
     * The requested tokens
     */
-    '_1'?: Array<Token>;
+    'tokens'?: Array<Token>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{ name: string, baseName: string, type: string, format: string }> = [
         {
-            "name": "_1",
-            "baseName": "1",
+            "name": "tokens",
+            "baseName": "tokens.[0]",
             "type": "Array<Token>",
             "format": ""
         }];

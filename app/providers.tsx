@@ -36,6 +36,7 @@ import {
     goerli
 } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { useSwapStore } from '@/lib/front/data/swapStore';
 
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
     [
@@ -97,8 +98,10 @@ export function State({ children }: { children: React.ReactNode }) {
     const [hydrated, setHydrated] = React.useState(false);
     const searchParams = useSearchParams();
     const chainId = searchParams.get('chain');
-    const { chains, error, isLoading, pendingChainId, switchNetwork } = useSwitchNetwork();
+    const toChainId = searchParams.get('toChain');
+    const { switchNetwork } = useSwitchNetwork();
     const { chain } = useNetwork();
+    const { outputChain, setOutputChain } = useSwapStore();
     const router = useRouter()
 
     React.useEffect(() => {
@@ -106,6 +109,9 @@ export function State({ children }: { children: React.ReactNode }) {
         if (typeof chain == "undefined" || typeof switchNetwork == "undefined") return;
         if (chainId !== chain.id.toString()) {
             switchNetwork?.(Number(chainId));
+        }
+        if (typeof toChainId !== "undefined" && toChainId !== outputChain?.toString()) {
+            setOutputChain(Number(toChainId));
         }
 
         setHydrated(true);
@@ -116,11 +122,12 @@ export function State({ children }: { children: React.ReactNode }) {
         if (typeof window !== 'undefined') {
             const newParams = new URLSearchParams(window.location.search);
             if (chain) newParams.set('chain', chain.id.toString());
+            if (outputChain) newParams.set('toChain', outputChain.toString());
 
             // Just append the new params to the path.
             router.push(`${window.location.pathname}?${newParams.toString()}`);
         }
-    }, [chain, router]);
+    }, [chain, outputChain, router]);
 
     return children;
 }

@@ -1,11 +1,11 @@
 // TODO: better import syntax?
-import {BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS} from './baseapi';
-import {Configuration} from '../configuration';
-import {RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo} from '../http/http';
-import {ObjectSerializer} from '../models/ObjectSerializer';
-import {ApiException} from './exception';
-import {canConsumeForm, isCodeInRange} from '../util';
-import {SecurityAuthentication} from '../auth/auth';
+import { BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS } from './baseapi';
+import { Configuration } from '../configuration';
+import { RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo } from '../http/http';
+import { ObjectSerializer } from '../models/ObjectSerializer';
+import { ApiException } from './exception';
+import { canConsumeForm, isCodeInRange } from '../util';
+import { SecurityAuthentication } from '../auth/auth';
 
 
 import { BridgesEnum } from '../models/BridgesEnum';
@@ -86,7 +86,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -149,7 +149,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -197,7 +197,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -233,7 +233,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -304,7 +304,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -356,7 +356,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -396,7 +396,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -447,7 +447,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -484,7 +484,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -536,7 +536,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -578,7 +578,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         );
         requestContext.setBody(serializedBody);
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -620,7 +620,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         );
         requestContext.setBody(serializedBody);
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -819,7 +819,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -881,7 +881,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -934,7 +934,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -977,7 +977,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -1006,7 +1006,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -1026,7 +1026,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to analyticsTransfersGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async analyticsTransfersGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<any >> {
+    public async analyticsTransfersGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<any>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: any = ObjectSerializer.deserialize(
@@ -1055,7 +1055,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to analyticsWalletsWalletAddressGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async analyticsWalletsWalletAddressGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<WalletAnalyticsResponse >> {
+    public async analyticsWalletsWalletAddressGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<WalletAnalyticsResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: WalletAnalyticsResponse = ObjectSerializer.deserialize(
@@ -1084,7 +1084,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to calldataParseGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async calldataParseGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<void >> {
+    public async calldataParseGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<void>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, undefined);
@@ -1109,7 +1109,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to chainsGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async chainsGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<ChainsResponse >> {
+    public async chainsGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<ChainsResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: ChainsResponse = ObjectSerializer.deserialize(
@@ -1138,7 +1138,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to connectionsGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async connectionsGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<ConnectionsResponse >> {
+    public async connectionsGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<ConnectionsResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: ConnectionsResponse = ObjectSerializer.deserialize(
@@ -1167,7 +1167,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to gasRefetchGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async gasRefetchGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<LIFuelStatus >> {
+    public async gasRefetchGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<LIFuelStatus>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: LIFuelStatus = ObjectSerializer.deserialize(
@@ -1196,7 +1196,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to gasStatusGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async gasStatusGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<LIFuelStatus >> {
+    public async gasStatusGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<LIFuelStatus>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: LIFuelStatus = ObjectSerializer.deserialize(
@@ -1225,7 +1225,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to gasSuggestionChainGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async gasSuggestionChainGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<void >> {
+    public async gasSuggestionChainGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<void>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, undefined);
@@ -1250,7 +1250,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to integratorsIntegratorIdGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async integratorsIntegratorIdGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<IntegratorResponse >> {
+    public async integratorsIntegratorIdGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<IntegratorResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: IntegratorResponse = ObjectSerializer.deserialize(
@@ -1282,7 +1282,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to integratorsIntegratorIdWithdrawChainIdGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async integratorsIntegratorIdWithdrawChainIdGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<IntegratorWithdrawalResponse >> {
+    public async integratorsIntegratorIdWithdrawChainIdGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<IntegratorWithdrawalResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: IntegratorWithdrawalResponse = ObjectSerializer.deserialize(
@@ -1317,7 +1317,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to quoteContractCallPost
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async quoteContractCallPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Tools >> {
+    public async quoteContractCallPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Tools>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: Tools = ObjectSerializer.deserialize(
@@ -1346,7 +1346,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to quoteContractCallsPost
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async quoteContractCallsPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Tools >> {
+    public async quoteContractCallsPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Tools>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: Tools = ObjectSerializer.deserialize(
@@ -1375,7 +1375,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to quoteGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async quoteGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Step >> {
+    public async quoteGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Step>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: Step = ObjectSerializer.deserialize(
@@ -1414,7 +1414,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to statusGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async statusGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<StatusResponse >> {
+    public async statusGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<StatusResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: StatusResponse = ObjectSerializer.deserialize(
@@ -1446,7 +1446,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to tokenGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async tokenGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Array<Token> >> {
+    public async tokenGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Array<Token>>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: Array<Token> = ObjectSerializer.deserialize(
@@ -1481,11 +1481,12 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to tokensGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async tokensGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<TokensGet200Response >> {
+    public async tokensGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<TokensGet200Response>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
+            const txt = await response.body.text()
             const body: TokensGet200Response = ObjectSerializer.deserialize(
-                ObjectSerializer.parse(await response.body.text(), contentType),
+                ObjectSerializer.parse(txt, contentType),
                 "TokensGet200Response", ""
             ) as TokensGet200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
@@ -1510,7 +1511,7 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to toolsGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async toolsGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Tools >> {
+    public async toolsGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Tools>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: Tools = ObjectSerializer.deserialize(

@@ -339,7 +339,21 @@ export class ObjectSerializer {
             let instance = new typeMap[type]();
             let attributeTypes = typeMap[type].getAttributeTypeMap();
             for (let attributeType of attributeTypes) {
-                let value = ObjectSerializer.deserialize(data[attributeType.baseName], attributeType.type, attributeType.format);
+                let value;
+                const pathArr = attributeType.baseName.split('.');
+                let curData = data;
+                for (let i = 0; i < pathArr.length; i++) {
+                    const prop = pathArr[i];
+                    if (prop === '') continue;
+                    if (prop.startsWith('[') && prop.endsWith(']')) {
+                        const index = parseInt(prop.substring(1, prop.length - 1), 10);
+                        curData = Object.values(curData)[index];
+                    } else {
+                        curData = curData[prop];
+                    }
+                }
+                value = ObjectSerializer.deserialize(curData, attributeType.type, attributeType.format);
+
                 if (value !== undefined) {
                     instance[attributeType.name] = value;
                 }

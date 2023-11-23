@@ -1,7 +1,7 @@
 import { ResponseContext, RequestContext, HttpFile, HttpInfo } from '../http/http';
-import { Configuration} from '../configuration'
+import { Configuration } from '../configuration'
 import { Observable, of, from } from '../rxjsStub';
-import {mergeMap, map} from  '../rxjsStub';
+import { mergeMap, map } from '../rxjsStub';
 import { Action } from '../models/Action';
 import { AllowDenyPrefer } from '../models/AllowDenyPrefer';
 import { BasicTransaction } from '../models/BasicTransaction';
@@ -68,7 +68,7 @@ import { UnavailableRoutesFailedInner } from '../models/UnavailableRoutesFailedI
 import { UnavailableRoutesFilteredOutInner } from '../models/UnavailableRoutesFilteredOutInner';
 import { WalletAnalyticsResponse } from '../models/WalletAnalyticsResponse';
 
-import { AdvancedApiRequestFactory, AdvancedApiResponseProcessor} from "../apis/AdvancedApi";
+import { AdvancedApiRequestFactory, AdvancedApiResponseProcessor } from "../apis/AdvancedApi";
 export class ObservableAdvancedApi {
     private requestFactory: AdvancedApiRequestFactory;
     private responseProcessor: AdvancedApiResponseProcessor;
@@ -191,7 +191,7 @@ export class ObservableAdvancedApi {
 
 }
 
-import { DefaultApiRequestFactory, DefaultApiResponseProcessor} from "../apis/DefaultApi";
+import { DefaultApiRequestFactory, DefaultApiResponseProcessor } from "../apis/DefaultApi";
 export class ObservableDefaultApi {
     private requestFactory: DefaultApiRequestFactory;
     private responseProcessor: DefaultApiResponseProcessor;
@@ -880,7 +880,7 @@ export class ObservableDefaultApi {
 
 }
 
-import { GasApiRequestFactory, GasApiResponseProcessor} from "../apis/GasApi";
+import { GasApiRequestFactory, GasApiResponseProcessor } from "../apis/GasApi";
 export class ObservableGasApi {
     private requestFactory: GasApiRequestFactory;
     private responseProcessor: GasApiResponseProcessor;

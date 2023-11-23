@@ -25,7 +25,7 @@ export class RoutesResponse {
     /**
     * An object representing the routes that are unavailable for the given transfer
     */
-    'unavailableRoutes'?: Array<UnavailableRoutes>;
+    'unavailableRoutes'?: UnavailableRoutes;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -39,7 +39,7 @@ export class RoutesResponse {
         {
             "name": "unavailableRoutes",
             "baseName": "unavailableRoutes",
-            "type": "Array<UnavailableRoutes>",
+            "type": "UnavailableRoutes",
             "format": ""
         }];
 

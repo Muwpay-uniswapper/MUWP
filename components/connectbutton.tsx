@@ -18,14 +18,14 @@ export function ConnectButton({
     const { isConnected } = useAccount();
     if (asChild) {
         return <>
-            {isConnected ^ not ? <div className={className}>
+            {isConnected !== not ? <div className={className}>
                 <ConnectRainbow />
             </div> : ""}
         </>
     }
 
     return <>
-        {isConnected ^ not ? <ConnectRainbow
+        {isConnected !== not ? <ConnectRainbow
             accountStatus={accountStatus as any}
             chainStatus={chainStatus as any}
             showBalance={false}

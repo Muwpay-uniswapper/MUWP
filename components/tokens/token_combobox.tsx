@@ -103,9 +103,14 @@ function TokenListContent({
     setOpen: (open: boolean) => void,
     mode: "input" | "output"
 }) {
+
     const [search, setSearch] = React.useState("")
     const { inputTokens, setInputToken, outputToken, setOutputToken, removeInputToken } = useSwapStore()
-
+    const [hydrated, setHydrated] = React.useState(false)
+    React.useEffect(() => {
+        setHydrated(true)
+        setSearch("")
+    }, [])
     const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
 
     return <Command
@@ -115,21 +120,25 @@ function TokenListContent({
         }}
     >
         <CommandInput placeholder="Search token..." value={search} onValueChange={setSearch} />
-        <CommandEmpty>No token found.</CommandEmpty>
+        <CommandEmpty>
+            <div className="h-4">
+                No token found.
+            </div>
+        </CommandEmpty>
         <CommandGroup>
             {tokenList
-                .filter((token) => token.label.toLowerCase().includes(search.toLowerCase()) && !(inputTokens.includes(token) && token !== value))
+                .filter((token) => token.value.toLowerCase().includes(search.toLowerCase()) && !(inputTokens.includes(token) && token !== value))
                 .slice(0, 10)
                 .map((token) => (
                     <CommandItem
                         key={token.value}
-                        value={token.label}
+                        value={token.value}
                         onSelect={(currentValue) => {
-                            if (value?.label.toLowerCase() == currentValue) {
+                            if (value?.value.toLowerCase() == currentValue) {
                                 if (mode == "input") removeInputToken(index);
                                 else setOutputToken(null)
                             } else {
-                                const token = tokenList.find((token) => token.label.toLowerCase() === currentValue.toLowerCase());
+                                const token = tokenList.find((token) => token.value.toLowerCase() === currentValue.toLowerCase());
                                 if (token && mode == "input") setInputToken(token, index ?? 0);
                                 else if (token && mode == "output") setOutputToken(token);
                             }
@@ -139,7 +148,7 @@ function TokenListContent({
                         <Check
                             className={cn(
                                 "mr-2 h-4 w-4",
-                                value?.label.toLowerCase?.() === token.label.toLowerCase() ? "opacity-100" : "opacity-0"
+                                value?.value.toLowerCase?.() === token.value.toLowerCase() ? "opacity-100" : "opacity-0"
                             )} />
                         <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
                         {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}

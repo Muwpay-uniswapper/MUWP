@@ -40,6 +40,7 @@ export function ChainCombobox({
     const { isAboveMd } = useBreakpoint("md")
 
     const { chain } = useNetwork()
+    const { outputChain } = useSwapStore()
     const { pendingChainId, isLoading, reset, switchNetwork } = useSwitchNetwork({
         onSettled: () => {
             reset(); // reset mutation variables (eg. pendingChainId, error
@@ -47,9 +48,11 @@ export function ChainCombobox({
     })
 
     const value = chainList.find(_chain =>
-        isLoading
-            ? (pendingChainId == _chain.chainId)
-            : (chain?.id == _chain.chainId)
+        mode == "input" ?
+            (isLoading
+                ? (pendingChainId == _chain.chainId)
+                : (chain?.id == _chain.chainId))
+            : outputChain == _chain.chainId
     )
 
     if (isAboveMd) {
@@ -71,7 +74,7 @@ export function ChainCombobox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={cn("w-full h-auto rounded-xl mr-2 transition-transform", value ? "p-0 overflow-clip border-none hover:scale-[1.025]" : "border-dashed border border-gray-300")}
+                    className={cn("w-full h-auto rounded-xl transition-transform", value ? "p-0 overflow-clip border-none hover:scale-[1.025]" : "border-dashed border border-gray-300")}
                     style={{
                         background: "var(--rk-colors-connectButtonBackground)"
                     }}
@@ -109,6 +112,7 @@ function ChainListContent({
     switchNetwork?: (chainId: number | undefined) => void
 }) {
     const [search, setSearch] = React.useState("")
+    const { setOutputChain, inputTokens, removeInputToken, setOutputToken } = useSwapStore()
 
 
     return <Command
@@ -126,19 +130,27 @@ function ChainListContent({
                 .map((chain) => (
                     <CommandItem
                         key={chain.value}
-                        value={chain.label}
+                        value={chain.value}
                         onSelect={(currentValue) => {
-                            const chain = chainList.find(a => a.label.toLowerCase() == currentValue)
+                            const chain = chainList.find(a => a.value.toLowerCase() == currentValue)
+                            if (value?.value.toLowerCase() == currentValue) return setOpen(false); // You can't remove the current chain
                             if (mode == "input") {
                                 switchNetwork?.(chain?.chainId)
+                                for (let i = 0; i < inputTokens.length; i++) {
+                                    removeInputToken(i);
+                                }
+                            } else {
+                                setOutputChain(chain?.chainId ?? null)
+                                setOutputToken(null)
                             }
+
                             setOpen(false);
                         }}
                     >
                         <Check
                             className={cn(
                                 "mr-2 h-4 w-4",
-                                value?.label.toLowerCase?.() === chain.label.toLowerCase() ? "opacity-100" : "opacity-0"
+                                value?.value.toLowerCase?.() === chain.value.toLowerCase() ? "opacity-100" : "opacity-0"
                             )} />
                         <img src={chain.logoURI} alt="logo" className="mr-2 h-4 w-4" />
                         {chain.label.length > 20 ? `${chain.label.substring(0, 20)}...` : chain.label}
