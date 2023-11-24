@@ -6,9 +6,9 @@ export default function Home({ searchParams }: { searchParams: { [key: string]: 
 	const toChain = typeof searchParams["toChain"] === "string" ? searchParams["toChain"] : chain;
 	return (
 		<main className="flex flex-col items-center py-2 mt-8">
-			<div className="flex flex-col md:flex-row max-w-screen-xl w-full">
+			<div className="flex flex-col md:flex-row gap-2 max-w-screen-xl w-full mx-4">
 				<SwapCard chain={chain} toChain={toChain} />
-				<div className="flex flex-col justify-center items-center md:w-8/12">
+				<div className="flex flex-col justify-center items-center md:w-8/12 mx-4">
 					<MainFlow />
 				</div>
 			</div>

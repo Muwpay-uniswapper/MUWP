@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/front/utils'
 import { ConnectButton } from '@/components/connectbutton'
 import { ArrowDown } from "lucide-react"
-import { TokenSelector, ChainSelector } from '@/components/tokens/token'
+import { TokenSelector, ChainSelector } from '@/components/dataFetch'
 import { Separator } from "./ui/separator"
 import { TokenLoader } from "./tokens/token_loader";
 import { ChainLoader } from "./chains/chain-loader";

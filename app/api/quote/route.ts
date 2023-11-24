@@ -35,15 +35,27 @@ export async function POST(request: Request) {
     const body = await request.json();
     const input = Input.parse(body);
 
-    const routes = await advancedAPI.advancedRoutesPost({
-        fromAmount: input.inputAmount[input.inputTokens[0].value].toString(),
+    const queries = input.inputTokens.map(inToken => advancedAPI.advancedRoutesPost({
+        fromAmount: input.inputAmount[inToken.value].toString(),
         fromChainId: input.inputChain,
-        fromTokenAddress: input.inputTokens[0].address,
+        fromTokenAddress: inToken.address,
         toChainId: input.outputChain,
         toTokenAddress: input.outputToken.address,
         fromAddress: input.fromAddress,
         toAddress: input.toAddress,
+    }))
+
+    const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
+
+    const routes = rawRoutes.map((rawRoute, index) => {
+        const route = rawRoute.routes?.[0];
+        if (!route) {
+            console.log(JSON.stringify(rawRoute.unavailableRoutes?.filteredOut, null, 2));
+            throw new Error(`No route found for ${input.inputTokens[index].value} -> ${input.outputToken.value}`);
+        }
+        return route;
     });
+
 
     return new Response(JSON.stringify(routes), {
         headers: { 'content-type': 'application/json' },
