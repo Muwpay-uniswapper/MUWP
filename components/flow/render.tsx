@@ -1,80 +1,156 @@
 import { Route, Token } from "@/lib/li.fi-ts";
 import { Edge, Node, Position } from "reactflow";
 import { TokenNodeData } from "./TokenNode";
+import { graphlib, layout } from "dagre";
+import { DetailNodeData } from "./DetailNode";
 
-
-export function renderNodes(initialPoint: { x: number, y: number }, routes: Route[]): { nodes: Node<TokenNodeData>[], edges: Edge[] } {
-    function hash(token?: Token) {
-        if (!token) {
-            return "";
-        }
-        return `${token.symbol}-${token.address}-${token.chainId}`
+export function hash(token?: Token) {
+    if (!token) {
+        return "";
     }
-    if (routes.length === 0) {
-        return { nodes: [], edges: [] };
-    }
-    const nodes = [];
-    const edges = [];
-    let maxSteps = 0;
-    let point = { ...initialPoint };
-    let maxY = 0;
+    return `${token.symbol}-${token.address}-${token.chainId}`
+}
 
-    for (const route of routes) {
-        if (route.steps.length > maxSteps) {
-            maxSteps = route.steps.length; // Keep track of the longest route
-        }
+const dagreGraph = new graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-        for (let i = 0; i < route.steps.length; i++) {
-            const step = route.steps[i];
-            const node: Node<TokenNodeData> = {
-                position: { ...point },
-                id: hash(step.action.fromToken),
-                sourcePosition: Position.Right,
-                targetPosition: Position.Left,
-                type: "token",
-                data: { ...step.action.fromToken, amount: step.action.fromAmount, isInput: i === 0 }
-            };
+const nodeWidth = 250;
+const nodeHeight = 150;
 
-            nodes.push(node);
+const getLayoutedElements = (_nodes: { [key: string]: Node<TokenNodeData> }, edges: Edge[], options: { direction: string }) => {
+    const isHorizontal = options.direction === 'LR';
+    dagreGraph.setGraph({ rankdir: options.direction });
 
-            if (step.action.toToken) {
-                const edge: Edge = {
-                    id: `${hash(step.action.fromToken)}-${hash(step.action.toToken)}`,
-                    source: hash(step.action.fromToken),
-                    target: hash(step.action.toToken),
-                    data: {
-                        label: step.tool,
-                    },
-                };
+    const nodes = Object.values(_nodes);
 
-                edges.push(edge);
-            }
+    nodes.forEach((node) => {
+        if (node.type === "detail") return;
+        dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
 
-            point = {
-                x: point.x,
-                y: point.y + 250,
-            };
-        }
+    edges.forEach((edge) => {
+        dagreGraph.setEdge(edge.source, edge.target);
+    });
 
-        point.x += 250; // Increasing X offset for each route
-        if (point.y > maxY) {
-            maxY = point.y;
-        }
-        point.y = initialPoint.y; // Reset X position for each route
-    }
+    layout(dagreGraph);
 
-    // Add the final node
-    const node: Node<TokenNodeData> = {
-        position: {
-            x: (point.x - initialPoint.x - 250) / 2,
-            y: initialPoint.x + maxY + 250,
-        },
-        id: hash(routes[0].steps[routes[0].steps.length - 1].action.toToken),
-        targetPosition: Position.Left,
-        type: "token",
-        data: { ...routes[0].steps[routes[0].steps.length - 1].action.toToken, amount: routes[0].steps[routes[0].steps.length - 1].estimate?.toAmount || "?" }
-    };
-    nodes.push(node);
+    nodes.forEach((node) => {
+        if (node.type === "detail") return;
+        const nodeWithPosition = dagreGraph.node(node.id);
+        node.targetPosition = isHorizontal ? Position.Left : Position.Top;
+        node.sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
+
+        // We are shifting the dagre node position (anchor=center center) to the top left
+        // so it matches the React Flow node anchor point (top left).
+        node.position = {
+            x: nodeWithPosition.x - nodeWidth / 2,
+            y: nodeWithPosition.y - nodeHeight / 2,
+        };
+
+        return node;
+    });
 
     return { nodes, edges };
 }
+
+export function renderNodes(initialPoint: { x: number, y: number }, routes: Route[]): { nodes: Node<TokenNodeData | DetailNodeData>[], edges: Edge[] } {
+    if (routes.length === 0) {
+        return { nodes: [], edges: [] };
+    }
+
+    const nodes: { [key: string]: Node<TokenNodeData | DetailNodeData> } = {};
+    const edges: Edge[] = [];
+    let point = { ...initialPoint };
+
+    for (const route of routes) {
+        let previousNodeId: string | null = null;
+
+        for (let i = 0; i < route.steps.length; i++) {
+            const step = route.steps[i];
+            const fromNodeId = hash(step.action.fromToken);
+            const toNodeId = step.action.toToken ? hash(step.action.toToken) : null;
+
+            // Add or update the source node
+            if (!nodes[fromNodeId]) {
+                nodes[fromNodeId] = {
+                    position: { ...point },
+                    id: fromNodeId,
+                    sourcePosition: Position.Right,
+                    targetPosition: Position.Left,
+                    type: "token",
+                    data: {
+                        ...step.action.fromToken,
+                        isInput: i === 0,
+                        amounts: {}
+                    },
+                };
+            }
+
+            // Use the previous node's ID as the key for the amount, or the node's own ID if it's the first one
+            if (!previousNodeId) {
+                (nodes[fromNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] = step.estimate?.fromAmount || "?";
+            }
+
+            // Add or update the target node
+            if (toNodeId) {
+                if (!nodes[toNodeId]) {
+                    nodes[toNodeId] = {
+                        position: { x: point.x, y: point.y + 250 },
+                        id: toNodeId,
+                        sourcePosition: Position.Right,
+                        targetPosition: Position.Left,
+                        type: "token",
+                        data: {
+                            ...step.action.toToken,
+                            isInput: false,
+                            amounts: {}
+                        },
+                    };
+                }
+
+                // Update the target node's amounts with the amount from the current source node
+                (nodes[toNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] = step.estimate?.toAmount || "?";
+
+                // Add an edge from the source to the target
+                const edgeId = `${fromNodeId}-${toNodeId}`;
+                edges.push({
+                    id: edgeId,
+                    source: fromNodeId,
+                    target: toNodeId,
+                    data: {
+                        label: step.tool,
+                    },
+                });
+
+                previousNodeId = toNodeId;
+
+
+                // Detail node
+                const detailNodeId = `${edgeId}-detail`;
+                nodes[detailNodeId] = {
+                    position: { x: point.x + 100, y: point.y },
+                    id: detailNodeId,
+                    sourcePosition: Position.Right,
+                    targetPosition: Position.Left,
+                    type: "detail",
+                    data: { ...step, edgeId, },
+                    style: {
+                        opacity: 0,
+                        pointerEvents: "none",
+                    }
+                };
+            } else {
+                previousNodeId = fromNodeId;
+            }
+
+            point.y += 250; // Increasing Y offset for each step
+        }
+
+        point.x += 250; // Increasing X offset for each route
+        point.y = initialPoint.y; // Reset Y position for the next route
+    }
+
+    return getLayoutedElements(nodes, edges, { direction: "TB" });
+}
+
+

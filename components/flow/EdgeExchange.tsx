@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { EdgeProps, getSmoothStepPath, EdgeLabelRenderer, useReactFlow } from 'reactflow';
+import { EdgeProps, getSmoothStepPath, EdgeLabelRenderer, useReactFlow, getBezierPath } from 'reactflow';
 import { GradientIdContext } from './provider';
 
 const EdgeExchange: FC<EdgeProps> = ({
@@ -18,7 +18,16 @@ const EdgeExchange: FC<EdgeProps> = ({
 }) => {
     const gradientId = React.useContext(GradientIdContext);
 
-    const [edgePath, labelX, labelY] = getSmoothStepPath({
+    // const [edgePath, labelX, labelY] = getSmoothStepPath({
+    //     sourceX,
+    //     sourceY,
+    //     sourcePosition,
+    //     targetX,
+    //     targetY,
+    //     targetPosition,
+    // });
+
+    const [edgePath, labelX, labelY] = getBezierPath({
         sourceX,
         sourceY,
         sourcePosition,
@@ -26,7 +35,6 @@ const EdgeExchange: FC<EdgeProps> = ({
         targetY,
         targetPosition,
     });
-
 
     return (
         <>
@@ -36,7 +44,7 @@ const EdgeExchange: FC<EdgeProps> = ({
                     ...style,
                     // stroke: `url(#${gradientId})`,
                     stroke: "#9E59FE",
-                    transition: "all 0.2s ease-in-out",
+                    transition: "all 0.5s ease-in-out, opacity 0.2s ease-in-out",
                 }}
                 className="react-flow__edge-path"
                 d={edgePath}
@@ -47,7 +55,7 @@ const EdgeExchange: FC<EdgeProps> = ({
                     style={{
                         position: 'absolute',
                         transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                        transition: "all 0.2s ease-in-out",
+                        transition: "all 0.5s ease-in-out, opacity 0.2s ease-in-out",
                         pointerEvents: "all",
                         padding: 10,
                         borderRadius: 5,

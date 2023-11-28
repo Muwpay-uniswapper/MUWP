@@ -1,0 +1,227 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--background: 0 0% 3.9%;
+		--foreground: 0 0% 98%;
+
+		--card: 0 0% 3.9% / 0.5;
+		--card-foreground: 0 0% 98%;
+
+		--popover: 0 0% 3.9%;
+		--popover-foreground: 0 0% 98%;
+
+		--primary: 0 0% 98%;
+		--primary-foreground: 0 0% 9%;
+
+		--secondary: 0 0% 14.9%;
+		--secondary-foreground: 0 0% 98%;
+
+		--muted: 0 0% 14.9%;
+		--muted-foreground: 0 0% 63.9%;
+
+		--accent: 0 0% 14.9%;
+		--accent-foreground: 0 0% 98%;
+
+		--destructive: 0 62.8% 30.6%;
+		--destructive-foreground: 0 0% 98%;
+
+		--radius: 0.75rem;
+		--border: 0 0% 30.6%;
+		--input: 0 0% 14.9%;
+		--ring: 0 0% 83.1%;
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+	}
+}
+
+.react-flow {
+	--bg-color: rgb(17, 17, 17);
+	--text-color: rgb(243, 244, 246);
+	--node-border-radius: 10px;
+	--node-box-shadow: 10px 0 15px rgba(42, 138, 246, 0.3), -10px 0 15px rgba(233, 42, 103, 0.3);
+	color: var(--text-color);
+}
+
+.react-flow {
+
+	&__node-detail {
+		transition: all 0.5s ease-in-out;
+	}
+
+	&__node-token {
+		width: 200px;
+		height: 70px;
+		font-weight: 500;
+		letter-spacing: -0.2px;
+		transition: all 0.5s ease-in-out, opacity 0.2s ease-in-out;
+		display: flex;
+		border-radius: var(--node-border-radius);
+		font-family: 'Fira Mono', Monospace;
+		box-shadow: var(--node-box-shadow);
+
+		.wrapper {
+			position: relative;
+			padding: 2px;
+			flex-grow: 1;
+			overflow: hidden;
+			display: flex;
+			border-radius: var(--node-border-radius);
+		}
+
+		.gradient {
+			&:before {
+				content: '';
+				position: absolute;
+				padding-bottom: calc(100% * 1.41421356237);
+				width: calc(100% * 1.41421356237);
+				background: conic-gradient(from -160deg at 50% 50%, #DC7896 0deg, #9E59FE 240deg, #DC7896 360deg);
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				border-radius: 100%;
+			}
+		}
+
+		&.selected .wrapper.gradient:before {
+			content: '';
+			background: conic-gradient(from -160deg at 50% 50%, #DC7896 0deg, #9E59FE 360deg);
+			animation: spinner 4s linear infinite;
+			transform: translate(-50%, -50%) rotate(0deg);
+			z-index: -1;
+		}
+
+		.inner {
+			background: var(--bg-color);
+			padding: 16px 20px;
+			border-radius: var(--node-border-radius);
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			flex-grow: 1;
+			position: relative;
+		}
+
+		.icon {
+			margin-right: 8px;
+		}
+
+		.body {
+			display: flex;
+		}
+
+		.title {
+			font-size: 16px;
+			margin-bottom: 2px;
+			line-height: 1;
+		}
+
+		.subline {
+			font-size: 12px;
+			color: #777;
+		}
+
+		.cloud {
+			border-radius: 100%;
+			width: 30px;
+			height: 30px;
+			right: 0;
+			position: absolute;
+			top: 0;
+			transform: translate(50%, -50%);
+			display: flex;
+			transform-origin: center center;
+			padding: 2px;
+			overflow: hidden;
+			box-shadow: var(--node-box-shadow);
+			z-index: 1;
+
+			div {
+				background-color: var(--bg-color);
+				flex-grow: 1;
+				border-radius: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				position: relative;
+			}
+		}
+	}
+
+	&__handle {
+		opacity: 0;
+
+		&.source {
+			bottom: -10px;
+		}
+
+		&.target {
+			top: -10px;
+			left: 50%;
+		}
+	}
+
+	&__node {
+		&:focus {
+			outline: none;
+		}
+	}
+
+	&__edge {
+		pointer-events: all;
+		transition: all 0.5s ease-in-out, opacity 0.2s ease-in-out;
+
+		.react-flow__edge-path {
+			stroke: #fff;
+			stroke-width: 2;
+			stroke-opacity: 0.75;
+		}
+	}
+
+	&__controls {
+		background-color: var(--bg-color);
+		color: var(--text-color);
+		border: 1px solid #95679e;
+
+		&:hover {
+			background-color: rgb(37, 37, 37);
+		}
+
+		&:first-child {
+			border-radius: 5px 5px 0 0;
+		}
+
+		&:last-child {
+			border-bottom: 1px solid #95679e;
+			border-radius: 0 0 5px 5px;
+		}
+
+		path {
+			fill: var(--text-color);
+		}
+	}
+
+	&__attribution {
+		background: rgba(200, 200, 200, 0.2);
+
+		a {
+			color: #95679e;
+		}
+	}
+}
+
+@keyframes spinner {
+	100% {
+		transform: translate(-50%, -50%) rotate(-360deg);
+	}
+}

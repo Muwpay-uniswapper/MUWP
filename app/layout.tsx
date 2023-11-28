@@ -1,5 +1,5 @@
 import Navbar from '@/components/layout/navbar'
-import './globals.css'
+import './globals.scss'
 import { Inter } from 'next/font/google'
 import { cn } from '@/lib/front/utils'
 import { Viewport, Metadata } from 'next'

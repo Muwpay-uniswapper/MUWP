@@ -5,12 +5,15 @@ import { Token } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
 
 export type TokenNodeData = Token & {
-    amount: string;
+    amounts: { [key: string]: string }
     isInput?: boolean;
+    isSource?: boolean;
+    source?: string; // Means isTarget
 }
 
 export default memo(({ data }: NodeProps<TokenNodeData>) => {
-    const formattedAmount = formatUnits(BigInt(data.amount), data.decimals)
+    const sum = Object.values(data.amounts).map((v) => BigInt(v)).reduce((a, b) => a + b, 0n);
+    const formattedAmount = formatUnits(data.source ? BigInt(data.amounts[data.source]) : sum, data.decimals)
     return (
         <>
             <div className="cloud gradient">
@@ -24,7 +27,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                         <div className="icon"> <img src={data.logoURI} alt={data.symbol} className="w-4 h-4 rounded-full" /></div>
                         <div>
                             <div className="title">{data.name.length > 12 ? data.symbol : data.name}</div>
-                            <div className="subline">{!data.isInput && "~"}{formattedAmount.slice(0, 10)}</div>
+                            <div className="subline">{(!data.isInput && !data.isSource) && "~"}{formattedAmount.slice(0, 10)}</div>
                         </div>
                     </div>
                     <Handle type="target" position={Position.Top} />
