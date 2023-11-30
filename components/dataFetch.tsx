@@ -33,8 +33,6 @@ export async function TokenSelector({
         }
     }) ?? []
 
-    const delegate = new TokenComboboxDelegate()
-
     if (mode == "input") {
         return <TokenComboboxes tokenList={tokenList} />
     }

@@ -1,7 +1,9 @@
 import React from "react";
 import { Token } from "@/lib/front/model/CellLike"
 import { useSwapStore } from "@/lib/front/data/swapStore";
-import { formatUnits, parseUnits } from "viem";
+import { formatUnits, parseUnits, zeroAddress } from "viem";
+import { Badge } from "../ui/badge";
+import { useAccount, useBalance, useNetwork } from "wagmi";
 
 export function TokenInput({
     token,
@@ -10,6 +12,13 @@ export function TokenInput({
     token: Token,
     mode: "input" | "output"
 }) {
+    const { address } = useAccount()
+    const { chain } = useNetwork()
+    const { data } = useBalance({
+        address,
+        token: token.address !== zeroAddress ? token.address as `0x${string}` : undefined,
+        chainId: chain?.id
+    })
     const { inputAmount, setAmount, priceOutput } = useSwapStore()
     const [inputValue, setInputValue] = React.useState('');
     const _value = mode == "input" ? inputAmount[token.value] ?? 0n : priceOutput().amount;
@@ -50,7 +59,7 @@ export function TokenInput({
                     />
                     <input
                         aria-label="Token amount"
-                        className="text-2xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-black"
+                        className="text-2xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-black w-full"
                         value={inputValue}
                         disabled={mode == 'output'}
                         onChange={handleInputChange}
@@ -58,6 +67,7 @@ export function TokenInput({
                         type="text"
                         onClick={(e) => e.stopPropagation()}
                     />
+                    {data && <Badge className="text-sm" onClick={() => setAmount(token, data.value)} >MAX</Badge>}
                 </div>
             </div>
             <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div>

@@ -11,6 +11,16 @@ export type DetailNodeData = Step & {
     edgeId: string;
 }
 
+export const format = (n?: number | string) => {
+    if (!n || typeof n == undefined) return "?";
+    if (typeof n === "number") {
+        return Math.round(n * 1000) / 1000;
+    }
+    if (!n.includes(".")) return n;
+    const [a, b] = n.split(".");
+    return `${a}.${b?.slice(0, 3)}`;
+}
+
 export default memo(({ data }: NodeProps<DetailNodeData>) => {
 
     const { setFocused } = useRouteStore();
@@ -18,14 +28,7 @@ export default memo(({ data }: NodeProps<DetailNodeData>) => {
 
     const { setCenter, fitView, setNodes, getNodes, getEdge, setEdges } = useReactFlow();
 
-    const format = (n?: number | string) => {
-        if (!n) return "?";
-        if (typeof n === "number") {
-            return Math.round(n * 1000) / 1000;
-        }
-        const [a, b] = n.split(".");
-        return `${a}.${b.slice(0, 3)}`;
-    }
+
 
     return (
         <Card>

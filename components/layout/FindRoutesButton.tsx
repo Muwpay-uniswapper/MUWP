@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 
 
 
-export function SwapButton() {
+export function FindRoutesButton() {
     const { inputTokens, outputToken, inputAmount, outputChain } = useSwapStore();
     const { fetchRoutes, isFetching } = useRouteStore();
     const { chain } = useNetwork();

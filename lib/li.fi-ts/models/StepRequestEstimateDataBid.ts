@@ -11,6 +11,7 @@
  */
 
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 export class StepRequestEstimateDataBid {
     'user'?: string;
@@ -34,7 +35,7 @@ export class StepRequestEstimateDataBid {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+    static readonly attributeTypeMap: Array<{ name: string, baseName: string, type: string, format: string }> = [
         {
             "name": "user",
             "baseName": "user",
@@ -142,13 +143,36 @@ export class StepRequestEstimateDataBid {
             "baseName": "bidExpiry",
             "type": "number",
             "format": "number"
-        }    ];
+        }];
 
     static getAttributeTypeMap() {
         return StepRequestEstimateDataBid.attributeTypeMap;
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            user: z.string().optional(),
+            router: z.string().optional(),
+            initiator: z.string().optional(),
+            sendingChainId: z.number().optional(),
+            sendingAssetId: z.string().optional(),
+            amount: z.string().optional(),
+            receivingChainId: z.number().optional(),
+            receivingAssetId: z.string().optional(),
+            amountReceived: z.string().optional(),
+            receivingAddress: z.string().optional(),
+            transactionId: z.string().optional(),
+            expiry: z.number().optional(),
+            callDataHash: z.string().optional(),
+            callTo: z.string().optional(),
+            encryptedCallData: z.string().optional(),
+            sendingChainTxManagerAddress: z.string().optional(),
+            receivingChainTxManagerAddress: z.string().optional(),
+            bidExpiry: z.number().optional()
+        });
     }
 }
 

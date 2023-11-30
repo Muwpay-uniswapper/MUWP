@@ -1,4 +1,5 @@
 import { MainFlow } from "@/components/flow/MainFlow";
+import { SwapButton } from "@/components/swapbutton";
 import { SwapCard } from "@/components/swapcard";
 
 export default function Home({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
@@ -10,6 +11,7 @@ export default function Home({ searchParams }: { searchParams: { [key: string]: 
 				<SwapCard chain={chain} toChain={toChain} />
 				<div className="flex flex-col items-center md:w-8/12 mx-4">
 					<MainFlow />
+					<SwapButton />
 				</div>
 			</div>
 		</main >

@@ -11,13 +11,13 @@ export function hash(token?: Token) {
     return `${token.symbol}-${token.address}-${token.chainId}`
 }
 
-const dagreGraph = new graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
-
 const nodeWidth = 250;
 const nodeHeight = 150;
 
-const getLayoutedElements = (_nodes: { [key: string]: Node<TokenNodeData> }, edges: Edge[], options: { direction: string }) => {
+const getLayoutedElements = (_nodes: { [key: string]: Node<TokenNodeData | DetailNodeData> }, edges: Edge[], options: { direction: string }) => {
+    const dagreGraph = new graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+
     const isHorizontal = options.direction === 'LR';
     dagreGraph.setGraph({ rankdir: options.direction });
 

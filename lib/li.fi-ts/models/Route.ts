@@ -13,6 +13,7 @@
 import { Step } from './Step';
 import { Token } from './Token';
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * A route describing a transfer form a token to another
@@ -172,6 +173,27 @@ export class Route {
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+
+        return z.object({
+            id: z.string(),
+            fromChainId: z.number(),
+            fromAmountUSD: z.string(),
+            fromAmount: z.string(),
+            fromToken: Token.zod,
+            toChainId: z.number(),
+            toAmountUSD: z.string(),
+            toAmount: z.string(),
+            toAmountMin: z.string(),
+            toToken: Token.zod,
+            gasCostUSD: z.string().optional(),
+            steps: z.array(Step.zod),
+            fromAddress: z.string().optional(),
+            toAddress: z.string().optional(),
+            containsSwitchChain: z.boolean().optional()
+        });
     }
 }
 

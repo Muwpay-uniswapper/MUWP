@@ -12,7 +12,7 @@
 
 import { Token } from './Token';
 import { HttpFile } from '../http/http';
-
+import { z } from 'zod';
 /**
 * Fees included in the transfer
 */
@@ -94,6 +94,18 @@ export class FeeCost {
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            name: z.string(),
+            description: z.string().optional(),
+            percentage: z.string(),
+            token: Token.zod,
+            amount: z.string().optional(),
+            amountUSD: z.string(),
+            included: z.boolean()
+        });
     }
 }
 

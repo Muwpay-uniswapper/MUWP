@@ -4,7 +4,12 @@ import { Edge, FitView, Node, SetCenter } from 'reactflow';
 import { create, StoreApi } from 'zustand';
 
 type RouteStore = {
-    routes: Route[];
+    needsUpdate: boolean;
+    forceUpdate: () => void;
+    routes: { [key: string]: Route[] };
+    chosenIndex: { [key: string]: number };
+    getRoutes: () => Route[];
+    choseIndex: (key: string, index: number) => void;
     isFetching: boolean;
     fetchRoutes: (input: InputType) => Promise<void>;
     isFocused: boolean;
@@ -31,7 +36,18 @@ BigInt.prototype.toJSON = function () {
 };
 
 export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setState'], get: StoreApi<RouteStore>['getState']) => ({
-    routes: [],
+    needsUpdate: false,
+    forceUpdate: () => set({ needsUpdate: !get().needsUpdate }),
+    routes: {},
+    chosenIndex: {},
+    getRoutes: () => {
+        const { routes, chosenIndex } = get();
+        return Object.keys(routes).map((key) => routes[key][chosenIndex[key] ?? 0]);
+    },
+    choseIndex: (key: string, index: number) => set((state) => {
+        state.chosenIndex[key] = index;
+        return { chosenIndex: state.chosenIndex, needsUpdate: !state.needsUpdate };
+    }),
     isFetching: false,
     isFocused: false,
     fetchRoutes: async (input: InputType) => {
@@ -45,7 +61,11 @@ export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setS
                 body: JSON.stringify(input),
             });
             const routes = await res.json();
-            set({ routes, isFetching: false });
+            const chosenIndex = Object.keys(routes).reduce((acc, key) => {
+                acc[key] = 0;
+                return acc;
+            }, {} as { [key: string]: number });
+            set({ routes, chosenIndex, isFetching: false });
         } catch (e) {
             set({ isFetching: false });
             throw e;
@@ -131,7 +151,7 @@ export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setS
                         opacity: _isFocused ? 0 : 1,
                         isSource: false,
                         source: undefined,
-                        pointerEvents: 'none',
+                        pointerEvents: node.data.isInput ? 'all' : 'none',
                     }
                 };
             })

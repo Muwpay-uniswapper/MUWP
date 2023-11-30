@@ -15,7 +15,7 @@ import { TokenSelector, ChainSelector } from '@/components/dataFetch'
 import { Separator } from "./ui/separator"
 import { TokenLoader } from "./tokens/token_loader";
 import { ChainLoader } from "./chains/chain-loader";
-import { SwapButton } from "./layout/swapButton";
+import { FindRoutesButton } from "./layout/FindRoutesButton";
 
 export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string }) {
     return <Card className={cn('md:w-4/12 relative mx-4')}>
@@ -47,7 +47,7 @@ export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string 
                     <TokenSelector id='to-token' chain={toChain ? parseInt(toChain) : undefined} mode="output" />
                 </Suspense>
             </div>
-            <SwapButton />
+            <FindRoutesButton />
         </CardContent>
     </Card>
 }

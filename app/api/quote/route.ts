@@ -1,4 +1,5 @@
 import { advancedAPI } from "@/lib/front/data/api";
+import { Route } from "@/lib/li.fi-ts";
 import { z } from 'zod';
 
 const Address = z
@@ -29,11 +30,16 @@ const Input = z.object({
 // Export Input type for use in other files
 export type InputType = z.infer<typeof Input>;
 
+BigInt.prototype.toJSON = function () {
+    return this.toString();
+};
 
 export async function POST(request: Request) {
     // Parse the incoming request body as JSON data
     const body = await request.json();
     const input = Input.parse(body);
+
+    console.log(JSON.stringify(input, null, 2));
 
     const queries = input.inputTokens.map(inToken => advancedAPI.advancedRoutesPost({
         fromAmount: input.inputAmount[inToken.value].toString(),
@@ -47,14 +53,18 @@ export async function POST(request: Request) {
 
     const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
 
-    const routes = rawRoutes.map((rawRoute, index) => {
-        const route = rawRoute.routes?.[0];
-        if (!route) {
+    const routes: { [key: string]: Route[] } = {};
+
+    for (let index = 0; index < rawRoutes.length; index++) {
+        const rawRoute = rawRoutes[index];
+        const _routes = rawRoute.routes;
+        if (!_routes || typeof rawRoute.routes[0].fromAddress == "undefined") {
             console.log(JSON.stringify(rawRoute.unavailableRoutes?.filteredOut, null, 2));
             throw new Error(`No route found for ${input.inputTokens[index].value} -> ${input.outputToken.value}`);
         }
-        return route;
-    });
+        const key = rawRoute.routes[0].fromToken.address;
+        routes[key] = _routes;
+    }
 
 
     return new Response(JSON.stringify(routes), {

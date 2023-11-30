@@ -146,7 +146,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -194,7 +196,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -230,7 +234,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -301,7 +307,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -353,7 +361,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -393,7 +403,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -444,7 +456,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -481,7 +495,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -533,7 +549,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -564,7 +582,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
         // Body Params
@@ -606,7 +626,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
         // Body Params
@@ -816,7 +838,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -878,7 +902,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -931,7 +957,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -974,7 +1002,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 
@@ -1003,7 +1033,9 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
 

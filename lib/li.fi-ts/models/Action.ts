@@ -12,6 +12,7 @@
 
 import { Token } from './Token';
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * Object describing what happens in a `Step`
@@ -101,6 +102,19 @@ export class Action {
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            fromChainId: z.number(),
+            fromAmount: z.string(),
+            fromToken: Token.zod,
+            toChainId: z.number(),
+            toToken: Token.zod,
+            slippage: z.number().optional(),
+            fromAddress: z.string().optional(),
+            toAddress: z.string().optional()
+        });
     }
 }
 

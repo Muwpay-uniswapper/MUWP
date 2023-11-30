@@ -1,11 +1,11 @@
 // TODO: better import syntax?
-import {BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS} from './baseapi';
-import {Configuration} from '../configuration';
-import {RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo} from '../http/http';
-import {ObjectSerializer} from '../models/ObjectSerializer';
-import {ApiException} from './exception';
-import {canConsumeForm, isCodeInRange} from '../util';
-import {SecurityAuthentication} from '../auth/auth';
+import { BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS } from './baseapi';
+import { Configuration } from '../configuration';
+import { RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo } from '../http/http';
+import { ObjectSerializer } from '../models/ObjectSerializer';
+import { ApiException } from './exception';
+import { canConsumeForm, isCodeInRange } from '../util';
+import { SecurityAuthentication } from '../auth/auth';
 
 
 import { PossibilitiesResponse } from '../models/PossibilitiesResponse';
@@ -38,8 +38,9 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
-
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
         // Body Params
         const contentType = ObjectSerializer.getPreferredMediaType([
@@ -52,7 +53,7 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
         );
         requestContext.setBody(serializedBody);
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -85,7 +86,9 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
         // Body Params
@@ -99,7 +102,7 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
         );
         requestContext.setBody(serializedBody);
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -132,7 +135,9 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
         // Body Params
@@ -146,7 +151,7 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
         );
         requestContext.setBody(serializedBody);
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -166,7 +171,7 @@ export class AdvancedApiResponseProcessor {
      * @params response Response returned by the server for a request to advancedPossibilitiesPost
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async advancedPossibilitiesPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<PossibilitiesResponse >> {
+    public async advancedPossibilitiesPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<PossibilitiesResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: PossibilitiesResponse = ObjectSerializer.deserialize(
@@ -195,7 +200,7 @@ export class AdvancedApiResponseProcessor {
      * @params response Response returned by the server for a request to advancedRoutesPost
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async advancedRoutesPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<RoutesResponse >> {
+    public async advancedRoutesPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<RoutesResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: RoutesResponse = ObjectSerializer.deserialize(
@@ -230,7 +235,7 @@ export class AdvancedApiResponseProcessor {
      * @params response Response returned by the server for a request to advancedStepTransactionPost
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async advancedStepTransactionPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Step >> {
+    public async advancedStepTransactionPostWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Step>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: Step = ObjectSerializer.deserialize(

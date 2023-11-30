@@ -12,6 +12,8 @@ import {
     argentWallet,
     trustWallet,
     ledgerWallet,
+    injectedWallet,
+    tokenaryWallet
 } from '@rainbow-me/rainbowkit/wallets';
 import { configureChains, createConfig, WagmiConfig, useNetwork, useSwitchNetwork } from 'wagmi';
 import {
@@ -33,7 +35,8 @@ import {
     okc,
     boba,
     aurora,
-    goerli
+    goerli,
+    polygonMumbai
 } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { useSwapStore } from '@/lib/front/data/swapStore';
@@ -58,7 +61,7 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
         okc,
         boba,
         aurora,
-        ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [goerli] : []),
+        ...(process.env.NODE_ENV !== 'production' ? [goerli, polygonMumbai] : []),
     ],
     [publicProvider()]
 );
@@ -66,13 +69,13 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
 const projectId = 'YOUR_PROJECT_ID';
 
 const { wallets } = getDefaultWallets({
-    appName: 'RainbowKit demo',
+    appName: 'MUWP Pay',
     projectId,
     chains,
 });
 
 const demoAppInfo = {
-    appName: 'Rainbowkit Demo',
+    appName: 'MUWP Pay',
 };
 
 const connectors = connectorsForWallets([
@@ -80,9 +83,11 @@ const connectors = connectorsForWallets([
     {
         groupName: 'Other',
         wallets: [
+            injectedWallet({ chains }),
             argentWallet({ projectId, chains }),
             trustWallet({ projectId, chains }),
             ledgerWallet({ projectId, chains }),
+            tokenaryWallet({ chains }),
         ],
     },
 ]);

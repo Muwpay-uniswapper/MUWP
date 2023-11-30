@@ -13,6 +13,7 @@
 import { Action } from './Action';
 import { Estimate } from './Estimate';
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * Object that represents one step of a `Route`
@@ -113,6 +114,20 @@ export class Step {
 
     public constructor() {
     }
+
+    static get zod() {
+        return z.object({
+            id: z.string(),
+            type: StepTypeEnum.zod(),
+            tool: z.string(),
+            action: Action.zod,
+            estimate: Estimate.zod.optional(),
+            integrator: z.string().optional(),
+            referrer: z.string().optional(),
+            execution: z.unknown().nullable().optional(),
+            transactionRequest: z.unknown().nullable().optional()
+        });
+    }
 }
 
 
@@ -122,3 +137,8 @@ export enum StepTypeEnum {
     Lifi = 'lifi'
 }
 
+export namespace StepTypeEnum {
+    export function zod() {
+        return z.enum(["swap", "cross", "lifi"]);
+    }
+}

@@ -12,6 +12,7 @@
 
 import { StepRequestEstimateDataBid } from './StepRequestEstimateDataBid';
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * Arbitrary data that depends on the the used tool
@@ -69,6 +70,17 @@ export class EstimateData {
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            bid: StepRequestEstimateDataBid.zod.optional(),
+            bidSignature: z.string().optional(),
+            gasFeeInReceivingToken: z.string().optional(),
+            totalFee: z.string().optional(),
+            metaTxRelayerFee: z.string().optional(),
+            routerFee: z.string().optional()
+        });
     }
 }
 

@@ -12,6 +12,7 @@
 
 import { Token } from './Token';
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * Gas costs included in the transfer
@@ -94,6 +95,18 @@ export class GasCost {
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            type: z.string(),
+            price: z.string().optional(),
+            estimate: z.string().optional(),
+            limit: z.string().optional(),
+            amount: z.string(),
+            amountUSD: z.string().optional(),
+            token: Token.zod
+        });
     }
 }
 

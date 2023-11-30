@@ -11,6 +11,7 @@
  */
 
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * Representation of a Token
@@ -51,7 +52,7 @@ export class Token {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+    static readonly attributeTypeMap: Array<{ name: string, baseName: string, type: string, format: string }> = [
         {
             "name": "address",
             "baseName": "address",
@@ -99,13 +100,26 @@ export class Token {
             "baseName": "priceUSD",
             "type": "string",
             "format": ""
-        }    ];
+        }];
 
     static getAttributeTypeMap() {
         return Token.attributeTypeMap;
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            address: z.string(),
+            decimals: z.number(),
+            symbol: z.string(),
+            chainId: z.number(),
+            coinKey: z.string().optional(),
+            name: z.string(),
+            logoURI: z.string().optional(),
+            priceUSD: z.string().optional()
+        });
     }
 }
 

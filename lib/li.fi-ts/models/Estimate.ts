@@ -14,6 +14,7 @@ import { EstimateData } from './EstimateData';
 import { FeeCost } from './FeeCost';
 import { GasCost } from './GasCost';
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * An estimate for the current transfer
@@ -43,6 +44,11 @@ export class Estimate {
     * Gas costs included in the transfer
     */
     'gasCosts'?: Array<GasCost>;
+    /**
+     * The duration of the execution
+     */
+    'executionDuration': number;
+
     'data'?: EstimateData;
 
     static readonly discriminator: string | undefined = undefined;
@@ -85,6 +91,12 @@ export class Estimate {
             "format": ""
         },
         {
+            "name": "executionDuration",
+            "baseName": "executionDuration",
+            "type": "number",
+            "format": ""
+        },
+        {
             "name": "data",
             "baseName": "data",
             "type": "EstimateData",
@@ -96,6 +108,19 @@ export class Estimate {
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            fromAmount: z.string(),
+            toAmount: z.string(),
+            toAmountMin: z.string(),
+            approvalAddress: z.string(),
+            feeCosts: z.array(FeeCost.zod).optional(),
+            gasCosts: z.array(GasCost.zod).optional(),
+            executionDuration: z.number(),
+            data: EstimateData.zod.optional()
+        });
     }
 }
 

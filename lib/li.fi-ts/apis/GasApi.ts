@@ -1,11 +1,11 @@
 // TODO: better import syntax?
-import {BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS} from './baseapi';
-import {Configuration} from '../configuration';
-import {RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo} from '../http/http';
-import {ObjectSerializer} from '../models/ObjectSerializer';
-import {ApiException} from './exception';
-import {canConsumeForm, isCodeInRange} from '../util';
-import {SecurityAuthentication} from '../auth/auth';
+import { BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS } from './baseapi';
+import { Configuration } from '../configuration';
+import { RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo } from '../http/http';
+import { ObjectSerializer } from '../models/ObjectSerializer';
+import { ApiException } from './exception';
+import { canConsumeForm, isCodeInRange } from '../util';
+import { SecurityAuthentication } from '../auth/auth';
 
 
 import { GasPrice } from '../models/GasPrice';
@@ -47,10 +47,12 @@ export class GasApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -83,10 +85,12 @@ export class GasApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Header Params
-        requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        if (xLifiApiKey) {
+            requestContext.setHeaderParam("x-lifi-api-key", ObjectSerializer.serialize(xLifiApiKey, "string", ""));
+        }
 
 
-        
+
         const defaultAuth: SecurityAuthentication | undefined = _options?.authMethods?.default || this.configuration?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
             await defaultAuth?.applySecurityAuthentication(requestContext);
@@ -106,7 +110,7 @@ export class GasApiResponseProcessor {
      * @params response Response returned by the server for a request to gasPricesChainIdGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async gasPricesChainIdGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<GasPrice >> {
+    public async gasPricesChainIdGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<GasPrice>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: GasPrice = ObjectSerializer.deserialize(
@@ -138,7 +142,7 @@ export class GasApiResponseProcessor {
      * @params response Response returned by the server for a request to gasPricesGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async gasPricesGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<GasPrice >> {
+    public async gasPricesGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<GasPrice>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
             const body: GasPrice = ObjectSerializer.deserialize(

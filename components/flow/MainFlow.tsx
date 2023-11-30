@@ -30,7 +30,7 @@ export function MainFlow() {
 }
 
 export function Flow() {
-    const { routes, setFocused, isFocused } = useRouteStore();
+    const { routes, setFocused, getRoutes, chosenIndex, needsUpdate } = useRouteStore();
     const gradientId = useMemo(() => 'gradient-' + Math.random(), []);
 
     const { setCenter, fitView } = useReactFlow();
@@ -42,18 +42,25 @@ export function Flow() {
         const renderedRoutes = renderNodes({
             x: 0,
             y: 0,
-        }, routes);
+        }, getRoutes());
 
-        setNodes(renderedRoutes.nodes);
-        setEdges(renderedRoutes.edges);
-
-        // setFocused(false, nodes, null, setNodes, setEdges, setCenter, fitView);
+        setNodes(() => renderedRoutes.nodes);
+        setEdges(() => renderedRoutes.edges);
 
         setTimeout(() => {
-            fitView({ duration: 500, includeHiddenNodes: true })
+            fitView({ duration: 500, includeHiddenNodes: false })
         }, 50);
 
-    }, [routes]);
+    }, [routes, chosenIndex, needsUpdate]);
+
+    // Fit view on window resize
+    React.useEffect(() => {
+        const onResize = () => {
+            fitView({ duration: 500, includeHiddenNodes: false })
+        }
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
 
     const defaultEdgeOptions: DefaultEdgeOptions = {
         type: 'exchange',
@@ -70,6 +77,8 @@ export function Flow() {
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                nodesDraggable={false}
+                nodesConnectable={false}
                 proOptions={{ hideAttribution: true }}
                 edgeTypes={edgeTypes}
                 nodeTypes={nodeTypes}
