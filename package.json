@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@moralisweb3/next": "^2.23.2",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-popover": "^1.0.7",
@@ -29,6 +30,7 @@
     "dagre": "^0.8.5",
     "inngest": "^3.6.2",
     "lucide-react": "^0.292.0",
+    "moralis": "^2.23.2",
     "next": "^14.0.3",
     "pino-pretty": "^10.2.3",
     "postcss": "8.4.31",

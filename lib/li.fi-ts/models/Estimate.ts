@@ -48,6 +48,10 @@ export class Estimate {
      * The duration of the execution
      */
     'executionDuration': number;
+    /**
+     * The tool used for this step. E.g. `connext`
+     */
+    'tool': string;
 
     'data'?: EstimateData;
 
@@ -94,6 +98,12 @@ export class Estimate {
             "name": "executionDuration",
             "baseName": "executionDuration",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "tool",
+            "baseName": "tool",
+            "type": "string",
             "format": ""
         },
         {
