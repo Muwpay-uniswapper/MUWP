@@ -245,7 +245,7 @@ export class AdvancedApiResponseProcessor {
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
         if (isCodeInRange("400", response.httpStatusCode)) {
-            throw new ApiException<undefined>(response.httpStatusCode, "Invalid Step Request", undefined, response.headers);
+            throw new ApiException<string>(response.httpStatusCode, "Invalid Step Request", await response.body.text(), response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml

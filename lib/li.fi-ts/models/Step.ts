@@ -14,6 +14,7 @@ import { Action } from './Action';
 import { Estimate } from './Estimate';
 import { HttpFile } from '../http/http';
 import { z } from 'zod';
+import { ToolDetails } from './ToolDetails';
 
 /**
 * Object that represents one step of a `Route`
@@ -49,6 +50,10 @@ export class Step {
     * An ether.js TransactionRequest that can be triggered using a wallet provider. (https://docs.ethers.io/v5/api/providers/types/#providers-TransactionRequest)
     */
     'transactionRequest'?: any | null;
+
+    'includedSteps': Array<Step>;
+
+    'toolDetails': ToolDetails;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -106,7 +111,20 @@ export class Step {
             "baseName": "transactionRequest",
             "type": "any",
             "format": ""
-        }];
+        },
+        {
+            "name": "includedSteps",
+            "baseName": "includedSteps",
+            "type": "Array<Step>",
+            "format": ""
+        },
+        {
+            "name": "toolDetails",
+            "baseName": "toolDetails",
+            "type": "ToolDetails",
+            "format": ""
+        }
+    ];
 
     static getAttributeTypeMap() {
         return Step.attributeTypeMap;

@@ -1,6 +1,5 @@
 import { inngest } from "./client";
 import { z } from "zod";
-import * as store from "@/lib/kv/store";
 import { Route } from "../li.fi-ts";
 
 
@@ -16,25 +15,30 @@ const Address = z
 
 const Data = z.object({
     address: Address,
-    routes: z.array(Route.zod),
+    route: Route.zod,
 });
 
 export const executeRoute = inngest.createFunction(
     { id: "execute-route" },
-    { event: "app/transfer.initiate" },
+    { event: "app/execute.route" },
     async ({ event, step }) => {
         const data = Data.parse(event.data);
 
-        const funds_transferred = await step.waitForEvent("wait-for-user-to-transfer-funds", {
-            event: "app/funds.transferred",
-            match: "data.address", // the field "data.address" must match
-            timeout: "24h", // wait at most 24 hours
-        });
+        for (let _step of data.route.steps) {
+            await step.sendEvent("app/consume.step", {
+                name: "app/consume.step",
+                data: {
+                    step: _step,
+                    address: data.address,
+                }
+            })
 
-        if (!funds_transferred) {
-            await step.run("should-close-account", async () => {
-                await store.del(data.address);
+            await step.waitForEvent("wait-for-step-to-complete", {
+                event: "app/step.completed",
+                match: "data.id",
+                timeout: "15m",
             })
         }
-    },
+
+    }
 );

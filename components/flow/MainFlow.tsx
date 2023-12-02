@@ -10,7 +10,6 @@ import EdgeExchange from "./EdgeExchange";
 import TokenNode from "./TokenNode";
 import React, { useCallback, useMemo } from "react";
 import { GradientIdContext } from "./provider";
-import { number } from "zod";
 import DetailNode from "./DetailNode";
 import { Route, Step } from "@/lib/li.fi-ts";
 

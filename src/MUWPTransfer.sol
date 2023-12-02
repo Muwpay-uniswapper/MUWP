@@ -8,6 +8,7 @@ contract MUWPTransfer {
     function transfer(
         address[] memory tokens,
         uint256[] memory amounts,
+        uint256 totalGas,
         address recipient
     ) public payable {
         require(
@@ -15,20 +16,21 @@ contract MUWPTransfer {
             "Arrays must be of equal length"
         );
 
-        uint256 totalEthRequired = 0;
+        uint256 totalEthRequired = totalGas; // calculating the total ETH required for the transfer
 
         for (uint i = 0; i < tokens.length; i++) {
             if (tokens[i] == address(0)) {
                 totalEthRequired += amounts[i];
             } else {
                 IERC20 token = IERC20(tokens[i]);
-                uint256 balance = token.balanceOf(address(this));
-                require(balance >= amounts[i], "Not enough token balance");
-                token.approve(recipient, amounts[i]);
-                require(
-                    token.transfer(recipient, amounts[i]),
-                    "Token transfer failed"
+                uint256 allowance = token.allowance(msg.sender, address(this));
+                require(allowance >= amounts[i], "Not enough token allowance");
+                bool _success = token.transferFrom(
+                    msg.sender,
+                    recipient,
+                    amounts[i]
                 );
+                require(_success, "Token transfer failed");
             }
         }
 

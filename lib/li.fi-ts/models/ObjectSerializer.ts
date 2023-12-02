@@ -307,7 +307,7 @@ export class ObjectSerializer {
             for (let attributeType of attributeTypes) {
                 instance[attributeType.baseName] = ObjectSerializer.serialize(data[attributeType.name], attributeType.type, attributeType.format);
             }
-            return instance;
+            return Object.assign(data, instance);
         }
     }
 
@@ -358,7 +358,7 @@ export class ObjectSerializer {
                     instance[attributeType.name] = value;
                 }
             }
-            return instance;
+            return Object.assign(data, instance);
         }
     }
 
