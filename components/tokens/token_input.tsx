@@ -44,7 +44,7 @@ export function TokenInput({
     }
 
     return <div className="w-full bg-zinc-800">
-        <div className="flex flex-wrap items-center justify-between bg-blue-50 dark:bg-blue-800 p-4 rounded">
+        <div className="flex flex-wrap items-center justify-between bg-white p-4 rounded">
             <div className="flex flex-col  items-start w-full">
                 <div className="flex items-center space-x-2">
                     <img
@@ -67,7 +67,7 @@ export function TokenInput({
                         type="text"
                         onClick={(e) => e.stopPropagation()}
                     />
-                    {data && <Badge className="text-sm" onClick={() => setAmount(token, data.value)} >MAX</Badge>}
+                    {(data && mode == 'input') && <Badge className="text-sm text-black" variant="outline" onClick={() => setAmount(token, data.value)} >MAX</Badge>}
                 </div>
             </div>
             <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div>

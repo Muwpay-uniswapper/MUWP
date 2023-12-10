@@ -120,7 +120,7 @@ export class Estimate {
     public constructor() {
     }
 
-    static get zod() {
+    static get zod(): z.ZodType<Estimate> {
         return z.object({
             fromAmount: z.string(),
             toAmount: z.string(),
@@ -129,6 +129,7 @@ export class Estimate {
             feeCosts: z.array(FeeCost.zod).optional(),
             gasCosts: z.array(GasCost.zod).optional(),
             executionDuration: z.number(),
+            tool: z.string(),
             data: EstimateData.zod.optional()
         });
     }

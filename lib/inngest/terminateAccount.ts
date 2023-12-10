@@ -32,9 +32,9 @@ export const terminateAccount = inngest.createFunction(
     { id: "terminate-account" },
     { event: "app/terminate.account" },
     async ({ event, step }) => {
-        const data = z.object({
+        const data = await z.object({
             address: Address,
-        }).parse(event.data);
+        }).parseAsync(event.data);
 
         await step.run("verify-account-funds", async () => {
             const options = {

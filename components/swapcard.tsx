@@ -31,7 +31,7 @@ export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string 
                 </Suspense>
                 <ConnectButton />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-2 w-full mt-8">
                 <Suspense fallback={<TokenLoader />}>
                     <TokenSelector id='from-token' chain={chain ? parseInt(chain) : undefined} mode="input" />
                 </Suspense>

@@ -22,23 +22,22 @@ export const executeRoute = inngest.createFunction(
     { id: "execute-route" },
     { event: "app/execute.route" },
     async ({ event, step }) => {
-        const data = Data.parse(event.data);
+        const data = await Data.parseAsync(event.data);
 
-        for (let _step of data.route.steps) {
+        await Promise.all(data.route.steps.map(async (_step) => {
             await step.sendEvent("app/consume.step", {
                 name: "app/consume.step",
                 data: {
                     step: _step,
                     address: data.address,
                 }
-            })
+            });
 
             await step.waitForEvent("wait-for-step-to-complete", {
                 event: "app/step.completed",
-                match: "data.id",
+                if: `async.data.id == ${_step.id}`,
                 timeout: "15m",
-            })
-        }
-
+            });
+        }));
     }
 );

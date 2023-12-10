@@ -6,6 +6,7 @@ import { useAccount, useNetwork } from "wagmi";
 import { InputType } from "@/app/api/quote/route";
 import { useRouteStore } from "@/lib/front/data/routeStore";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 
 
@@ -17,20 +18,24 @@ export function FindRoutesButton() {
 
     const onClick = async () => {
         if (!chain || !outputChain || !address || !outputToken) return;
-        await fetchRoutes({
-            inputAmount,
-            fromAddress: address,
-            inputChain: chain.id,
-            inputTokens: inputTokens.map(token => ({
-                address: token.address,
-                value: token.value,
-            })),
-            outputChain,
-            outputToken: {
-                address: outputToken.address,
-                value: outputToken.value,
-            }
-        })
+        try {
+            await fetchRoutes({
+                inputAmount,
+                fromAddress: address,
+                inputChain: chain.id,
+                inputTokens: inputTokens.map(token => ({
+                    address: token.address,
+                    value: token.value,
+                })),
+                outputChain,
+                outputToken: {
+                    address: outputToken.address,
+                    value: outputToken.value,
+                }
+            })
+        } catch (e) {
+            toast.error("Error fetching routes")
+        }
     }
 
     return <Button className="w-full h-full rounded flex justify-center items-center" onClick={onClick} disabled={isFetching}>
