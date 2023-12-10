@@ -1,6 +1,5 @@
 import { publicClient } from "@/app/providers";
 import { inngest } from "@/lib/inngest/client";
-import * as store from "@/lib/kv/store";
 import { Route } from "@/lib/li.fi-ts";
 import { createPublicClient, createWalletClient, encodeFunctionData, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
@@ -13,33 +12,27 @@ BigInt.prototype.toJSON = function () {
     return this.toString();
 };
 
+const Address = z
+    .string()
+    .refine(value =>
+        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
+        {
+            message: 'Invalid Ethereum address.',
+            path: [], // path is kept empty to indicate whole string should be validated
+        }
+    );
+
 
 export async function POST(request: Request) {
     const body = await request.json();
-    const input = z.object({
-        from: z.string(),
+    const input = await z.object({
+        from: Address,
+        account: Address,
         chainId: z.number(),
         routes: z.array(Route.zod),
         maxFeePerGas: z.coerce.bigint(),
         maxPriorityFeePerGas: z.coerce.bigint(),
-    }).parse(body);
-
-    const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
-    const privateKey = fromHex(master_hd, "bytes")
-    const hdKey = HDKey.fromMasterSeed(privateKey)
-
-    // Generate random index using crypto module
-    const bytes = new Uint32Array(1)
-    crypto.getRandomValues(bytes)
-
-    const index = bytes[0] % 0x80000000; // Max offset
-
-    const account = hdKeyToAccount(hdKey, {
-        accountIndex: index,
-    })
-
-    await store.set(account.address, index.toString())
-
+    }).parseAsync(body);
 
     const totalGas = input.routes.reduce((acc, route) => acc +
         route
@@ -69,7 +62,7 @@ export async function POST(request: Request) {
             input.routes.map(route => route.steps[0].action.fromToken.address),
             input.routes.map(route => BigInt(route.steps[0].action.fromAmount)),
             totalGas,
-            account.address,
+            input.account,
         ]
     })
 
@@ -115,7 +108,7 @@ export async function POST(request: Request) {
     await inngest.send({
         name: "app/transfer.initiate",
         data: {
-            address: account.address,
+            address: input.account,
             routes: input.routes,
             totalGas,
         },
@@ -124,7 +117,7 @@ export async function POST(request: Request) {
 
     return new Response(JSON.stringify({
         status: "success",
-        address: account.address,
+        address: input.account,
         txn,
         approvals: approveTransactions,
     }), {

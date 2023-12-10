@@ -1,4 +1,4 @@
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useContext } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import {
     Select,
@@ -14,6 +14,7 @@ import { useRouteStore } from '@/lib/front/data/routeStore';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/front/utils';
 import { format } from './DetailNode';
+import { ChainIcon } from 'connectkit';
 
 export type TokenNodeData = Token & {
     amounts: { [key: string]: string }
@@ -26,11 +27,12 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
     const { routes, chosenIndex, choseIndex } = useRouteStore();
     const sum = Object.values(data.amounts).map((v) => BigInt(v)).reduce((a, b) => a + b, 0n);
     const formattedAmount = formatUnits(data.source ? BigInt(data.amounts[data.source]) : sum, data.decimals)
+
     return (
         <>
             <div className="cloud gradient">
                 <div>
-                    {data.chainId}
+                    <ChainIcon id={data.chainId} />
                 </div>
             </div>
             <div className="wrapper gradient">

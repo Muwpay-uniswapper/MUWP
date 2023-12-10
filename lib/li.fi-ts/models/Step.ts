@@ -51,7 +51,7 @@ export class Step {
     */
     'transactionRequest'?: any | null;
 
-    'includedSteps': Array<Step>;
+    'includedSteps'?: Array<Step>;
 
     'toolDetails': ToolDetails;
 
@@ -133,7 +133,7 @@ export class Step {
     public constructor() {
     }
 
-    static get zod() {
+    static get zod(): z.ZodType<Step> {
         return z.object({
             id: z.string(),
             type: StepTypeEnum.zod(),
@@ -143,7 +143,9 @@ export class Step {
             integrator: z.string().optional(),
             referrer: z.string().optional(),
             execution: z.unknown().nullable().optional(),
-            transactionRequest: z.unknown().nullable().optional()
+            transactionRequest: z.unknown().nullable().optional(),
+            includedSteps: z.lazy(() => z.array(Step.zod).optional()),
+            toolDetails: ToolDetails.zod
         });
     }
 }
@@ -156,7 +158,11 @@ export enum StepTypeEnum {
 }
 
 export namespace StepTypeEnum {
-    export function zod() {
-        return z.enum(["swap", "cross", "lifi"]);
+    export function zod(): z.ZodSchema<StepTypeEnum> {
+        return z.enum([
+            StepTypeEnum.Swap,
+            StepTypeEnum.Cross,
+            StepTypeEnum.Lifi
+        ]);
     }
 }

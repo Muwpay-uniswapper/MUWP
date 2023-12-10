@@ -4,9 +4,10 @@ import * as store from "@/lib/kv/store";
 import { Step } from "../li.fi-ts";
 import { publicClient } from "@/app/providers";
 import { advancedAPI } from "../front/data/api";
-import { createPublicClient, createWalletClient, extractChain, fromHex, http } from 'viem'
+import { HDAccount, HttpTransport, PublicClient, createPublicClient, createWalletClient, extractChain, fromHex, http } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
+import { WalletClient } from "wagmi";
 
 const Address = z
     .string()
@@ -34,19 +35,26 @@ const transactionRequestSchema = z.object({
 
 export const consumeStep = inngest.createFunction(
     { id: "consume-step" },
-    { event: "app/consume.step" },
+    { event: "app/consume.steps" },
     async ({ event, step }) => {
-        const { step: _step, address } = z.object({
+        const { remainingSteps, address } = await z.object({
             address: Address,
-            step: Step.zod
-        }).parse(event.data);
+            remainingSteps: z.array(Step.zod),
+            id: z.string(),
+        }).parseAsync(event.data);
+
+        if (remainingSteps.length === 0) return; // Should not happen, but just in case
+
+        const _step = remainingSteps[0];
 
         const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
             const fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
-            const transactionRequest = transactionRequestSchema.parse(fullStep.transactionRequest)
+            const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
             if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
 
-            const walletClient = await getWallet(address, fullStep.transactionRequest.chainId);
+            const { walletClient } = await getWallet(address, fullStep.transactionRequest.chainId);
+
+            console.log("Sending transaction", transactionRequest)
 
             const hash = await walletClient.sendTransaction({
                 data: transactionRequest.data as `0x${string}`,
@@ -77,16 +85,32 @@ export const consumeStep = inngest.createFunction(
             }
         })
 
-        await step.sendEvent("step-completed", {
-            name: "app/step.completed",
+        const _remainingSteps = remainingSteps.slice(1);
+
+        if (_remainingSteps.length >= 0) {
+            return await step.sendEvent("app/consume.steps", {
+                name: "app/consume.steps",
+                data: {
+                    address,
+                    remainingSteps: _remainingSteps,
+                }
+            })
+        }
+
+        return await step.sendEvent("app/route.completed", {
+            name: "app/route.completed",
             data: {
-                id: _step.id,
-            },
+                address,
+                id: event.data.id,
+            }
         })
     },
 );
 
-async function getWallet(address: string, chainId: number) {
+export async function getWallet(address: string, chainId: number): Promise<{
+    walletClient: WalletClient<HttpTransport, chains.Chain, HDAccount>,
+    publicClient: PublicClient
+}> {
     const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`;
     const privateKey = fromHex(master_hd, "bytes");
     const hdKey = HDKey.fromMasterSeed(privateKey);
@@ -110,5 +134,5 @@ async function getWallet(address: string, chainId: number) {
         chain: client.chain,
         transport: http()
     });
-    return walletClient;
+    return { walletClient, publicClient: client as PublicClient };
 }

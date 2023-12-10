@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
 * Object that represents one step of a `Route`
 */
@@ -44,5 +46,13 @@ export class ToolDetails {
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            key: z.string(),
+            name: z.string().optional(),
+            logoURI: z.string().optional(),
+        });
     }
 }

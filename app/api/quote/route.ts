@@ -1,6 +1,10 @@
 import { advancedAPI } from "@/lib/front/data/api";
 import { Route } from "@/lib/li.fi-ts";
 import { z } from 'zod';
+import { HDKey, hdKeyToAccount } from 'viem/accounts'
+import { fromHex } from "viem";
+import * as store from "@/lib/kv/store";
+import { inngest } from "@/lib/inngest/client";
 
 const Address = z
     .string()
@@ -18,12 +22,13 @@ const Token = z.object({
 });
 
 const Input = z.object({
-    inputTokens: z.array(Token),
+    inputTokens: z.array(Token).min(1),
     outputToken: Token,
     inputChain: z.number(),
     outputChain: z.number(),
     inputAmount: z.record(z.coerce.bigint()),
     fromAddress: Address,
+    tempAccount: Address.optional(),
     toAddress: Address.optional(),
 });
 
@@ -37,9 +42,34 @@ BigInt.prototype.toJSON = function () {
 export async function POST(request: Request) {
     // Parse the incoming request body as JSON data
     const body = await request.json();
-    const input = Input.parse(body);
+    const input = await Input.parseAsync(body);
 
-    console.log(JSON.stringify(input, null, 2));
+    if (!input.tempAccount || typeof input.tempAccount == "undefined") {
+        const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
+        const privateKey = fromHex(master_hd, "bytes")
+        const hdKey = HDKey.fromMasterSeed(privateKey)
+
+        // Generate random index using crypto module
+        const bytes = new Uint32Array(1)
+        crypto.getRandomValues(bytes)
+
+        const index = bytes[0] % 0x80000000; // Max offset
+
+        const account = hdKeyToAccount(hdKey, {
+            accountIndex: index,
+        })
+
+        await store.set(account.address, index.toString())
+
+        await inngest.send({
+            name: "app/account.created",
+            data: {
+                address: account.address,
+            },
+        })
+
+        input.tempAccount = account.address;
+    }
 
     const queries = input.inputTokens.map(inToken => advancedAPI.advancedRoutesPost({
         fromAmount: input.inputAmount[inToken.value].toString(),
@@ -47,13 +77,15 @@ export async function POST(request: Request) {
         fromTokenAddress: inToken.address,
         toChainId: input.outputChain,
         toTokenAddress: input.outputToken.address,
-        fromAddress: input.fromAddress,
-        toAddress: input.toAddress,
+        fromAddress: input.tempAccount,
+        toAddress: input.toAddress ?? input.fromAddress,
     }))
 
     const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
 
-    const routes: { [key: string]: Route[] } = {};
+    const routes: {
+        [key: string]: Route[]
+    } = {};
 
     for (let index = 0; index < rawRoutes.length; index++) {
         const rawRoute = rawRoutes[index];
@@ -67,7 +99,10 @@ export async function POST(request: Request) {
     }
 
 
-    return new Response(JSON.stringify(routes), {
+    return new Response(JSON.stringify({
+        routes,
+        tempAccount: input.tempAccount,
+    }), {
         headers: { 'content-type': 'application/json' },
     });
 }

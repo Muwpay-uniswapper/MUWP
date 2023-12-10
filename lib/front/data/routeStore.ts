@@ -1,9 +1,12 @@
 import { InputType } from '@/app/api/quote/route';
 import { Route } from '@/lib/li.fi-ts';
 import { Edge, FitView, Node, SetCenter } from 'reactflow';
+import { z } from 'zod';
 import { create, StoreApi } from 'zustand';
+import { useSwapStore } from './swapStore';
 
 type RouteStore = {
+    tempAccount: `0x${string}` | null;
     needsUpdate: boolean;
     forceUpdate: () => void;
     routes: { [key: string]: Route[] };
@@ -36,6 +39,7 @@ BigInt.prototype.toJSON = function () {
 };
 
 export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setState'], get: StoreApi<RouteStore>['getState']) => ({
+    tempAccount: null,
     needsUpdate: false,
     forceUpdate: () => set({ needsUpdate: !get().needsUpdate }),
     routes: {},
@@ -60,12 +64,25 @@ export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setS
                 },
                 body: JSON.stringify(input),
             });
-            const routes = await res.json();
-            const chosenIndex = Object.keys(routes).reduce((acc, key) => {
+            const json = await res.json();
+            const routes = await z.object({
+                routes: z.record(Route.zod.array()),
+                tempAccount: z.string(),
+            }).parseAsync(json);
+
+            const chosenIndex = Object.keys(routes.routes).reduce((acc, key) => {
                 acc[key] = 0;
                 return acc;
             }, {} as { [key: string]: number });
-            set({ routes, chosenIndex, isFetching: false });
+
+            useSwapStore.setState({});
+
+            set({
+                routes: routes.routes as any,
+                tempAccount: routes.tempAccount as `0x${string}`,
+                chosenIndex,
+                isFetching: false
+            });
         } catch (e) {
             set({ isFetching: false });
             throw e;

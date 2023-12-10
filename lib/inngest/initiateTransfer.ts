@@ -1,6 +1,5 @@
 import { inngest } from "./client";
 import { z } from "zod";
-import * as store from "@/lib/kv/store";
 import { Route } from "../li.fi-ts";
 
 
@@ -22,9 +21,27 @@ const Data = z.object({
 
 export const initiateTransfer = inngest.createFunction(
     { id: "initiate-transfer" },
-    { event: "app/transfer.initiate" },
+    { event: "app/account.created" },
     async ({ event, step }) => {
-        const data = Data.parse(event.data);
+        const accountData = await z.object({
+            address: Address,
+        }).parseAsync(event.data);
+
+        const transfer = await step.waitForEvent("wait-for-user-to-select-route", {
+            event: "app/transfer.initiate",
+            match: "data.address", // the field "data.address" must match
+            timeout: "24h", // wait at most 24h
+        });
+        if (!transfer) {
+            return await step.sendEvent("app/terminate.account", {
+                name: "app/terminate.account",
+                data: {
+                    address: accountData.address,
+                }
+            })
+        }
+
+        const data = await Data.parseAsync(transfer.data);
 
         const funds_transferred = await step.waitForEvent("wait-for-user-to-transfer-funds", {
             event: "app/funds.transferred",
@@ -41,12 +58,27 @@ export const initiateTransfer = inngest.createFunction(
             })
         }
 
-        await step.sendEvent("app/execute.route", data.routes.map(route => ({
-            name: "app/execute.route",
+        await step.sendEvent("app/consume.steps", data.routes.map(route => ({
+            name: "app/consume.steps",
             data: {
                 address: data.address,
-                route,
+                remainingSteps: route.steps,
+                id: route.id,
             }
         })))
-    }
-);
+
+        const routesWait = data.routes.map(route => step.waitForEvent(`wait-for-route-${route.id}-to-complete`, {
+            event: "app/route.completed",
+            if: `async.data.id == ${route.id}`,
+            timeout: "24h"
+        }))
+        await Promise.all(routesWait);
+
+        return await step.sendEvent("app/terminate.account", {
+            name: "app/terminate.account",
+            data: {
+                address: data.address,
+            }
+        })
+
+    });
