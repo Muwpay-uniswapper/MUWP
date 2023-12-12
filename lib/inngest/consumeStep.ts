@@ -4,10 +4,10 @@ import * as store from "@/lib/kv/store";
 import { Step } from "../li.fi-ts";
 import { publicClient } from "@/app/providers";
 import { advancedAPI } from "../front/data/api";
-import { HDAccount, HttpTransport, PublicClient, createPublicClient, createWalletClient, extractChain, fromHex, http } from 'viem'
+import { HDAccount, HttpTransport, PublicClient, createPublicClient, createWalletClient, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
-import { WalletClient } from "wagmi";
+import { WalletClient, erc20ABI } from "wagmi";
 
 const Address = z
     .string()
@@ -52,7 +52,30 @@ export const consumeStep = inngest.createFunction(
             const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
             if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
 
-            const { walletClient } = await getWallet(address, fullStep.transactionRequest.chainId);
+            const { walletClient, publicClient } = await getWallet(address, fullStep.transactionRequest.chainId);
+
+            if (fullStep.action.fromToken.address !== zeroAddress && fullStep.estimate) {
+                // Approvals
+                const contract = getContract({
+                    address: fullStep.action.fromToken.address as `0x${string}`,
+                    abi: erc20ABI,
+                    publicClient: publicClient!,
+                    walletClient: walletClient!,
+                })
+
+                const allowance = await contract.read.allowance([
+                    walletClient.account.address as `0x${string}`,
+                    fullStep.estimate!.approvalAddress as `0x${string}`
+                ]) // TODO: Replace with router address
+
+                const amount = BigInt(fullStep.action.fromAmount)
+
+                if (allowance < amount) {
+                    const hash = await contract.write.approve([fullStep.estimate!.approvalAddress as `0x${string}`, amount])
+
+                    await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
+                }
+            }
 
             console.log("Sending transaction", transactionRequest)
 

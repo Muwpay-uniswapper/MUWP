@@ -26,7 +26,7 @@ export class Exchange {
     /**
     * The chains which are supported on this exchange
     */
-    'supportedChains'?: string;
+    'supportedChains'?: Array<number>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -52,7 +52,7 @@ export class Exchange {
         {
             "name": "supportedChains",
             "baseName": "supportedChains",
-            "type": "string",
+            "type": "Array<number>",
             "format": ""
         }];
 

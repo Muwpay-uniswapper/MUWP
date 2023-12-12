@@ -21,6 +21,7 @@ import { TokenInput } from "./token_input"
 import { Token } from "@/lib/front/model/CellLike"
 import { useSwapStore } from "@/lib/front/data/swapStore"
 import { useBreakpoint } from "@/lib/front/media-query";
+import { zeroAddress } from "viem";
 
 export function TokenComboboxes({ tokenList }: { tokenList: Token[] }) {
     const tokenCount = useSwapStore((state) => state.inputTokens.length)

@@ -3,6 +3,7 @@
 import { useBreakpoint } from "@/lib/front/media-query";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/front/utils";
+import Link from "next/link";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,10 +20,10 @@ export default function Navbar() {
             isMenuOpen ? "backdrop-blur-sm bg-black/50" : "bg-transparent")}>
             <div className="container max-w-screen-xl flex justify-between">
                 <div className="flex flex-row justify-between w-full">
-                    <a href="/" className="flex items-center gap-x-2 cursor-pointer">
+                    <Link href="/" className="flex items-center gap-x-2 cursor-pointer">
                         <img src="/muwpayLogoIcon.svg" alt="logo" />
                         <p>BETA</p>
-                    </a>
+                    </Link>
                     <button className="flex flex-col justify-center items-center gap-1 w-8 h-8 md:hidden"
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                     >
@@ -45,11 +46,9 @@ export default function Navbar() {
                                 transactions
                             </button>
                         </a>
-                        <a className="" href="/networks">
-                            <button disabled className="uppercase py-2 px-4 rounded-sm text-white hover:bg-gradient-to-r hover:from-[#DC7896] hover:to-[#9E59FE] hover:text-transparent bg-clip-text transition-all duration-300 ease-in-out false !cursor-default">
-                                Networks
-                            </button>
-                        </a>
+                        <Link className="uppercase py-2 px-4 rounded-sm text-white hover:bg-gradient-to-r hover:from-[#DC7896] hover:to-[#9E59FE] hover:text-transparent bg-clip-text transition-all duration-300 ease-in-out false" href="/networks">
+                            Networks
+                        </Link>
                         <a className="" href="/blockchain">
                             <button disabled className="uppercase py-2 px-4 rounded-sm text-white hover:bg-gradient-to-r hover:from-[#DC7896] hover:to-[#9E59FE] hover:text-transparent bg-clip-text transition-all duration-300 ease-in-out false !cursor-default">
                                 Blockchain
