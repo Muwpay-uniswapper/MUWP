@@ -4,6 +4,17 @@ import { useSwapStore } from "@/lib/front/data/swapStore";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
 import { Badge } from "../ui/badge";
 import { useAccount, useBalance, useNetwork } from "wagmi";
+import { BadgeCheck, FileDigit } from "lucide-react";
+
+export function FormatTokenAddress({ address }: { address: `0x${string}` }) {
+    if (address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
+
+    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`
+    return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1">
+        <FileDigit className="inline w-4 h-4" />
+        <a href={`https://etherscan.io/address/${address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono">{shortAddress}</a>
+    </div>
+}
 
 export function TokenInput({
     token,
@@ -76,7 +87,7 @@ export function TokenInput({
 
         <div className="text-left p-4">
             <div className="text-base font-semibold">{token.label} Token</div>
-            <div className="text-sm text-zinc-400">{token.address}</div>
+            <FormatTokenAddress address={token.address as `0x${string}`} />
         </div>
     </div>
 }
