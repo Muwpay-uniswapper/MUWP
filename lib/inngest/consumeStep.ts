@@ -7,7 +7,8 @@ import { advancedAPI } from "../front/data/api";
 import { HDAccount, HttpTransport, PublicClient, createPublicClient, createWalletClient, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
-import { WalletClient, erc20ABI } from "wagmi";
+import { WalletClient } from "wagmi";
+import { abi as erc20ABI } from '@/out/ERC20.sol/ERC20.json'
 
 const Address = z
     .string()
@@ -48,6 +49,13 @@ export const consumeStep = inngest.createFunction(
         const _step = remainingSteps[0];
 
         const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
+            if (process.env.NODE_ENV !== "production") {
+                _step.action.slippage = 1.0; // 100% slippage
+                if (_step.estimate) {
+                    _step.estimate.toAmountMin = "1"; // 1 output token, which is like 0.00...1 ETH
+                }
+            }
+
             const fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
             const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
             if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
@@ -63,10 +71,12 @@ export const consumeStep = inngest.createFunction(
                     walletClient: walletClient!,
                 })
 
-                const allowance = await contract.read.allowance([
+                const _allowance = await contract.read.allowance([
                     walletClient.account.address as `0x${string}`,
                     fullStep.estimate!.approvalAddress as `0x${string}`
-                ]) // TODO: Replace with router address
+                ]) as string
+
+                const allowance = BigInt(_allowance)
 
                 const amount = BigInt(fullStep.action.fromAmount)
 
@@ -83,6 +93,8 @@ export const consumeStep = inngest.createFunction(
                 data: transactionRequest.data as `0x${string}`,
                 to: transactionRequest.to as `0x${string}`,
                 value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
+                gas: fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint"),
+                gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
             })
 
             return { hash, chainId: fullStep.transactionRequest.chainId }
@@ -110,7 +122,7 @@ export const consumeStep = inngest.createFunction(
 
         const _remainingSteps = remainingSteps.slice(1);
 
-        if (_remainingSteps.length >= 0) {
+        if (_remainingSteps.length > 0) {
             return await step.sendEvent("app/consume.steps", {
                 name: "app/consume.steps",
                 data: {

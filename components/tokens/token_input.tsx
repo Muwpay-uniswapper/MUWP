@@ -1,19 +1,107 @@
 import React from "react";
 import { Token } from "@/lib/front/model/CellLike"
 import { useSwapStore } from "@/lib/front/data/swapStore";
-import { formatUnits, parseUnits, zeroAddress } from "viem";
+import { Chain, formatUnits, parseUnits, zeroAddress } from "viem";
 import { Badge } from "../ui/badge";
 import { useAccount, useBalance, useNetwork } from "wagmi";
 import { BadgeCheck, FileDigit } from "lucide-react";
+import { publicClient } from "@/app/providers";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { cn } from "@/lib/front/utils";
 
-export function FormatTokenAddress({ address }: { address: `0x${string}` }) {
-    if (address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
+export function FormatTokenAddress({ token }: { token: Token }) {
+    const { chain } = publicClient({ chainId: token.chainId })
 
-    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`
+    if (token.address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
+
+    const shortAddress = `${token.address.slice(0, 6)}...${token.address.slice(-4)}`
     return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1">
         <FileDigit className="inline w-4 h-4" />
-        <a href={`https://etherscan.io/address/${address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono">{shortAddress}</a>
+        <a href={`${chain?.blockExplorers?.default.url}/address/${token.address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono">{shortAddress}</a>
     </div>
+}
+
+export function PercentageSelector({
+    token,
+    balance
+}: {
+    token: Token,
+    balance: bigint
+}) {
+    const [inputValue, setInputValue] = React.useState('');
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    const { inputAmount, setAmount, priceOutput } = useSwapStore()
+
+    return <Tooltip onOpenChange={() => {
+        setInputValue('');
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100);
+    }}>
+        <TooltipTrigger>
+            <Badge
+                className={cn("text-sm",
+                    inputAmount[token.value] > balance
+                        ? "text-red-500 border-red-500"
+                        : "text-black"
+                )}
+                variant="outline"
+                onClick={e => {
+                    e.stopPropagation();
+                }}
+            >{
+                    Math.round((Number(BigInt(inputAmount[token.value] ?? 0n) * 1000n / BigInt(balance))) / 10).toString() + "%"
+                }</Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+            <div className="flex flex-row gap-2">
+                <Badge className="text-sm" variant="outline" onClick={e => {
+                    e.stopPropagation();
+                    setAmount(token, balance / 4n)
+                }}>
+                    25%
+                </Badge>
+                <Badge className="text-sm" variant="outline" onClick={e => {
+                    e.stopPropagation();
+                    setAmount(token, balance / 2n)
+                }}>
+                    50%
+                </Badge>
+                <Badge className="text-sm" variant="outline" onClick={e => {
+                    e.stopPropagation();
+                    setAmount(token, balance * 3n / 4n)
+                }}>
+                    75%
+                </Badge>
+                <Badge className="text-sm" variant="outline" onClick={e => {
+                    e.stopPropagation();
+                    setAmount(token, balance)
+                }}>
+                    100%
+                </Badge>
+                <Badge className="text-sm" variant="outline">
+                    <input
+                        className="text-sm font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-white w-12"
+                        value={inputValue}
+                        placeholder="0"
+                        onChange={e => {
+                            setInputValue(e.target.value);
+                            const newAmount = parseFloat(e.target.value);
+                            if (!isNaN(newAmount) && isFinite(newAmount)) {
+                                const bigAmount = BigInt(Math.round(newAmount));
+                                setAmount(token, balance * bigAmount / 100n)
+                            }
+                        }}
+                        ref={inputRef}
+                        type="text"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    %
+                </Badge>
+            </div>
+        </TooltipContent>
+    </Tooltip>
 }
 
 export function TokenInput({
@@ -78,7 +166,7 @@ export function TokenInput({
                         type="text"
                         onClick={(e) => e.stopPropagation()}
                     />
-                    {(data && mode == 'input') && <Badge className="text-sm text-black" variant="outline" onClick={() => setAmount(token, data.value)} >MAX</Badge>}
+                    {(data && mode == 'input' && data.value > 0n) && <PercentageSelector token={token} balance={data.value} />}
                 </div>
             </div>
             <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div>
@@ -87,7 +175,7 @@ export function TokenInput({
 
         <div className="text-left p-4">
             <div className="text-base font-semibold">{token.label} Token</div>
-            <FormatTokenAddress address={token.address as `0x${string}`} />
+            <FormatTokenAddress token={token} />
         </div>
     </div>
 }

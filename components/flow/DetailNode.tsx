@@ -4,7 +4,7 @@ import { FiCloud } from 'react-icons/fi';
 import { FeeCost, GasCost, Step, Token } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { X } from 'lucide-react';
+import { ArrowDownToLine, Diff, DollarSign, Fuel, X } from 'lucide-react';
 import { useRouteStore } from '@/lib/front/data/routeStore';
 
 export type DetailNodeData = Step & {
@@ -31,7 +31,7 @@ export default memo(({ data }: NodeProps<DetailNodeData>) => {
 
 
     return (
-        <Card>
+        <Card className="w-[128]">
             <CardHeader className="relative">
                 <X className="cursor-pointer bg-black/50 p-1 rounded-full absolute right-2 top-2" onClick={() => {
                     const nodes = getNodes()
@@ -43,9 +43,9 @@ export default memo(({ data }: NodeProps<DetailNodeData>) => {
                 <CardDescription>{data.action.fromToken.symbol} to {data.action.toToken.symbol} on {data.tool}</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-2">
-                <p>Slippage</p>
+                <p><Diff className="inline w-4 h-4 mr-1" /> Slippage</p>
                 <p className="text-right">{format((data.action.slippage ?? 0) * 100)}%</p>
-                <p>Fees</p>
+                <p><DollarSign className="inline w-4 h-4 mr-1" /> Fees</p>
                 <p className="text-right">
                     {
                         format(
@@ -56,7 +56,7 @@ export default memo(({ data }: NodeProps<DetailNodeData>) => {
                                 .reduce((a: number, b: number) => a + b, 0)
                         )}$
                 </p>
-                <p>Gas Fees</p>
+                <p><Fuel className="inline w-4 h-4 mr-1" /> Gas Fees</p>
                 <p className="text-right">
                     {
                         format(
@@ -67,7 +67,7 @@ export default memo(({ data }: NodeProps<DetailNodeData>) => {
                                 .reduce((a: number, b: number) => a + b, 0)
                         )}$
                 </p>
-                <p>Minimum Received</p>
+                <p><ArrowDownToLine className="inline w-4 h-4 mr-1" /> Minimum Received</p>
                 <p className="text-right">{format(formatUnits(BigInt(data.estimate?.toAmountMin ?? ""), data.action.toToken.decimals))}</p>
             </CardContent>
         </Card>

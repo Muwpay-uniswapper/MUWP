@@ -10,16 +10,18 @@ import React from "react";
 import { z } from "zod";
 import { PrepareTransactionRequestReturnType, getContract, zeroAddress } from "viem";
 import { toast } from "sonner";
+import { Route } from "@/lib/li.fi-ts";
 
 const InitiateResponse = z.object({
     status: z.literal("success"),
     address: z.string(),
     txn: z.any(),
     approvals: z.array(z.any()),
+    id: z.string(),
 });
 
 export function SwapButton() {
-    const { getRoutes, tempAccount } = useRouteStore();
+    const { getRoutes, tempAccount, routes: _route, setTransaction } = useRouteStore();
     const { data: walletClient } = useWalletClient()
     const publicClient = usePublicClient()
     const account = useAccount();
@@ -29,6 +31,36 @@ export function SwapButton() {
 
     const { isError, isLoading } = useWaitForTransaction({ hash })
     const [isFetching, setIsFetching] = React.useState(false);
+
+    const routes = React.useMemo(() => getRoutes(), [_route])
+
+    const [needApprovals, setNeedApprovals] = React.useState(false);
+
+    React.useEffect(() => {
+        (async () => {
+            const routes = getRoutes()
+            for (const route of routes) {
+                if (route.fromToken.address === zeroAddress) return false;
+                // Check allowance
+                const contract = getContract({
+                    address: route.fromToken.address as `0x${string}`,
+                    abi: erc20ABI,
+                    publicClient: publicClient!,
+                    walletClient: walletClient!,
+                })
+
+                const allowance = await contract.read.allowance([account.address!, "0xADf1687e201d1DCb466D902F350499D008811e84"]) // TODO: Replace with router address
+
+                const amount = BigInt(route.steps[0].action.fromAmount)
+
+                if (allowance < amount) {
+                    setNeedApprovals(true);
+                    return;
+                }
+            }
+            setNeedApprovals(false);
+        })()
+    }, [routes])
 
     React.useEffect(() => {
         if (hash && !isError && !isLoading && isFetching) {
@@ -53,7 +85,6 @@ export function SwapButton() {
 
     const onClick = async () => {
         setIsFetching(true);
-        const routes = getRoutes()
         // Process allowance
         const allowances = Promise.all(routes.map(async (route) => {
             if (route.fromToken.address !== zeroAddress) {
@@ -152,6 +183,12 @@ export function SwapButton() {
                 });
             })
 
+            setTransaction({
+                routes,
+                status: "pending",
+                id: address,
+            })
+
             setHash(_hash);
         } while (!_hash && counter < 3);
 
@@ -171,6 +208,6 @@ export function SwapButton() {
         }
     }} disabled={isFetching || !tempAccount}>
         {isFetching && <Loader2 className="h-6 w-6 animate-spin mx-2" />}
-        Swap
+        {needApprovals ? "Approve & Swap" : "Swap"}
     </Button >
 }

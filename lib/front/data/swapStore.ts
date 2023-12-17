@@ -1,8 +1,14 @@
 import { create, StoreApi } from 'zustand';
 import { Token } from '@/lib/front/model/CellLike';
 import { parseUnits } from "viem";
+import { AllowDenyPrefer } from '@/lib/li.fi-ts';
 
 type SwapStore = {
+    allowDenyBridges: AllowDenyPrefer;
+    toggleAllowDenyBridge: (bridge: string) => void;
+    allowDenyExchanges: AllowDenyPrefer;
+    toggleAllowDenyExchange: (exchange: string) => void;
+    setAllowDenyExchanges: (allowDenyExchanges: AllowDenyPrefer) => void;
     inputTokens: Token[];
     outputToken: Token | null;
     outputChain: number | null;
@@ -16,6 +22,31 @@ type SwapStore = {
 };
 
 export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setState'], get: StoreApi<SwapStore>['getState']) => ({
+    allowDenyBridges: { allow: undefined, deny: [], prefer: undefined },
+    toggleAllowDenyBridge: (bridge: string) => {
+        set((state: SwapStore) => {
+            const allowDenyBridges = { ...state.allowDenyBridges };
+            if (allowDenyBridges.deny?.includes(bridge)) {
+                allowDenyBridges.deny = allowDenyBridges.deny.filter(b => b !== bridge);
+            } else {
+                allowDenyBridges.deny?.push(bridge);
+            }
+            return { allowDenyBridges };
+        })
+    },
+    allowDenyExchanges: { allow: undefined, deny: [], prefer: undefined },
+    toggleAllowDenyExchange: (exchange: string) => {
+        set((state: SwapStore) => {
+            const allowDenyExchanges = { ...state.allowDenyExchanges };
+            if (allowDenyExchanges.deny?.includes(exchange)) {
+                allowDenyExchanges.deny = allowDenyExchanges.deny.filter(b => b !== exchange);
+            } else {
+                allowDenyExchanges.deny?.push(exchange);
+            }
+            return { allowDenyExchanges };
+        })
+    },
+    setAllowDenyExchanges: (allowDenyExchanges: AllowDenyPrefer) => set({ allowDenyExchanges }),
     inputTokens: [],
     outputToken: null,
     outputChain: null,

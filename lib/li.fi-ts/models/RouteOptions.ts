@@ -12,6 +12,7 @@
 
 import { AllowDenyPrefer } from './AllowDenyPrefer';
 import { HttpFile } from '../http/http';
+import { z } from 'zod';
 
 /**
 * Optional settings for the route
@@ -112,6 +113,20 @@ export class RouteOptions {
 
     public constructor() {
     }
+
+    static get zod() {
+        return z.object({
+            integrator: z.string().optional(),
+            slippage: z.number().optional(),
+            bridges: AllowDenyPrefer.zod.optional(),
+            exchanges: AllowDenyPrefer.zod.optional(),
+            order: RouteOptionsOrderEnum.zod().optional(),
+            allowSwitchChain: z.boolean().optional(),
+            referrer: z.string().optional(),
+            fee: z.number().optional(),
+            maxPriceImpact: z.number().optional(),
+        });
+    }
 }
 
 
@@ -122,3 +137,8 @@ export enum RouteOptionsOrderEnum {
     Safest = 'SAFEST'
 }
 
+export namespace RouteOptionsOrderEnum {
+    export function zod(): z.ZodSchema<RouteOptionsOrderEnum> {
+        return z.enum([RouteOptionsOrderEnum.Recommended, RouteOptionsOrderEnum.Fastest, RouteOptionsOrderEnum.Cheapest, RouteOptionsOrderEnum.Safest])
+    }
+}

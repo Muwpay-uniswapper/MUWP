@@ -41,6 +41,7 @@ import {
 import { publicProvider } from 'wagmi/providers/public';
 import { useSwapStore } from '@/lib/front/data/swapStore';
 import { Toaster } from 'sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
     [
@@ -141,12 +142,12 @@ export function State({ children }: { children: React.ReactNode }) {
 export function Providers({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = React.useState(false);
     React.useEffect(() => setMounted(true), []);
-    return <>
+    return <TooltipProvider skipDelayDuration={250} delayDuration={300}>
         <Toaster richColors />
         <WagmiConfig config={wagmiConfig}>
             <RainbowKitProvider chains={chains} appInfo={demoAppInfo} modalSize="compact" coolMode={true} theme={darkTheme()}>
                 {mounted && <State>{children}</State>}
             </RainbowKitProvider>
         </WagmiConfig>
-    </>;
+    </TooltipProvider>;
 }

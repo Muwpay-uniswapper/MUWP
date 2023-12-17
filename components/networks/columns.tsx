@@ -1,25 +1,30 @@
+"use client";
+
 import { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "../ui/checkbox"
 import { Exchange } from "@/lib/li.fi-ts"
 import { ChainIcon } from "connectkit"
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useSwapStore } from "@/lib/front/data/swapStore";
 
 export const columns: ColumnDef<Exchange>[] = [
     {
         id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
+        header: () => null,
         cell: ({ row }) => (
             <Checkbox
                 checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                onCheckedChange={(value) => {
+                    useSwapStore.setState((state) => {
+                        const allowDenyExchanges = { ...state.allowDenyExchanges };
+                        if (allowDenyExchanges.deny?.includes(row.original.key ?? "")) {
+                            allowDenyExchanges.deny = allowDenyExchanges.deny.filter(b => b !== row.original.key);
+                        } else {
+                            allowDenyExchanges.deny?.push(row.original.key ?? "");
+                        }
+                        return { allowDenyExchanges };
+                    })
+                }}
                 aria-label="Select row"
             />
         ),
@@ -49,9 +54,14 @@ export const columns: ColumnDef<Exchange>[] = [
         header: "Supported Chains",
         cell: ({ row }) => (
             <div className="flex flex-row gap-1">
-                {row.original.supportedChains?.map((chain) => (
-                    <ChainIcon id={chain} key={chain} />
-                ))}
+                {row.original.supportedChains?.map((chain) => <Tooltip>
+                    <TooltipTrigger>
+                        <ChainIcon id={chain} key={chain} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        Chain ID: {chain}
+                    </TooltipContent>
+                </Tooltip>)}
             </div>
         ),
     }

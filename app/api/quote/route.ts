@@ -1,5 +1,5 @@
 import { advancedAPI } from "@/lib/front/data/api";
-import { Route } from "@/lib/li.fi-ts";
+import { Route, RouteOptions } from "@/lib/li.fi-ts";
 import { z } from 'zod';
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import { fromHex } from "viem";
@@ -30,6 +30,7 @@ const Input = z.object({
     fromAddress: Address,
     tempAccount: Address.optional(),
     toAddress: Address.optional(),
+    options: RouteOptions.zod.optional(),
 });
 
 // Export Input type for use in other files
@@ -44,7 +45,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const input = await Input.parseAsync(body);
 
-    if (!input.tempAccount || typeof input.tempAccount == "undefined") {
+    const _tempAccount = await store.get(input.tempAccount ?? "");
+
+    if (!input.tempAccount || typeof input.tempAccount == "undefined" || _tempAccount == null || typeof _tempAccount == "undefined") {
         const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
         const privateKey = fromHex(master_hd, "bytes")
         const hdKey = HDKey.fromMasterSeed(privateKey)
@@ -79,6 +82,7 @@ export async function POST(request: Request) {
         toTokenAddress: input.outputToken.address,
         fromAddress: input.tempAccount,
         toAddress: input.toAddress ?? input.fromAddress,
+        options: input.options,
     }))
 
     const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
@@ -102,6 +106,7 @@ export async function POST(request: Request) {
     return new Response(JSON.stringify({
         routes,
         tempAccount: input.tempAccount,
+        validUntil: Date.now() + 1000 * 60 * 5, // 5 minutes
     }), {
         headers: { 'content-type': 'application/json' },
     });

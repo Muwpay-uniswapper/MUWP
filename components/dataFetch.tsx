@@ -29,7 +29,8 @@ export async function TokenSelector({
             priceUSD: token.priceUSD,
             address: token.address,
             ticker: token.symbol,
-            decimals: token.decimals
+            decimals: token.decimals,
+            chainId: chain!
         }
     }) ?? []
 

@@ -44,7 +44,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                             <div className="subline">{(!data.isInput && !data.isSource) && "~"}{formattedAmount.slice(0, 10)}</div>
                         </div>
                     </div>
-                    {data.isInput && <Select value={chosenIndex[data.address].toString()} onValueChange={value => {
+                    {data.isInput && <Select value={chosenIndex[data.address]?.toString()} onValueChange={value => {
                         choseIndex(data.address, Number(value))
                     }}>
                         <SelectTrigger className="w-4 h-4 p-0 border-none bg-transparent" />
@@ -72,8 +72,8 @@ export function RouteInfo({ route, index }: { route: Route, index: number }) {
             {format(formatUnits(BigInt(route.toAmount), route.toToken.decimals))} {route.toToken.symbol}
         </div>
         <div className="flex flex-row items-center justify-around">
-            <span className='flex flex-row items-center'><Fuel className='w-3 h-3' /> {format(route.gasCostUSD)}$</span>
-            <span className='flex flex-row items-center'><DollarSign className='w-3 h-3' /> {
+            <span className='flex flex-row items-center'><Fuel className='w-3 h-3 mr-1' /> {format(route.gasCostUSD)}$</span>
+            <span className='flex flex-row items-center'><DollarSign className='w-3 h-3 mr-1' /> {
                 format(route
                     .steps
                     .map(step => step.estimate?.feeCosts?.map(fee => Number(fee.amountUSD))
@@ -81,7 +81,7 @@ export function RouteInfo({ route, index }: { route: Route, index: number }) {
                     )
                     .reduce((acc, curr) => (acc ?? 0) + (curr ?? 0), 0))}$
             </span>
-            <span className='flex flex-row items-center'><Clock className='w-3 h-3' />
+            <span className='flex flex-row items-center'><Clock className='w-3 h-3 mr-1' />
                 {Math.ceil(
                     route.steps
                         .map((step) => step.estimate?.executionDuration ?? 0)

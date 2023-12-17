@@ -1,6 +1,6 @@
 "use client";
 
-import ReactFlow, { Connection, DefaultEdgeOptions, Edge, ReactFlowProvider, addEdge, useEdgesState, useNodesState, useReactFlow, useViewport } from "reactflow";
+import ReactFlow, { Connection, DefaultEdgeOptions, Edge, Panel, ReactFlowProvider, addEdge, useEdgesState, useNodesState, useReactFlow, useViewport } from "reactflow";
 import { Card } from "../ui/card";
 
 import "reactflow/dist/style.css"
@@ -12,6 +12,7 @@ import React, { useCallback, useMemo } from "react";
 import { GradientIdContext } from "./provider";
 import DetailNode from "./DetailNode";
 import { Route, Step } from "@/lib/li.fi-ts";
+import { Progress } from "./progress";
 
 const edgeTypes = {
     exchange: EdgeExchange,
@@ -29,7 +30,7 @@ export function MainFlow() {
 }
 
 export function Flow() {
-    const { routes, setFocused, getRoutes, chosenIndex, needsUpdate } = useRouteStore();
+    const { routes, setFocused, getRoutes, chosenIndex, needsUpdate, validUntil } = useRouteStore();
     const gradientId = useMemo(() => 'gradient-' + Math.random(), []);
 
     const { setCenter, fitView } = useReactFlow();
@@ -106,6 +107,13 @@ export function Flow() {
                         </marker>
                     </defs>
                 </svg>
+                <Panel position="top-right">
+                    {validUntil && <Progress validUntil={validUntil} />}
+                </Panel>
+
+                {nodes.length == 0 && <Panel position="top-center">
+                    <span className="text-gray-500">Find a route to swap tokens</span>
+                </Panel>}
             </ReactFlow>
         </GradientIdContext.Provider>
     </Card>

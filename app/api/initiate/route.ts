@@ -105,7 +105,7 @@ export async function POST(request: Request) {
         })
     );
 
-    await inngest.send({
+    const _id = await inngest.send({
         name: "app/transfer.initiate",
         data: {
             address: input.account,
@@ -119,6 +119,7 @@ export async function POST(request: Request) {
         status: "success",
         address: input.account,
         txn,
+        id: _id.ids[0],
         approvals: approveTransactions,
     }), {
         headers: {
