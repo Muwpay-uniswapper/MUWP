@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { z } from 'zod';
 import { HttpFile } from '../http/http';
 
 /**
@@ -31,7 +32,7 @@ export class AllowDenyPrefer {
 
     static readonly discriminator: string | undefined = undefined;
 
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+    static readonly attributeTypeMap: Array<{ name: string, baseName: string, type: string, format: string }> = [
         {
             "name": "allow",
             "baseName": "allow",
@@ -49,13 +50,21 @@ export class AllowDenyPrefer {
             "baseName": "prefer",
             "type": "Array<string>",
             "format": ""
-        }    ];
+        }];
 
     static getAttributeTypeMap() {
         return AllowDenyPrefer.attributeTypeMap;
     }
 
     public constructor() {
+    }
+
+    static get zod() {
+        return z.object({
+            allow: z.array(z.string()).optional(),
+            deny: z.array(z.string()).optional(),
+            prefer: z.array(z.string()).optional(),
+        });
     }
 }
 

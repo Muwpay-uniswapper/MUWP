@@ -4,9 +4,19 @@ import { Edge, FitView, Node, SetCenter } from 'reactflow';
 import { z } from 'zod';
 import { create, StoreApi } from 'zustand';
 import { useSwapStore } from './swapStore';
+import { persist, createJSONStorage } from 'zustand/middleware'
+
+export type Transaction = {
+    routes: Route[];
+    id: string;
+    status: "pending" | "success" | "failed";
+};
 
 type RouteStore = {
-    tempAccount: `0x${string}` | null;
+    tempAccount?: `0x${string}`;
+    transactions: Transaction[];
+    setTransaction: (transaction: Transaction) => void;
+    validUntil?: Date;
     needsUpdate: boolean;
     forceUpdate: () => void;
     routes: { [key: string]: Route[] };
@@ -38,9 +48,23 @@ BigInt.prototype.toJSON = function () {
     return this.toString();
 };
 
-export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setState'], get: StoreApi<RouteStore>['getState']) => ({
-    tempAccount: null,
+export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteStore>['setState'], get: StoreApi<RouteStore>['getState']) => ({
+    tempAccount: undefined,
+    transactions: [],
+    setTransaction: (transaction: Transaction) => {
+        const { transactions } = get();
+        const tx = transactions.findIndex((tx) => tx.id === transaction.id);
+        if (tx === -1) {
+            set({ transactions: [...transactions, transaction] });
+        } else {
+            set((state) => {
+                state.transactions[tx] = transaction;
+                return { transactions: state.transactions };
+            });
+        }
+    },
     needsUpdate: false,
+    validUntil: undefined,
     forceUpdate: () => set({ needsUpdate: !get().needsUpdate }),
     routes: {},
     chosenIndex: {},
@@ -68,6 +92,7 @@ export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setS
             const routes = await z.object({
                 routes: z.record(Route.zod.array()),
                 tempAccount: z.string(),
+                validUntil: z.coerce.date(),
             }).parseAsync(json);
 
             const chosenIndex = Object.keys(routes.routes).reduce((acc, key) => {
@@ -81,7 +106,8 @@ export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setS
                 routes: routes.routes as any,
                 tempAccount: routes.tempAccount as `0x${string}`,
                 chosenIndex,
-                isFetching: false
+                isFetching: false,
+                validUntil: routes.validUntil,
             });
         } catch (e) {
             set({ isFetching: false });
@@ -109,9 +135,7 @@ export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setS
                 y2: targetNode?.position.y || 0,
             }
 
-            setCenter(100 + 200, 150, { duration: 500, zoom: 1 });
-
-
+            setCenter(150 + 200, 150, { duration: 500, zoom: 1 });
         } else {
             setTimeout(() => {
                 fitView({ duration: 500, includeHiddenNodes: true })
@@ -193,4 +217,10 @@ export const useRouteStore = create<RouteStore>((set: StoreApi<RouteStore>['setS
 
         return { isFocused: _isFocused, focusedPoint: state.focusedPoint };
     }),
+}), {
+    name: 'routeStore',
+    storage: createJSONStorage(() => (global as any).sessionStorage), // (optional) by default, 'localStorage' is used,
+    partialize: (state) => ({
+        transactions: state.transactions
+    })
 }));

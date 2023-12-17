@@ -7,6 +7,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
 import { VercelToolbar } from '@vercel/toolbar/next';
 import { Suspense } from "react";
+import Footer from '@/components/layout/footer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -34,6 +35,7 @@ export default function RootLayout({
 						<Suspense>
 							<VercelToolbar />
 						</Suspense>
+						<Footer />
 					</div>
 				</Providers>
 			</body>

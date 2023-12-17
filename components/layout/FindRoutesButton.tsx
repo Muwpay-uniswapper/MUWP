@@ -7,14 +7,25 @@ import { InputType } from "@/app/api/quote/route";
 import { useRouteStore } from "@/lib/front/data/routeStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import React from "react";
 
 
 
 export function FindRoutesButton() {
-    const { inputTokens, outputToken, inputAmount, outputChain } = useSwapStore();
-    const { fetchRoutes, isFetching } = useRouteStore();
+    const { inputTokens, outputToken, inputAmount, outputChain, allowDenyBridges, allowDenyExchanges } = useSwapStore();
+    const { fetchRoutes, isFetching, tempAccount, validUntil } = useRouteStore();
     const { chain } = useNetwork();
     const { address } = useAccount();
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            if (validUntil && validUntil < new Date() && !isFetching) {
+                onClick();
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [validUntil, isFetching]);
 
     const onClick = async () => {
         if (!chain || !outputChain || !address || !outputToken) return;
@@ -31,6 +42,11 @@ export function FindRoutesButton() {
                 outputToken: {
                     address: outputToken.address,
                     value: outputToken.value,
+                },
+                tempAccount,
+                options: {
+                    bridges: allowDenyBridges,
+                    exchanges: allowDenyExchanges,
                 }
             })
         } catch (e) {

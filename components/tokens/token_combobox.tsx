@@ -50,7 +50,7 @@ export function TokenCombobox({
 
     const { isAboveMd } = useBreakpoint("md")
 
-    const { inputTokens, setInputToken, outputToken, setOutputToken } = useSwapStore()
+    const { inputTokens, outputToken } = useSwapStore()
 
     const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
 
@@ -111,7 +111,7 @@ function TokenListContent({
     React.useEffect(() => {
         setHydrated(true)
         setSearch("")
-    }, [])
+    }, [hydrated])
     const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
 
     return <Command

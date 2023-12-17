@@ -129,6 +129,7 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                 const detailNodeId = `${edgeId}-detail`;
                 nodes[detailNodeId] = {
                     position: { x: point.x + 100, y: point.y },
+                    width: 400,
                     id: detailNodeId,
                     sourcePosition: Position.Right,
                     targetPosition: Position.Left,

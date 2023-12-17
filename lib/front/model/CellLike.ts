@@ -8,7 +8,8 @@ export interface Token extends CellLike {
     address: string,
     ticker: string,
     decimals: number,
-    priceUSD?: string
+    priceUSD?: string,
+    chainId: number
 };
 
 export interface Chain extends CellLike {

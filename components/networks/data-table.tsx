@@ -2,6 +2,8 @@
 
 import {
     ColumnDef,
+    OnChangeFn,
+    RowSelectionState,
     flexRender,
     getCoreRowModel,
     useReactTable,
@@ -24,10 +26,20 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
     columns,
     data,
-}: DataTableProps<TData, TValue>) {
+    rowSelection,
+    onRowSelectionChange,
+}: DataTableProps<TData, TValue> & {
+    rowSelection?: RowSelectionState,
+    onRowSelectionChange?: OnChangeFn<RowSelectionState>
+}) {
     const table = useReactTable({
         data,
         columns,
+        enableRowSelection: true,
+        state: {
+            rowSelection,
+        },
+        onRowSelectionChange,
         getCoreRowModel: getCoreRowModel(),
     })
 
