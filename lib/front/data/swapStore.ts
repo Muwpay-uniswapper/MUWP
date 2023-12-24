@@ -65,7 +65,13 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
         const tokens = [...state.inputTokens];
         const inputAmount = { ...state.inputAmount };
         // Remove the input amount for the removed token
-        delete inputAmount[tokens[index ?? 0].value];
+        const token = tokens[index ?? 0];
+        const v = token?.value;
+
+        if (v && inputAmount[v]) {
+            delete inputAmount[v];
+        }
+
         tokens.splice(index ?? 0, 1);
         return { inputTokens: tokens, inputAmount };
     }),

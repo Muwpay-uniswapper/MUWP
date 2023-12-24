@@ -4,10 +4,16 @@ import { useBreakpoint } from "@/lib/front/media-query";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/front/utils";
 import Link from "next/link";
+import { useNetwork } from "wagmi";
+import { useSwapStore } from "@/lib/front/data/swapStore";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isAboveMd } = useBreakpoint("md");
+    const { chain } = useNetwork();
+    const { outputChain } = useSwapStore();
+
+    const [homeURL, setHomeURL] = useState("/");
 
     useEffect(() => {
         if (isAboveMd) {
@@ -15,12 +21,19 @@ export default function Navbar() {
         }
     }, [isAboveMd]);
 
+    useEffect(() => {
+        const newParams = new URLSearchParams(window.location.search);
+        if (chain) newParams.set('chain', chain.id.toString());
+        if (outputChain) newParams.set('toChain', outputChain.toString());
+        setHomeURL(`/?${newParams.toString()}`);
+    }, [chain, outputChain]);
+
     return (
         <div className={cn("text-white my-auto py-4 items-center relative w-full top-0 z-50 transition-all",
             isMenuOpen ? "backdrop-blur-sm bg-black/50" : "bg-transparent")}>
             <div className="container max-w-screen-xl flex justify-between">
                 <div className="flex flex-row justify-between w-full">
-                    <Link href="/" className="flex items-center gap-x-2 cursor-pointer">
+                    <Link href={homeURL} className="flex items-center gap-x-2 cursor-pointer">
                         <img src="/muwpayLogoIcon.svg" alt="logo" />
                         <p>BETA</p>
                     </Link>
@@ -36,11 +49,11 @@ export default function Navbar() {
                 ${isMenuOpen ? "translate-y-0 backdrop-blur-sm bg-black/50 opacity-100" : "-translate-y-[calc(100%+70px)] md:translate-y-0 opacity-0 md:opacity-100"}`
                 }>
                     <div className="flex flex-col md:flex-row gap-6 items-center">
-                        <a className="" href="/transactions">
+                        <Link className="" href="/transactions">
                             <button className="uppercase cursor-pointer py-2 px-4 rounded-sm text-white hover:bg-gradient-to-r hover:from-[#DC7896] hover:to-[#9E59FE] hover:text-transparent bg-clip-text transition-all duration-300 ease-in-out false false">
                                 transactions
                             </button>
-                        </a>
+                        </Link>
                         <Link className="uppercase py-2 px-4 rounded-sm text-white hover:bg-gradient-to-r hover:from-[#DC7896] hover:to-[#9E59FE] hover:text-transparent bg-clip-text transition-all duration-300 ease-in-out false" href="/networks">
                             Networks
                         </Link>
