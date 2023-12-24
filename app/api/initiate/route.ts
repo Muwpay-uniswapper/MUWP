@@ -1,4 +1,4 @@
-import { publicClient } from "@/app/providers";
+import { muwpChains, publicClient } from "@/app/providers";
 import { inngest } from "@/lib/inngest/client";
 import { Route } from "@/lib/li.fi-ts";
 import { createPublicClient, createWalletClient, encodeFunctionData, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
@@ -66,9 +66,11 @@ export async function POST(request: Request) {
         ]
     })
 
+    const chain = muwpChains.find(chain => chain.id === input.chainId)
+
     const txn = await client.prepareTransactionRequest({
         account: input.from as `0x${string}`,
-        to: process.env.GOERLI_ADDRESS as `0x${string}`,
+        to: chain?.muwpContract,
         value: totalGas + input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n),
         data,
         chain: client.chain,
@@ -90,7 +92,7 @@ export async function POST(request: Request) {
             const approveData = encodeFunctionData({
                 abi: erc20.abi, // Use ERC20 abi
                 functionName: "approve",
-                args: [process.env.GOERLI_ADDRESS as `0x${string}`, args.amount]
+                args: [chain?.muwpContract, args.amount]
             });
 
             return client.prepareTransactionRequest({
