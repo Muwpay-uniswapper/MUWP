@@ -6,8 +6,10 @@ import { columns } from "./columns";
 export default function Transactions() {
     const { transactions } = useRouteStore();
 
-    return <DataTable
-        columns={columns}
-        data={transactions}
-    />
+    return <div className="w-full px-4 max-w-3xl">
+        <DataTable
+            columns={columns}
+            data={transactions}
+        />
+    </div>
 }

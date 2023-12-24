@@ -45,9 +45,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const input = await Input.parseAsync(body);
 
-    const _tempAccount = await store.get(input.tempAccount ?? "");
+    const accountInfo = await store.get(input.tempAccount ?? "") as string | object | null;
+    const _tempAccount = typeof accountInfo === "string" ? JSON.parse(accountInfo)
+        : typeof accountInfo === "object" ? (accountInfo as any)
+            : null;
 
-    if (!input.tempAccount || typeof input.tempAccount == "undefined" || _tempAccount == null || typeof _tempAccount == "undefined") {
+    if (!input.tempAccount || typeof input.tempAccount == "undefined" || _tempAccount == null || typeof _tempAccount == "undefined" || _tempAccount.index == null || typeof _tempAccount.index == "undefined") {
         const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
         const privateKey = fromHex(master_hd, "bytes")
         const hdKey = HDKey.fromMasterSeed(privateKey)
@@ -62,7 +65,9 @@ export async function POST(request: Request) {
             accountIndex: index,
         })
 
-        await store.set(account.address, index.toString())
+        await store.set(account.address, JSON.stringify({
+            index,
+        }));
 
         await inngest.send({
             name: "app/account.created",

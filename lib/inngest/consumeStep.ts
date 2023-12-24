@@ -35,7 +35,10 @@ const transactionRequestSchema = z.object({
 
 
 export const consumeStep = inngest.createFunction(
-    { id: "consume-step" },
+    {
+        id: "consume-step",
+        retries: 10, // This way, we can ensure that the step will be executed over 2 hours (backoff time is exponential)
+    },
     { event: "app/consume.steps" },
     async ({ event, step }) => {
         const { remainingSteps, address } = await z.object({
@@ -48,7 +51,7 @@ export const consumeStep = inngest.createFunction(
 
         const _step = remainingSteps[0];
 
-        const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
+        const { transactionRequest, approvalAddress } = await step.run(`approvals-${_step.id}`, async () => {
             if (process.env.NODE_ENV !== "production") {
                 _step.action.slippage = 1.0; // 100% slippage
                 if (_step.estimate) {
@@ -62,7 +65,7 @@ export const consumeStep = inngest.createFunction(
 
             const { walletClient, publicClient } = await getWallet(address, fullStep.transactionRequest.chainId);
 
-            if (fullStep.action.fromToken.address !== zeroAddress && fullStep.estimate) {
+            if (fullStep.action.fromToken.address !== zeroAddress) {
                 // Approvals
                 const contract = getContract({
                     address: fullStep.action.fromToken.address as `0x${string}`,
@@ -71,9 +74,11 @@ export const consumeStep = inngest.createFunction(
                     walletClient: walletClient!,
                 })
 
+                const approvalAddress = fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`
+
                 const _allowance = await contract.read.allowance([
                     walletClient.account.address as `0x${string}`,
-                    fullStep.estimate!.approvalAddress as `0x${string}`
+                    approvalAddress
                 ]) as string
 
                 const allowance = BigInt(_allowance)
@@ -81,9 +86,39 @@ export const consumeStep = inngest.createFunction(
                 const amount = BigInt(fullStep.action.fromAmount)
 
                 if (allowance < amount) {
-                    const hash = await contract.write.approve([fullStep.estimate!.approvalAddress as `0x${string}`, amount])
+                    const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
 
                     await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
+
+                    return { transactionRequest, hash, approvalAddress }
+                }
+            }
+            return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}` }
+        })
+
+        const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
+            const { walletClient, publicClient } = await getWallet(address, transactionRequest.chainId);
+
+            // Check if allowance is sufficient
+            if (_step.action.fromToken.address !== zeroAddress) {
+                const contract = getContract({
+                    address: _step.action.fromToken.address as `0x${string}`,
+                    abi: erc20ABI,
+                    publicClient: publicClient!,
+                    walletClient: walletClient!,
+                })
+
+                const _allowance = await contract.read.allowance([
+                    walletClient.account.address as `0x${string}`,
+                    approvalAddress
+                ]) as string
+
+                const allowance = BigInt(_allowance)
+
+                const amount = BigInt(_step.action.fromAmount)
+
+                if (allowance < amount) {
+                    throw new Error("Allowance insufficient")
                 }
             }
 
@@ -97,7 +132,7 @@ export const consumeStep = inngest.createFunction(
                 gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
             })
 
-            return { hash, chainId: fullStep.transactionRequest.chainId }
+            return { hash, chainId: transactionRequest.chainId }
         })
         await step.waitForEvent(`transaction-${hash}`, {
             event: "app/transaction.executed",
@@ -110,7 +145,7 @@ export const consumeStep = inngest.createFunction(
             const client = createPublicClient({
                 chain: extractChain({
                     chains: Object.values(chains),
-                    id: chainId
+                    id: chainId as any,
                 }),
                 transport: http()
             })
@@ -132,12 +167,21 @@ export const consumeStep = inngest.createFunction(
             })
         }
 
-        return await step.sendEvent("app/route.completed", {
-            name: "app/route.completed",
-            data: {
-                address,
-                id: event.data.id,
+        return await step.run("route-completed", async () => {
+            const accountInfo = await store.get(address) as string | object | undefined;
+            const info = typeof accountInfo === "string" ? JSON.parse(accountInfo) : accountInfo;
+
+            if (!info) {
+                throw new Error("Account not found");
             }
+
+            const completed = info.completed ?? [];
+            completed.push(event.data.id);
+
+            await store.set(address, JSON.stringify({
+                ...info,
+                completed,
+            }));
         })
     },
 );
@@ -150,7 +194,14 @@ export async function getWallet(address: string, chainId: number): Promise<{
     const privateKey = fromHex(master_hd, "bytes");
     const hdKey = HDKey.fromMasterSeed(privateKey);
 
-    const index = await store.get(address) as string;
+    const accountInfo = await store.get(address) as string | object | undefined;
+    const index = typeof accountInfo === "string" ? JSON.parse(accountInfo).index
+        : typeof accountInfo === "object" ? (accountInfo as any).index
+            : null;
+
+    if (!index) {
+        throw new Error("Account not found");
+    }
 
     const account = hdKeyToAccount(hdKey, {
         accountIndex: Number(index),

@@ -11,6 +11,8 @@ import { z } from "zod";
 import { PrepareTransactionRequestReturnType, getContract, zeroAddress } from "viem";
 import { toast } from "sonner";
 import { Route } from "@/lib/li.fi-ts";
+import { MUWPChain } from "@/app/providers";
+import { useRouter } from "next/navigation";
 
 const InitiateResponse = z.object({
     status: z.literal("success"),
@@ -26,7 +28,8 @@ export function SwapButton() {
     const publicClient = usePublicClient()
     const account = useAccount();
     const { chain } = useNetwork();
-    const { data } = useFeeData()
+    const { data } = useFeeData();
+    const router = useRouter();
     const [hash, setHash] = React.useState<`0x${string}` | undefined>();
 
     const { isError, isLoading } = useWaitForTransaction({ hash })
@@ -40,7 +43,7 @@ export function SwapButton() {
         (async () => {
             const routes = getRoutes()
             for (const route of routes) {
-                if (route.fromToken.address === zeroAddress) return false;
+                if (route.fromToken.address === zeroAddress) continue;
                 // Check allowance
                 const contract = getContract({
                     address: route.fromToken.address as `0x${string}`,
@@ -49,7 +52,7 @@ export function SwapButton() {
                     walletClient: walletClient!,
                 })
 
-                const allowance = await contract.read.allowance([account.address!, "0xADf1687e201d1DCb466D902F350499D008811e84"]) // TODO: Replace with router address
+                const allowance = await contract.read.allowance([account.address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
 
                 const amount = BigInt(route.steps[0].action.fromAmount)
 
@@ -63,25 +66,52 @@ export function SwapButton() {
     }, [routes])
 
     React.useEffect(() => {
-        if (hash && !isError && !isLoading && isFetching) {
-            (async () => {
-                const notifyBackend = await fetch("/api/receive-funds", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        chainId: chain?.id,
-                        transactionHash: hash,
-                        accountAddress: tempAccount
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }).then((res) => res.json());
+        if (!hash) return;
+        if (isError) {
+            toast.error("Could not wait for transaction")
+        }
 
-                setIsFetching(false);
-                setHash(undefined);
+        if (hash && !isLoading && isFetching) {
+            (async () => {
+
+                let retries = 3;
+                while (retries > 0) {
+                    try {
+                        const notifyBackend = await fetch("/api/receive-funds", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                chainId: chain?.id,
+                                transactionHash: hash,
+                                accountAddress: tempAccount
+                            }),
+                            headers: {
+                                "Content-Type": "application/json"
+                            }
+                        }).then((res) => res.json());
+
+                        if ((notifyBackend as any).status === "success") {
+                            router.push("/transactions");
+                            setHash(undefined);
+                            break;
+                        } else {
+                            retries--;
+                            if (retries === 0) {
+                                toast.error("Could not notify backend after several attempts")
+                            }
+                        }
+                    } catch (err) {
+                        retries--;
+                        if (retries === 0) {
+                            toast.error("Could not notify backend after several attempts")
+                        }
+                    } finally {
+                        setIsFetching(false);
+                    }
+                }
             })();
         }
     }, [hash, isError, isLoading])
+
 
     const onClick = async () => {
         setIsFetching(true);
@@ -96,12 +126,12 @@ export function SwapButton() {
                     walletClient: walletClient!,
                 })
 
-                const allowance = await contract.read.allowance([account.address!, "0xADf1687e201d1DCb466D902F350499D008811e84"]) // TODO: Replace with router address
+                const allowance = await contract.read.allowance([account.address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
 
                 const amount = BigInt(route.steps[0].action.fromAmount)
 
                 if (allowance < amount) {
-                    const hash = await contract.write.approve(["0xADf1687e201d1DCb466D902F350499D008811e84", amount])
+                    const hash = await contract.write.approve([(chain as MUWPChain).muwpContract, amount])
 
                     await publicClient.waitForTransactionReceipt({ hash })
                 }
@@ -185,7 +215,7 @@ export function SwapButton() {
 
             setTransaction({
                 routes,
-                status: "pending",
+                timestamp: Date.now(),
                 id: address,
             })
 

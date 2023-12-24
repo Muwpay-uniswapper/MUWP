@@ -9,13 +9,14 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 export type Transaction = {
     routes: Route[];
     id: string;
-    status: "pending" | "success" | "failed";
+    timestamp: number;
 };
 
 type RouteStore = {
     tempAccount?: `0x${string}`;
     transactions: Transaction[];
     setTransaction: (transaction: Transaction) => void;
+    deleteTransaction: (transaction: Transaction) => void;
     validUntil?: Date;
     needsUpdate: boolean;
     forceUpdate: () => void;
@@ -61,6 +62,13 @@ export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteSt
                 state.transactions[tx] = transaction;
                 return { transactions: state.transactions };
             });
+        }
+    },
+    deleteTransaction: (transaction: Transaction) => {
+        const { transactions } = get();
+        const tx = transactions.findIndex((tx) => tx.id === transaction.id);
+        if (tx !== -1) {
+            set({ transactions: transactions.filter((_, i) => i !== tx) });
         }
     },
     needsUpdate: false,

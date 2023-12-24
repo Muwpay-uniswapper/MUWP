@@ -4,6 +4,7 @@ import {
     ColumnDef,
     OnChangeFn,
     RowSelectionState,
+    TableOptions,
     flexRender,
     getCoreRowModel,
     useReactTable,
@@ -32,16 +33,18 @@ export function DataTable<TData, TValue>({
     rowSelection?: RowSelectionState,
     onRowSelectionChange?: OnChangeFn<RowSelectionState>
 }) {
-    const table = useReactTable({
+    const input = {
         data,
         columns,
         enableRowSelection: true,
-        state: {
-            rowSelection,
-        },
+        state: {},
         onRowSelectionChange,
         getCoreRowModel: getCoreRowModel(),
-    })
+    } as TableOptions<TData>
+    if (rowSelection) {
+        input.state.rowSelection = rowSelection
+    }
+    const table = useReactTable(input)
 
     return (
         <div className="rounded-md border">

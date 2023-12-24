@@ -146,16 +146,26 @@ export function TokenInput({
         <div className="flex flex-wrap items-center justify-between bg-white p-4 rounded">
             <div className="flex flex-col  items-start w-full">
                 <div className="flex items-center space-x-2">
-                    <img
-                        alt="Token Symbol"
-                        height="32"
-                        src={token.logoURI}
-                        style={{
-                            aspectRatio: "32/32",
-                            objectFit: "cover",
-                        }}
-                        width="32"
-                    />
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <img
+                                alt="Token Symbol"
+                                height="32"
+                                src={token.logoURI}
+                                style={{
+                                    aspectRatio: "32/32",
+                                    objectFit: "cover",
+                                }}
+                                width="32"
+                            />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <div className="text-left p-4">
+                                <div className="text-base font-semibold">{token.label} Token</div>
+                                <FormatTokenAddress token={token} />
+                            </div>
+                        </TooltipContent>
+                    </Tooltip>
                     <input
                         aria-label="Token amount"
                         className="text-2xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-black w-full"
@@ -169,13 +179,10 @@ export function TokenInput({
                     {(data && mode == 'input' && data.value > 0n) && <PercentageSelector token={token} balance={data.value} />}
                 </div>
             </div>
-            <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div>
-            <div className="text-sm font-normal text-gray-500 w-full text-left">≈{formatUnits((parseUnits(token.priceUSD?.toString() ?? "", 9) * _value), 9 + token.decimals)} $</div>
-        </div>
-
-        <div className="text-left p-4">
-            <div className="text-base font-semibold">{token.label} Token</div>
-            <FormatTokenAddress token={token} />
+            <div className="flex flex-row justify-between w-full">
+                <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div>
+                <div className="text-sm font-normal text-gray-500 text-left">≈{formatUnits((parseUnits(token.priceUSD?.toString() ?? "", 9) * _value), 9 + token.decimals)} $</div>
+            </div>
         </div>
     </div>
 }

@@ -46,7 +46,7 @@ export const initiateTransfer = inngest.createFunction(
         const funds_transferred = await step.waitForEvent("wait-for-user-to-transfer-funds", {
             event: "app/funds.transferred",
             match: "data.address", // the field "data.address" must match
-            timeout: "5m", // wait at most 5m
+            timeout: "30d", // wait at most 30 days
         });
 
         if (!funds_transferred) {
@@ -66,19 +66,4 @@ export const initiateTransfer = inngest.createFunction(
                 id: route.id,
             }
         })))
-
-        const routesWait = data.routes.map(route => step.waitForEvent(`wait-for-route-${route.id}-to-complete`, {
-            event: "app/route.completed",
-            if: `async.data.id == ${route.id}`,
-            timeout: "24h"
-        }))
-        await Promise.all(routesWait);
-
-        return await step.sendEvent("app/terminate.account", {
-            name: "app/terminate.account",
-            data: {
-                address: data.address,
-            }
-        })
-
     });
