@@ -1,1 +1,3 @@
-{}
+{
+    "installCommand": "bun install && cd lib/li.fi-ts && bun install && cd ../.."
+}
