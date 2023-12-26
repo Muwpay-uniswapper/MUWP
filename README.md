@@ -1,2 +1,2 @@
 ## MUWP Beta
-https://muwp-pr1mer.vercel.app
+https://muwp-pr1mer.vercel.app/
