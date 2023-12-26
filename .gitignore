@@ -1,6 +1,5 @@
 # Compiler files
 cache/
-out/
 
 # Ignores development broadcast logs
 !/broadcast
@@ -22,7 +21,8 @@ docs/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
