@@ -45,12 +45,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const input = await Input.parseAsync(body);
 
+    console.log("Input parsed successfully");
+
     const accountInfo = await store.get(input.tempAccount ?? "") as string | object | null;
     const _tempAccount = typeof accountInfo === "string" ? JSON.parse(accountInfo)
         : typeof accountInfo === "object" ? (accountInfo as any)
             : null;
 
+    console.log("Account info retrieved successfully");
+
     if (!input.tempAccount || typeof input.tempAccount == "undefined" || _tempAccount == null || typeof _tempAccount == "undefined" || _tempAccount.index == null || typeof _tempAccount.index == "undefined") {
+
+        console.log("Account not found, generating new account");
+
         const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
         const privateKey = fromHex(master_hd, "bytes")
         const hdKey = HDKey.fromMasterSeed(privateKey)
@@ -65,9 +72,13 @@ export async function POST(request: Request) {
             accountIndex: index,
         })
 
+        console.log("Account generated successfully");
+
         await store.set(account.address, JSON.stringify({
             index,
         }));
+
+        console.log("Account stored successfully");
 
         await inngest.send({
             name: "app/account.created",
@@ -76,8 +87,12 @@ export async function POST(request: Request) {
             },
         })
 
+        console.log("Account created event sent successfully");
+
         input.tempAccount = account.address;
     }
+
+    console.log("Fetching routes");
 
     const queries = input.inputTokens.map(inToken => advancedAPI.advancedRoutesPost({
         fromAmount: input.inputAmount[inToken.value].toString(),
@@ -91,6 +106,8 @@ export async function POST(request: Request) {
     }))
 
     const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
+
+    console.log("Routes fetched successfully");
 
     const routes: {
         [key: string]: Route[]
