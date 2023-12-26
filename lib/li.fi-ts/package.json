@@ -16,10 +16,6 @@
   "license": "Unlicense",
   "main": "./index.ts",
   "type": "commonjs",
-  "scripts": {
-    "build": "tsc",
-    "prepare": "npm run build"
-  },
   "dependencies": {
     "whatwg-fetch": "^3.0.0",
     "es6-promise": "^4.2.4",
