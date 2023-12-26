@@ -45,8 +45,8 @@ export const muwpChains: MUWPChain[] = [
     { ...okc, muwpContract: "0x" },
     { ...boba, muwpContract: "0x" },
     { ...aurora, muwpContract: "0x" },
+    { ...goerli, muwpContract: "0xADf1687e201d1DCb466D902F350499D008811e84" },
     ...(process.env.NODE_ENV !== 'production' ? [
-        { ...goerli, muwpContract: "0xADf1687e201d1DCb466D902F350499D008811e84" as `0x${string}` },
         { ...polygonMumbai, muwpContract: "0x" as `0x${string}` }
     ] : []),
 ]
