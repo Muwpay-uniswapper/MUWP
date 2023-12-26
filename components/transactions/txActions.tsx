@@ -69,6 +69,7 @@ export default function TxActions({ row }: { row: Row<Transaction> }) {
                         </div>
                     </div>
                     <Button className="absolute top-2 right-2" variant="secondary" onClick={() => {
+                        if (!pk) return;
                         navigator.clipboard.writeText(pk)
                         setPk(null)
                     }}>
