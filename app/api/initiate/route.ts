@@ -1,12 +1,11 @@
-import { muwpChains, publicClient } from "@/app/providers";
 import { inngest } from "@/lib/inngest/client";
 import { Route } from "@/lib/li.fi-ts";
-import { createPublicClient, createWalletClient, encodeFunctionData, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
-import { HDKey, hdKeyToAccount } from 'viem/accounts'
+import { createPublicClient, encodeFunctionData, extractChain, http, zeroAddress } from 'viem'
 import { z } from "zod";
 import { abi } from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import erc20 from "@/out/ERC20.sol/ERC20.json";
 import * as chains from 'viem/chains'
+import { muwpChains } from "@/muwp";
 
 BigInt.prototype.toJSON = function () {
     return this.toString();
