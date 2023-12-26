@@ -41,7 +41,7 @@ export function DataTable<TData, TValue>({
         onRowSelectionChange,
         getCoreRowModel: getCoreRowModel(),
     } as TableOptions<TData>
-    if (rowSelection) {
+    if (rowSelection && input.state) {
         input.state.rowSelection = rowSelection
     }
     const table = useReactTable(input)

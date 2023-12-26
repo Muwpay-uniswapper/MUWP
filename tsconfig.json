@@ -19,7 +19,8 @@
     "jsx": "preserve",
     "incremental": true,
     "types": [
-      "bun-types"
+      "bun-types",
+      "web"
     ],
     "plugins": [
       {
