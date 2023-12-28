@@ -46,7 +46,9 @@ export function PreviewSend({
 
                         if ((notifyBackend as any).status === "success") {
                             router.push("/transactions");
-                            setHash(undefined);
+                            setTimeout(() => {
+                                setHash(undefined);
+                            }, 5000);
                             break;
                         } else {
                             retries--;
