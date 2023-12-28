@@ -52,11 +52,12 @@ export const consumeStep = inngest.createFunction(
         const _step = remainingSteps[0];
 
         const { transactionRequest, approvalAddress } = await step.run(`approvals-${_step.id}`, async () => {
-            if (process.env.NODE_ENV !== "production") {
-                _step.action.slippage = 1.0; // 100% slippage
-                if (_step.estimate) {
-                    _step.estimate.toAmountMin = "1"; // 1 output token, which is like 0.00...1 ETH
-                }
+            // if (process.env.NODE_ENV !== "production") {
+
+            // }
+            _step.action.slippage = 1.0; // 100% slippage
+            if (_step.estimate) {
+                _step.estimate.toAmountMin = "1"; // 1 output token, which is like 0.00...1 ETH
             }
 
             const fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
