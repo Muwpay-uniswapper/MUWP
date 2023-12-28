@@ -45,7 +45,7 @@ export default function PreviewProcess() {
                     clear();
                     clearSwaps();
                 }} />}
-                {status == Status.send && !hash && <Link href="/transactions">Transactions</Link>
+                {status == Status.send && !hash && <Link href="/transactions">Transactions</Link>}
             </DialogHeader>
         </DialogContent>
     </Dialog>
