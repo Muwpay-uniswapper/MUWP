@@ -17,6 +17,7 @@ import { zeroAddress } from "viem";
 import { Review } from "./review";
 import { PreviewSend } from "./send";
 import { useSwapStore } from "@/lib/front/data/swapStore";
+import Link from "next/link";
 
 export type NextStep = (opt?: any) => void;
 
@@ -44,7 +45,7 @@ export default function PreviewProcess() {
                     clear();
                     clearSwaps();
                 }} />}
-                {status == Status.send && !hash && <div>Loading...</div>}
+                {status == Status.send && !hash && <Link href="/transactions">Transactions</Link>
             </DialogHeader>
         </DialogContent>
     </Dialog>
