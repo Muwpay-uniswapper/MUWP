@@ -19,6 +19,7 @@ type SwapStore = {
     setOutputChain: (chain: number | null) => void;
     setAmount: (token: Token, amount: bigint) => void;
     priceOutput: () => { amount: bigint, priceUSD: bigint };
+    clearSwaps: () => void;
 };
 
 export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setState'], get: StoreApi<SwapStore>['getState']) => ({
@@ -94,5 +95,11 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
         // Convert USD to output token
         const amount = priceUSD * (10n ** BigInt(outputToken.decimals)) / parseUnits(outputToken.priceUSD?.toString() ?? "", 9);
         return { amount, priceUSD }
-    }
+    },
+    clearSwaps: () => set({
+        inputTokens: [],
+        outputToken: null,
+        outputChain: null,
+        inputAmount: {},
+    })
 }));

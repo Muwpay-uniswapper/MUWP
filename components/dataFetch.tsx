@@ -23,7 +23,7 @@ export async function TokenSelector({
 
     const tokenList: Token[] = tokens.tokens?.map((token) => {
         return {
-            value: `${token.coinKey}:${token.address}`,
+            value: `${token.symbol}:${token.name}:${token.address}`,
             label: token.name,
             logoURI: token.logoURI,
             priceUSD: token.priceUSD,

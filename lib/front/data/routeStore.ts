@@ -37,6 +37,7 @@ type RouteStore = {
     ) => void;
     focusedPoint: { x1: number, y1: number, x2: number, y2: number };
     setFocusedPoint: (point: { x1: number, y1: number, x2: number, y2: number }) => void;
+    clear: () => void;
 };
 
 declare global {
@@ -224,6 +225,10 @@ export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteSt
         })
 
         return { isFocused: _isFocused, focusedPoint: state.focusedPoint };
+    }),
+    clear: () => set({
+        routes: {},
+        chosenIndex: {}
     }),
 }), {
     name: 'routeStore',

@@ -1,4 +1,5 @@
 import { MainFlow } from "@/components/flow/MainFlow";
+import PreviewProcess from "@/components/preview/process";
 import PreviewSwap from "@/components/previewswap";
 import { SwapButton } from "@/components/swapbutton";
 import { SwapCard } from "@/components/swapcard";
@@ -13,7 +14,7 @@ export default function Home({ searchParams }: { searchParams: { [key: string]: 
 				<div className="flex flex-col items-center md:w-8/12 mx-4">
 					<MainFlow />
 					<PreviewSwap />
-					<SwapButton />
+					<PreviewProcess />
 				</div>
 			</div>
 		</main >

@@ -12,12 +12,9 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
+    CommandList,
 } from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { Chain } from "@/lib/front/model/CellLike";
 import { useSwapStore } from "@/lib/front/data/swapStore"
 import { useBreakpoint } from "@/lib/front/media-query";
@@ -56,14 +53,14 @@ export function ChainCombobox({
     )
 
     if (isAboveMd) {
-        Container = Popover
-        ContainerTrigger = PopoverTrigger
-        ContainerContent = PopoverContent
+        Container = Dialog
+        ContainerTrigger = DialogTrigger
+        ContainerContent = (props: any) => <DialogContent className="overflow-hidden p-0 shadow-lg" {...props} />
     } else {
         Container = (props: any) => <Drawer.Root {...props} shouldScaleBackground />
         ContainerTrigger = Drawer.Trigger
         ContainerContent = (props: any) => (
-            <Drawer.Portal><Drawer.Overlay className="fixed inset-0 bg-black/40" /><Drawer.Content {...props} /></Drawer.Portal>
+            <Drawer.Portal><Drawer.Overlay className="fixed inset-0 bg-black/40" /><Drawer.Content {...props} className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0" /></Drawer.Portal>
         )
     }
 
@@ -92,8 +89,8 @@ export function ChainCombobox({
                         </div>}
                 </Button>
             </ContainerTrigger>
-            <ContainerContent side="right" className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0">
-                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={switchNetwork} />
+            <ContainerContent side="right">
+                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={switchNetwork} isAboveMd={isAboveMd} />
             </ContainerContent>
         </Container>
     )
@@ -103,13 +100,15 @@ function ChainListContent({
     tokenList: chainList,
     setOpen,
     mode,
-    switchNetwork
+    switchNetwork,
+    isAboveMd
 }: {
     value?: Chain,
     tokenList: Chain[],
     setOpen: (open: boolean) => void,
     mode: "input" | "output",
-    switchNetwork?: (chainId: number | undefined) => void
+    switchNetwork?: (chainId: number | undefined) => void,
+    isAboveMd: boolean
 }) {
     const [search, setSearch] = React.useState("")
     const { setOutputChain, inputTokens, removeInputToken, setOutputToken } = useSwapStore()
@@ -120,42 +119,44 @@ function ChainListContent({
             if (value.includes(search.toLowerCase())) return 1;
             return 0;
         }}
+        className={cn(isAboveMd ? "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5" : "")}
     >
         <CommandInput placeholder="Search chain..." value={search} onValueChange={setSearch} />
-        <CommandEmpty>No chain found.</CommandEmpty>
-        <CommandGroup>
-            {chainList
-                .filter((chain) => chain.label.toLowerCase().includes(search.toLowerCase()) || chain === value)
-                .slice(0, 10)
-                .map((chain) => (
-                    <CommandItem
-                        key={chain.value}
-                        value={chain.value}
-                        onSelect={(currentValue) => {
-                            const chain = chainList.find(a => a.value.toLowerCase() == currentValue)
-                            if (value?.value.toLowerCase() == currentValue) return setOpen(false); // You can't remove the current chain
-                            if (mode == "input") {
-                                switchNetwork?.(chain?.chainId)
-                                for (let i = 0; i < inputTokens.length; i++) {
-                                    removeInputToken(i);
+        <CommandList>
+            <CommandEmpty>No chain found.</CommandEmpty>
+            <CommandGroup>
+                {chainList
+                    .filter((chain) => chain.label.toLowerCase().includes(search.toLowerCase()) || chain === value)
+                    .map((chain) => (
+                        <CommandItem
+                            key={chain.value}
+                            value={chain.value}
+                            onSelect={(currentValue) => {
+                                const chain = chainList.find(a => a.value.toLowerCase() == currentValue)
+                                if (value?.value.toLowerCase() == currentValue) return setOpen(false); // You can't remove the current chain
+                                if (mode == "input") {
+                                    switchNetwork?.(chain?.chainId)
+                                    for (let i = 0; i < inputTokens.length; i++) {
+                                        removeInputToken(i);
+                                    }
+                                } else {
+                                    setOutputChain(chain?.chainId ?? null)
+                                    setOutputToken(null)
                                 }
-                            } else {
-                                setOutputChain(chain?.chainId ?? null)
-                                setOutputToken(null)
-                            }
 
-                            setOpen(false);
-                        }}
-                    >
-                        <Check
-                            className={cn(
-                                "mr-2 h-4 w-4",
-                                value?.value.toLowerCase?.() === chain.value.toLowerCase() ? "opacity-100" : "opacity-0"
-                            )} />
-                        <img src={chain.logoURI} alt="logo" className="mr-2 h-4 w-4" />
-                        {chain.label.length > 20 ? `${chain.label.substring(0, 20)}...` : chain.label}
-                    </CommandItem>
-                ))}
-        </CommandGroup>
+                                setOpen(false);
+                            }}
+                        >
+                            <Check
+                                className={cn(
+                                    "mr-2 h-4 w-4",
+                                    value?.value.toLowerCase?.() === chain.value.toLowerCase() ? "opacity-100" : "opacity-0"
+                                )} />
+                            <img src={chain.logoURI} alt="logo" className="mr-2 h-4 w-4" />
+                            {chain.label.length > 20 ? `${chain.label.substring(0, 20)}...` : chain.label}
+                        </CommandItem>
+                    ))}
+            </CommandGroup>
+        </CommandList>
     </Command>;
 }

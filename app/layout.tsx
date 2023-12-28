@@ -8,6 +8,7 @@ import { Providers } from './providers';
 import { VercelToolbar } from '@vercel/toolbar/next';
 import { Suspense } from "react";
 import Footer from '@/components/layout/footer'
+import NextNProgressClient from './progress'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,6 +29,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={cn(inter.className)}>
+				<NextNProgressClient />
 				<Providers>
 					<div className="bg-home-gradient font-poppins min-h-100vh bg-50 bg-cover bg-no-repeat">
 						<Navbar />

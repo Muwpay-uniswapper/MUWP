@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check } from "lucide-react"
 import { Drawer } from 'vaul';
 import { cn } from "@/lib/front/utils"
 import { Button } from "@/components/ui/button"
@@ -11,17 +11,13 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
+    CommandList,
 } from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
 import { TokenInput } from "./token_input"
 import { Token } from "@/lib/front/model/CellLike"
 import { useSwapStore } from "@/lib/front/data/swapStore"
 import { useBreakpoint } from "@/lib/front/media-query";
-import { zeroAddress } from "viem";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
 export function TokenComboboxes({ tokenList }: { tokenList: Token[] }) {
     const tokenCount = useSwapStore((state) => state.inputTokens.length)
@@ -55,14 +51,14 @@ export function TokenCombobox({
     const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
 
     if (isAboveMd) {
-        Container = Popover
-        ContainerTrigger = PopoverTrigger
-        ContainerContent = PopoverContent
+        Container = Dialog
+        ContainerTrigger = DialogTrigger
+        ContainerContent = (props: any) => <DialogContent className="overflow-hidden p-0 shadow-lg" {...props} />
     } else {
         Container = (props: any) => <Drawer.Root {...props} shouldScaleBackground />
         ContainerTrigger = Drawer.Trigger
         ContainerContent = (props: any) => (
-            <Drawer.Portal><Drawer.Overlay className="fixed inset-0 bg-black/40" /><Drawer.Content {...props} /></Drawer.Portal>
+            <Drawer.Portal><Drawer.Overlay className="fixed inset-0 bg-black/40" /><Drawer.Content {...props} className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0" /></Drawer.Portal>
         )
     }
 
@@ -87,8 +83,8 @@ export function TokenCombobox({
                         </div>}
                 </Button>
             </ContainerTrigger>
-            <ContainerContent side="right" className="bg-gray-100 flex flex-col rounded-t-[10px] h-full mt-24 max-h-[75%] fixed bottom-0 left-0 right-0 md:bg-transparent md:block md:rounded-md md:h-auto md:mt-0 md:max-h-full md:relative md:top-auto md:left-auto md:right-auto md:p-0">
-                <TokenListContent index={index} tokenList={tokenList} setOpen={setOpen} mode={mode} />
+            <ContainerContent side="right">
+                <TokenListContent index={index} tokenList={tokenList} setOpen={setOpen} mode={mode} isAboveMd={isAboveMd} />
             </ContainerContent>
         </Container>
     )
@@ -97,12 +93,14 @@ function TokenListContent({
     index,
     tokenList,
     setOpen,
-    mode
+    mode,
+    isAboveMd
 }: {
     index?: number,
     tokenList: Token[],
     setOpen: (open: boolean) => void,
-    mode: "input" | "output"
+    mode: "input" | "output",
+    isAboveMd: boolean
 }) {
 
     const [search, setSearch] = React.useState("")
@@ -115,46 +113,47 @@ function TokenListContent({
     const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
 
     return <Command
-        filter={(value: string, search) => {
-            if (value.includes(search.toLowerCase())) return 1;
-            return 0;
-        }}
+        className={cn(isAboveMd ? "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5" : "")}
+        value={search}
+        onValueChange={setSearch}
+        loop
     >
-        <CommandInput placeholder="Search token..." value={search} onValueChange={setSearch} />
-        <CommandEmpty>
-            <div className="h-4">
-                No token found.
-            </div>
-        </CommandEmpty>
-        <CommandGroup>
-            {tokenList
-                .filter((token) => token.value.toLowerCase().includes(search.toLowerCase()) && !(inputTokens.includes(token) && token !== value))
-                .slice(0, 10)
-                .map((token) => (
-                    <CommandItem
-                        key={token.value}
-                        value={token.value}
-                        onSelect={(currentValue) => {
-                            if (value?.value.toLowerCase() == currentValue) {
-                                if (mode == "input") removeInputToken(index);
-                                else setOutputToken(null)
-                            } else {
-                                const token = tokenList.find((token) => token.value.toLowerCase() === currentValue.toLowerCase());
-                                if (token && mode == "input") setInputToken(token, index ?? 0);
-                                else if (token && mode == "output") setOutputToken(token);
-                            }
-                            setOpen(false);
-                        }}
-                    >
-                        <Check
-                            className={cn(
-                                "mr-2 h-4 w-4",
-                                value?.value.toLowerCase?.() === token.value.toLowerCase() ? "opacity-100" : "opacity-0"
-                            )} />
-                        <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
-                        {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
-                    </CommandItem>
-                ))}
-        </CommandGroup>
+        <CommandInput placeholder="Search token..." />
+        <CommandList>
+            <CommandEmpty>
+                <div className="h-4">
+                    No token found.
+                </div>
+            </CommandEmpty>
+            <CommandGroup>
+                {tokenList
+                    .filter((token) => !(inputTokens.includes(token) && token !== value && outputToken == token))
+                    .map((token) => (
+                        <CommandItem
+                            key={token.value}
+                            value={token.value}
+                            onSelect={(currentValue) => {
+                                if (value?.value.toLowerCase() == currentValue) {
+                                    if (mode == "input") removeInputToken(index);
+                                    else setOutputToken(null)
+                                } else {
+                                    const token = tokenList.find((token) => token.value.toLowerCase() === currentValue.toLowerCase());
+                                    if (token && mode == "input") setInputToken(token, index ?? 0);
+                                    else if (token && mode == "output") setOutputToken(token);
+                                }
+                                setOpen(false);
+                            }}
+                        >
+                            <Check
+                                className={cn(
+                                    "mr-2 h-4 w-4",
+                                    value?.value.toLowerCase?.() === token.value.toLowerCase() ? "opacity-100" : "opacity-0"
+                                )} />
+                            <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
+                            {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
+                        </CommandItem>
+                    ))}
+            </CommandGroup>
+        </CommandList>
     </Command>;
 }
