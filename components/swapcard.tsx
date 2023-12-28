@@ -13,8 +13,7 @@ import { ConnectButton } from '@/components/connectbutton'
 import { ArrowDown } from "lucide-react"
 import { TokenSelector, ChainSelector } from '@/components/dataFetch'
 import { Separator } from "./ui/separator"
-import { TokenLoader } from "./tokens/token_loader";
-import { ChainLoader } from "./chains/chain-loader";
+import Loader from "../app/loading";
 import { FindRoutesButton } from "./layout/FindRoutesButton";
 
 export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string }) {
@@ -26,13 +25,13 @@ export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string 
         </CardHeader>
         <CardContent>
             <div className="flex flex-row gap-2">
-                <Suspense fallback={<ChainLoader />}>
+                <Suspense fallback={<Loader />}>
                     <ChainSelector mode="input" />
                 </Suspense>
                 <ConnectButton />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-1 gap-2 w-full mt-8">
-                <Suspense fallback={<TokenLoader />}>
+                <Suspense fallback={<Loader />}>
                     <TokenSelector id='from-token' chain={chain ? parseInt(chain) : undefined} mode="input" />
                 </Suspense>
             </div>
@@ -40,10 +39,10 @@ export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string 
                 <ArrowDown className="text-white -translate-y-1/2 mx-2" />
             </Separator>
             <div className="grid grid-cols-1 gap-4 w-full mt-8 mb-4">
-                <Suspense fallback={<ChainLoader />}>
+                <Suspense fallback={<Loader />}>
                     <ChainSelector mode="output" />
                 </Suspense>
-                <Suspense fallback={<TokenLoader />}>
+                <Suspense fallback={<Loader />}>
                     <TokenSelector id='to-token' chain={toChain ? parseInt(toChain) : undefined} mode="output" />
                 </Suspense>
             </div>

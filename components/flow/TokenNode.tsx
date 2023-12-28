@@ -49,7 +49,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                     }}>
                         <SelectTrigger className="w-4 h-4 p-0 border-none bg-transparent" />
                         <SelectContent className="w-64">
-                            {routes[data.address].map((route, index) => <SelectItem key={index} value={index.toString()} className='w-full'>
+                            {routes[data.address]?.map((route, index) => <SelectItem key={index} value={index.toString()} className='w-full'>
                                 <RouteInfo route={route} index={index} />
                             </SelectItem>)}
                         </SelectContent>
