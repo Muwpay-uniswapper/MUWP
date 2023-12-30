@@ -4,7 +4,7 @@ import { useSwapStore } from "@/lib/front/data/swapStore";
 import { Chain, formatUnits, parseUnits, zeroAddress } from "viem";
 import { Badge } from "../ui/badge";
 import { useAccount, useBalance, useNetwork } from "wagmi";
-import { BadgeCheck, FileDigit } from "lucide-react";
+import { BadgeCheck, FileDigit, Wallet2Icon } from "lucide-react";
 import { publicClient } from "@/app/providers";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "@/lib/front/utils";
@@ -44,7 +44,7 @@ export function PercentageSelector({
                 className={cn("text-sm",
                     inputAmount[token.value] > balance
                         ? "text-red-500 border-red-500"
-                        : "text-black"
+                        : "text-white"
                 )}
                 variant="outline"
                 onClick={e => {
@@ -143,7 +143,7 @@ export function TokenInput({
     }
 
     return <div className="w-full bg-zinc-800">
-        <div className="flex flex-wrap items-center justify-between bg-white p-4 rounded">
+        <div className="flex flex-wrap items-center justify-between p-4 rounded">
             <div className="flex flex-col  items-start w-full">
                 <div className="flex items-center space-x-2">
                     <Tooltip>
@@ -168,7 +168,7 @@ export function TokenInput({
                     </Tooltip>
                     <input
                         aria-label="Token amount"
-                        className="text-2xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-black w-full"
+                        className="text-2xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none w-full"
                         value={inputValue}
                         disabled={mode == 'output'}
                         onChange={handleInputChange}
@@ -180,8 +180,9 @@ export function TokenInput({
                 </div>
             </div>
             <div className="flex flex-row justify-between w-full">
-                <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div>
+                {/* <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div> */}
                 <div className="text-sm font-normal text-gray-500 text-left">≈{formatUnits((parseUnits(token.priceUSD?.toString() ?? "", 9) * _value), 9 + token.decimals)} $</div>
+                {data && <div className="text-sm font-normal text-gray-500 text-right"><Wallet2Icon className="w-3 h-3 inline mr-1" />{formatUnits(data.value, token.decimals).slice(0, 10)} {token.ticker}</div>}
             </div>
         </div>
     </div>

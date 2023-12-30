@@ -48,7 +48,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                         choseIndex(data.address, Number(value))
                     }}>
                         <SelectTrigger className="w-4 h-4 p-0 border-none bg-transparent" />
-                        <SelectContent className="w-64">
+                        <SelectContent className="w-96">
                             {routes[data.address]?.map((route, index) => <SelectItem key={index} value={index.toString()} className='w-full'>
                                 <RouteInfo route={route} index={index} />
                             </SelectItem>)}
@@ -64,8 +64,10 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
 });
 
 export function RouteInfo({ route, index }: { route: Route, index: number }) {
-    return <div className={cn("w-full relative p-4", index == 0 ? "pt-8" : "")}>
-        {index == 0 && <Badge className="absolute top-0 left-0">Recommended</Badge>}
+    return <div className={cn("w-full relative p-4")}>
+        {
+            route.tags?.map((tag) => <Badge className="mr-1 mb-1">{tag}</Badge>)
+        }
         <div className="flex flex-col items-center justify-center">
             {format(formatUnits(BigInt(route.fromAmount), route.fromToken.decimals))} {route.fromToken.symbol}
             <ArrowDown className="w-4 h-4" />

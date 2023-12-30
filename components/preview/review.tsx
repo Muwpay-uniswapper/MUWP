@@ -1,5 +1,5 @@
 import { useRouteStore } from "@/lib/front/data/routeStore";
-import { ArrowLeftRight, DollarSign, Fuel, Layers2, Loader2 } from "lucide-react";
+import { ArrowLeftRight, DollarSign, Fuel, Layers2, Loader2, PercentCircle, Receipt } from "lucide-react";
 import React from "react";
 import { PrepareTransactionRequestReturnType, formatUnits } from "viem";
 import { Button } from "../ui/button";
@@ -39,7 +39,9 @@ export function Review({
         duration += 3 * 60; // Add 3 min for the transaction to be mined
     }
     const steps = routes.map((route) => route.steps.length).reduce((a, b) => a + b, 0);
-    const sum = routes.reduce((acc, route) => acc + BigInt(route.toAmount), BigInt(0))
+    const sum = routes.reduce((acc, route) => acc + BigInt(route.toAmount), BigInt(0));
+    const slippage = routes.map((route) => route.steps.map((step) => step.action.slippage ?? 0).reduce((a, b) => Math.max(a, b), 0)).reduce((a, b) => Math.max(a, b), 0);
+    const amountMin = routes.map((route) => BigInt(route.toAmountMin)).reduce((a, b) => a + b, 0n);
 
     const { data: walletClient } = useWalletClient()
     const { data } = useFeeData();
@@ -74,7 +76,10 @@ export function Review({
                 error: (e) => {
                     reject(e);
                     setIsSending(false);
-                    return 'Could not load transaction data'
+                    return <>
+                        <b>Could not load transaction data</b>
+                        {e instanceof Error && e.message}
+                    </>
                 }
             });
         })
@@ -101,7 +106,10 @@ export function Review({
                     error: (e) => {
                         reject(e);
                         setIsSending(false);
-                        return 'Could not send transaction... trying again'
+                        return <>
+                            <b>Could not send transaction... trying again</b>
+                            {e instanceof Error && e.message}
+                        </>
                     }
                 });
             })
@@ -110,6 +118,7 @@ export function Review({
                 routes,
                 timestamp: Date.now(),
                 id: address,
+                status: 0,
             })
 
             nextStep(_hash)
@@ -148,6 +157,14 @@ export function Review({
             </Tooltip>
         </div>
         <div className="grid grid-cols-2 gap-2 my-4">
+            <p><Receipt className="inline w-4 h-4 mr-1" />Minimum Output</p>
+            <p className="text-right">
+                {format(formatUnits(amountMin, routes[0].toToken.decimals))} {routes[0].toToken.symbol}
+            </p>
+            <p><PercentCircle className="inline w-4 h-4 mr-1" />Slippage</p>
+            <p className="text-right">
+                {Math.round(slippage * 1000) / 10}%
+            </p>
             <p><DollarSign className="inline w-4 h-4 mr-1" /> Fees</p>
             <p className="text-right">
                 {format(feeCosts)}$

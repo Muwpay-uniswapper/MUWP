@@ -1,15 +1,40 @@
 "use client";
 
 import { Transaction } from "@/lib/front/data/routeStore";
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, Row } from "@tanstack/react-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Route } from "@lifi/sdk";
 import { formatUnits } from "viem";
 import TxActions from "./txActions";
 import Status from "./status";
+import { Button } from "../ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 
 export const columns: ColumnDef<Transaction>[] = [
+    {
+        accessorKey: "timestamp",
+        sortingFn: (rowA: Row<Transaction>, rowB: Row<Transaction>, columnId: string): number => {
+            const a = new Date(rowA.original.timestamp)
+            const b = new Date(rowB.original.timestamp)
+            return a > b ? 1 : a < b ? -1 : 0
+        },
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Date
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+            const date = new Date(row.original.timestamp)
+            return date.toLocaleString()
+        }
+    },
     {
         accessorKey: "id",
         header: "ID",

@@ -10,10 +10,11 @@ export type Transaction = {
     routes: Route[];
     id: string;
     timestamp: number;
+    status: number;
 };
 
 type RouteStore = {
-    tempAccount?: `0x${string}`;
+    tempAccount: `0x${string}` | undefined;
     transactions: Transaction[];
     setTransaction: (transaction: Transaction) => void;
     deleteTransaction: (transaction: Transaction) => void;
@@ -98,6 +99,9 @@ export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteSt
                 body: JSON.stringify(input),
             });
             const json = await res.json();
+            if (json.message) {
+                throw new Error(json.message)
+            }
             const routes = await z.object({
                 routes: z.record(Route.zod.array()),
                 tempAccount: z.string(),
@@ -228,11 +232,11 @@ export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteSt
     }),
     clear: () => set({
         routes: {},
-        chosenIndex: {}
+        chosenIndex: {},
+        tempAccount: undefined
     }),
 }), {
     name: 'routeStore',
-    storage: createJSONStorage(() => (global as any).sessionStorage), // (optional) by default, 'localStorage' is used,
     partialize: (state) => ({
         transactions: state.transactions
     })
