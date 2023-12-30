@@ -50,7 +50,9 @@ export function FindRoutesButton() {
                 }
             })
         } catch (e) {
-            toast.error("Error fetching routes")
+            toast.error("Error fetching routes", {
+                description: <>{e instanceof Error && e.message}</>
+            })
         }
     }
 

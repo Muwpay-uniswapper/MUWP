@@ -73,6 +73,10 @@ export class Route {
     * Whether a chain switch is part of the route
     */
     'containsSwitchChain'?: boolean;
+    /**
+     * Tags
+     */
+    'tags'?: string[];
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -166,6 +170,11 @@ export class Route {
             "baseName": "containsSwitchChain",
             "type": "boolean",
             "format": ""
+        }, {
+            "name": "tags",
+            "baseName": "tags",
+            "type": "Array<string>",
+            "format": ""
         }];
 
     static getAttributeTypeMap() {
@@ -192,7 +201,8 @@ export class Route {
             steps: z.array(Step.zod),
             fromAddress: z.string().optional(),
             toAddress: z.string().optional(),
-            containsSwitchChain: z.boolean().optional()
+            containsSwitchChain: z.boolean().optional(),
+            tags: z.string().array().optional()
         });
     }
 }

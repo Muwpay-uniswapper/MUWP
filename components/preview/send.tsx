@@ -18,12 +18,14 @@ export function PreviewSend({
     const { tempAccount, routes: _route } = useRouteStore();
     const router = useRouter();
     const { chain } = useNetwork();
-    const { isError, isLoading } = useWaitForTransaction({ hash })
+    const { isError, isLoading, error } = useWaitForTransaction({ hash })
 
     React.useEffect(() => {
         if (!hash) return;
         if (isError) {
-            toast.error("Could not wait for transaction")
+            toast.error("Could not wait for transaction", {
+                description: <>{error instanceof Error && error.message}</>
+            })
         }
 
         if (hash && !isLoading) {

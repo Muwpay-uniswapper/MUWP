@@ -62,7 +62,10 @@ export function Approvals({
                 error: (e) => {
                     setWaiting(-1);
                     reject(e);
-                    return 'Could not approve tokens'
+                    return <>
+                        <b>Could not approve tokens</b>
+                        {e instanceof Error && e.message}
+                    </>
                 },
             });
         })
