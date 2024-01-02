@@ -35,7 +35,12 @@ export async function POST(request: Request) {
 
     const totalGas = input.routes.reduce((acc, route) => acc +
         route
-            .steps.map(step => step.estimate?.gasCosts?.reduce((acc, gas) => acc + (gas.limit && gas.price ? (BigInt(gas.limit) * BigInt(gas.price)) : BigInt(gas.amount)), 0n) ?? 0n)
+            .steps.map(step => {
+                const gas = step.estimate?.gasCosts?.reduce((acc, gas) => acc + (gas.limit && gas.price ? (BigInt(gas.limit) * BigInt(gas.price)) : BigInt(gas.amount)), 0n) ?? 0n
+
+                const fees = step.estimate?.feeCosts?.reduce((acc, fee) => acc + (fee.token.address == zeroAddress ? BigInt(fee.amount ?? "0") : 0n), 0n) ?? 0n
+                return gas + fees
+            })
             .reduce((acc, gas) => acc + gas, 0n)
         , 0n)
 
