@@ -14,41 +14,52 @@ const Hash = z.string().refine(value => value.startsWith('0x'), {
 
 
 export async function POST(request: Request) {
-    const body = await request.json();
-    const input = z.object({
-        transactionHash: Hash,
-        chainId: z.number(),
-        accountAddress: Hash,
-    }).parse(body);
+    try {
+        const body = await request.json();
+        const input = z.object({
+            transactionHash: Hash,
+            chainId: z.number(),
+            accountAddress: Hash,
+        }).parse(body);
 
-    const client = createPublicClient({
-        chain: extractChain({
-            chains: Object.values(chains),
-            id: input.chainId as any,
-        }),
-        transport: http()
-    })
+        const client = createPublicClient({
+            chain: extractChain({
+                chains: Object.values(chains),
+                id: input.chainId as any,
+            }),
+            transport: http()
+        })
 
-    const transaction = await client.getTransactionReceipt({
-        hash: input.transactionHash as `0x${string}`,
-    })
+        const transaction = await client.getTransactionReceipt({
+            hash: input.transactionHash as `0x${string}`,
+        })
 
-    if (!transaction || transaction.status !== "success") {
-        return new Response("Transaction not found", { status: 404 })
-    }
-
-    await inngest.send({
-        name: "app/funds.transferred",
-        data: {
-            address: input.accountAddress,
-        },
-    })
-
-    return new Response(JSON.stringify({
-        status: "success",
-    }), {
-        headers: {
-            'Content-Type': 'application/json',
+        if (!transaction || transaction.status !== "success") {
+            return new Response("Transaction not found", { status: 404 })
         }
-    })
+
+        await inngest.send({
+            name: "app/funds.transferred",
+            data: {
+                address: input.accountAddress,
+            },
+        })
+
+        return new Response(JSON.stringify({
+            status: "success",
+        }), {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+    } catch (e) {
+        return new Response(JSON.stringify({
+            status: "error",
+            message: e.message,
+        }), {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+    }
 }
