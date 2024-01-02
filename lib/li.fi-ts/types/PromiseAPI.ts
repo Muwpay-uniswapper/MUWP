@@ -1,5 +1,5 @@
 import { ResponseContext, RequestContext, HttpFile, HttpInfo } from '../http/http';
-import { Configuration} from '../configuration'
+import { Configuration } from '../configuration'
 
 import { Action } from '../models/Action';
 import { AllowDenyPrefer } from '../models/AllowDenyPrefer';
@@ -68,7 +68,7 @@ import { UnavailableRoutesFilteredOutInner } from '../models/UnavailableRoutesFi
 import { WalletAnalyticsResponse } from '../models/WalletAnalyticsResponse';
 import { ObservableAdvancedApi } from './ObservableAPI';
 
-import { AdvancedApiRequestFactory, AdvancedApiResponseProcessor} from "../apis/AdvancedApi";
+import { AdvancedApiRequestFactory, AdvancedApiResponseProcessor } from "../apis/AdvancedApi";
 export class PromiseAdvancedApi {
     private api: ObservableAdvancedApi
 
@@ -153,7 +153,7 @@ export class PromiseAdvancedApi {
 
 import { ObservableDefaultApi } from './ObservableAPI';
 
-import { DefaultApiRequestFactory, DefaultApiResponseProcessor} from "../apis/DefaultApi";
+import { DefaultApiRequestFactory, DefaultApiResponseProcessor } from "../apis/DefaultApi";
 export class PromiseDefaultApi {
     private api: ObservableDefaultApi
 
@@ -349,7 +349,7 @@ export class PromiseDefaultApi {
      * @param fromToken If &#x60;fromChain&#x60; and &#x60;fromToken&#x60; are specified, the result will contain information about how much &#x60;fromToken&#x60; amount the user has to send to receive the suggested gas amount on the requested chain.
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public gasSuggestionChainGetWithHttpInfo(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Promise<HttpInfo<void>> {
+    public gasSuggestionChainGetWithHttpInfo(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Promise<HttpInfo<GasSuggestionResponse>> {
         const result = this.api.gasSuggestionChainGetWithHttpInfo(chain, fromChain, fromToken, xLifiApiKey, _options);
         return result.toPromise();
     }
@@ -362,7 +362,7 @@ export class PromiseDefaultApi {
      * @param fromToken If &#x60;fromChain&#x60; and &#x60;fromToken&#x60; are specified, the result will contain information about how much &#x60;fromToken&#x60; amount the user has to send to receive the suggested gas amount on the requested chain.
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public gasSuggestionChainGet(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Promise<void> {
+    public gasSuggestionChainGet(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Promise<GasSuggestionResponse> {
         const result = this.api.gasSuggestionChainGet(chain, fromChain, fromToken, xLifiApiKey, _options);
         return result.toPromise();
     }
@@ -622,7 +622,8 @@ export class PromiseDefaultApi {
 
 import { ObservableGasApi } from './ObservableAPI';
 
-import { GasApiRequestFactory, GasApiResponseProcessor} from "../apis/GasApi";
+import { GasApiRequestFactory, GasApiResponseProcessor } from "../apis/GasApi";
+import { GasSuggestionResponse } from '../models/GasSuggestion';
 export class PromiseGasApi {
     private api: ObservableGasApi
 

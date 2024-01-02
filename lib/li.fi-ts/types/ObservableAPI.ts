@@ -482,7 +482,7 @@ export class ObservableDefaultApi {
      * @param fromToken If &#x60;fromChain&#x60; and &#x60;fromToken&#x60; are specified, the result will contain information about how much &#x60;fromToken&#x60; amount the user has to send to receive the suggested gas amount on the requested chain.
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public gasSuggestionChainGetWithHttpInfo(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Observable<HttpInfo<void>> {
+    public gasSuggestionChainGetWithHttpInfo(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Observable<HttpInfo<GasSuggestionResponse>> {
         const requestContextPromise = this.requestFactory.gasSuggestionChainGet(chain, fromChain, fromToken, xLifiApiKey, _options);
 
         // build promise chain
@@ -509,8 +509,8 @@ export class ObservableDefaultApi {
      * @param fromToken If &#x60;fromChain&#x60; and &#x60;fromToken&#x60; are specified, the result will contain information about how much &#x60;fromToken&#x60; amount the user has to send to receive the suggested gas amount on the requested chain.
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public gasSuggestionChainGet(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Observable<void> {
-        return this.gasSuggestionChainGetWithHttpInfo(chain, fromChain, fromToken, xLifiApiKey, _options).pipe(map((apiResponse: HttpInfo<void>) => apiResponse.data));
+    public gasSuggestionChainGet(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Observable<GasSuggestionResponse> {
+        return this.gasSuggestionChainGetWithHttpInfo(chain, fromChain, fromToken, xLifiApiKey, _options).pipe(map((apiResponse: HttpInfo<GasSuggestionResponse>) => apiResponse.data));
     }
 
     /**
@@ -881,6 +881,7 @@ export class ObservableDefaultApi {
 }
 
 import { GasApiRequestFactory, GasApiResponseProcessor } from "../apis/GasApi";
+import { GasSuggestionResponse } from '../models/GasSuggestion';
 export class ObservableGasApi {
     private requestFactory: GasApiRequestFactory;
     private responseProcessor: GasApiResponseProcessor;
