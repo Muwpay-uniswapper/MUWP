@@ -44,7 +44,7 @@ export const consumeStep = inngest.createFunction(
         const { remainingSteps, address } = await z.object({
             address: Address,
             remainingSteps: z.array(Step.zod),
-            id: z.string(),
+            id: z.string().optional(),
         }).parseAsync(event.data);
 
         if (remainingSteps.length === 0) return; // Should not happen, but just in case
