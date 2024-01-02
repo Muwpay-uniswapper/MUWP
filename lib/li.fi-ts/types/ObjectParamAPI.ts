@@ -1,5 +1,5 @@
 import { ResponseContext, RequestContext, HttpFile, HttpInfo } from '../http/http';
-import { Configuration} from '../configuration'
+import { Configuration } from '../configuration'
 
 import { Action } from '../models/Action';
 import { AllowDenyPrefer } from '../models/AllowDenyPrefer';
@@ -68,7 +68,7 @@ import { UnavailableRoutesFilteredOutInner } from '../models/UnavailableRoutesFi
 import { WalletAnalyticsResponse } from '../models/WalletAnalyticsResponse';
 
 import { ObservableAdvancedApi } from "./ObservableAPI";
-import { AdvancedApiRequestFactory, AdvancedApiResponseProcessor} from "../apis/AdvancedApi";
+import { AdvancedApiRequestFactory, AdvancedApiResponseProcessor } from "../apis/AdvancedApi";
 
 export interface AdvancedApiAdvancedPossibilitiesPostRequest {
     /**
@@ -128,7 +128,7 @@ export class ObjectAdvancedApi {
      * @param param the request object
      */
     public advancedPossibilitiesPostWithHttpInfo(param: AdvancedApiAdvancedPossibilitiesPostRequest = {}, options?: Configuration): Promise<HttpInfo<PossibilitiesResponse>> {
-        return this.api.advancedPossibilitiesPostWithHttpInfo(param.xLifiApiKey, param.possiblitiesRequest,  options).toPromise();
+        return this.api.advancedPossibilitiesPostWithHttpInfo(param.xLifiApiKey, param.possiblitiesRequest, options).toPromise();
     }
 
     /**
@@ -137,7 +137,7 @@ export class ObjectAdvancedApi {
      * @param param the request object
      */
     public advancedPossibilitiesPost(param: AdvancedApiAdvancedPossibilitiesPostRequest = {}, options?: Configuration): Promise<PossibilitiesResponse> {
-        return this.api.advancedPossibilitiesPost(param.xLifiApiKey, param.possiblitiesRequest,  options).toPromise();
+        return this.api.advancedPossibilitiesPost(param.xLifiApiKey, param.possiblitiesRequest, options).toPromise();
     }
 
     /**
@@ -146,7 +146,7 @@ export class ObjectAdvancedApi {
      * @param param the request object
      */
     public advancedRoutesPostWithHttpInfo(param: AdvancedApiAdvancedRoutesPostRequest, options?: Configuration): Promise<HttpInfo<RoutesResponse>> {
-        return this.api.advancedRoutesPostWithHttpInfo(param.routesRequest, param.xLifiApiKey,  options).toPromise();
+        return this.api.advancedRoutesPostWithHttpInfo(param.routesRequest, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -155,7 +155,7 @@ export class ObjectAdvancedApi {
      * @param param the request object
      */
     public advancedRoutesPost(param: AdvancedApiAdvancedRoutesPostRequest, options?: Configuration): Promise<RoutesResponse> {
-        return this.api.advancedRoutesPost(param.routesRequest, param.xLifiApiKey,  options).toPromise();
+        return this.api.advancedRoutesPost(param.routesRequest, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -164,7 +164,7 @@ export class ObjectAdvancedApi {
      * @param param the request object
      */
     public advancedStepTransactionPostWithHttpInfo(param: AdvancedApiAdvancedStepTransactionPostRequest, options?: Configuration): Promise<HttpInfo<Step>> {
-        return this.api.advancedStepTransactionPostWithHttpInfo(param.step, param.xLifiApiKey,  options).toPromise();
+        return this.api.advancedStepTransactionPostWithHttpInfo(param.step, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -173,13 +173,13 @@ export class ObjectAdvancedApi {
      * @param param the request object
      */
     public advancedStepTransactionPost(param: AdvancedApiAdvancedStepTransactionPostRequest, options?: Configuration): Promise<Step> {
-        return this.api.advancedStepTransactionPost(param.step, param.xLifiApiKey,  options).toPromise();
+        return this.api.advancedStepTransactionPost(param.step, param.xLifiApiKey, options).toPromise();
     }
 
 }
 
 import { ObservableDefaultApi } from "./ObservableAPI";
-import { DefaultApiRequestFactory, DefaultApiResponseProcessor} from "../apis/DefaultApi";
+import { DefaultApiRequestFactory, DefaultApiResponseProcessor } from "../apis/DefaultApi";
 
 export interface DefaultApiAnalyticsTransfersGetRequest {
     /**
@@ -689,7 +689,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public analyticsTransfersGetWithHttpInfo(param: DefaultApiAnalyticsTransfersGetRequest, options?: Configuration): Promise<HttpInfo<any>> {
-        return this.api.analyticsTransfersGetWithHttpInfo(param.integrator, param.wallet, param.status, param.fromTimestamp, param.toTimestamp,  options).toPromise();
+        return this.api.analyticsTransfersGetWithHttpInfo(param.integrator, param.wallet, param.status, param.fromTimestamp, param.toTimestamp, options).toPromise();
     }
 
     /**
@@ -698,7 +698,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public analyticsTransfersGet(param: DefaultApiAnalyticsTransfersGetRequest, options?: Configuration): Promise<any> {
-        return this.api.analyticsTransfersGet(param.integrator, param.wallet, param.status, param.fromTimestamp, param.toTimestamp,  options).toPromise();
+        return this.api.analyticsTransfersGet(param.integrator, param.wallet, param.status, param.fromTimestamp, param.toTimestamp, options).toPromise();
     }
 
     /**
@@ -707,7 +707,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public analyticsWalletsWalletAddressGetWithHttpInfo(param: DefaultApiAnalyticsWalletsWalletAddressGetRequest, options?: Configuration): Promise<HttpInfo<WalletAnalyticsResponse>> {
-        return this.api.analyticsWalletsWalletAddressGetWithHttpInfo(param.walletAddress, param.integrator, param.fromTimestamp, param.toTimestamp, param.xLifiApiKey,  options).toPromise();
+        return this.api.analyticsWalletsWalletAddressGetWithHttpInfo(param.walletAddress, param.integrator, param.fromTimestamp, param.toTimestamp, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -716,7 +716,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public analyticsWalletsWalletAddressGet(param: DefaultApiAnalyticsWalletsWalletAddressGetRequest, options?: Configuration): Promise<WalletAnalyticsResponse> {
-        return this.api.analyticsWalletsWalletAddressGet(param.walletAddress, param.integrator, param.fromTimestamp, param.toTimestamp, param.xLifiApiKey,  options).toPromise();
+        return this.api.analyticsWalletsWalletAddressGet(param.walletAddress, param.integrator, param.fromTimestamp, param.toTimestamp, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -725,7 +725,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public calldataParseGetWithHttpInfo(param: DefaultApiCalldataParseGetRequest, options?: Configuration): Promise<HttpInfo<void>> {
-        return this.api.calldataParseGetWithHttpInfo(param.callData, param.chainId, param.xLifiApiKey,  options).toPromise();
+        return this.api.calldataParseGetWithHttpInfo(param.callData, param.chainId, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -734,7 +734,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public calldataParseGet(param: DefaultApiCalldataParseGetRequest, options?: Configuration): Promise<void> {
-        return this.api.calldataParseGet(param.callData, param.chainId, param.xLifiApiKey,  options).toPromise();
+        return this.api.calldataParseGet(param.callData, param.chainId, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -743,7 +743,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public chainsGetWithHttpInfo(param: DefaultApiChainsGetRequest = {}, options?: Configuration): Promise<HttpInfo<ChainsResponse>> {
-        return this.api.chainsGetWithHttpInfo(param.chainTypes, param.xLifiApiKey,  options).toPromise();
+        return this.api.chainsGetWithHttpInfo(param.chainTypes, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -752,7 +752,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public chainsGet(param: DefaultApiChainsGetRequest = {}, options?: Configuration): Promise<ChainsResponse> {
-        return this.api.chainsGet(param.chainTypes, param.xLifiApiKey,  options).toPromise();
+        return this.api.chainsGet(param.chainTypes, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -761,7 +761,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public connectionsGetWithHttpInfo(param: DefaultApiConnectionsGetRequest = {}, options?: Configuration): Promise<HttpInfo<ConnectionsResponse>> {
-        return this.api.connectionsGetWithHttpInfo(param.fromChain, param.toChain, param.fromToken, param.toToken, param.chainTypes, param.allowBridges, param.xLifiApiKey,  options).toPromise();
+        return this.api.connectionsGetWithHttpInfo(param.fromChain, param.toChain, param.fromToken, param.toToken, param.chainTypes, param.allowBridges, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -770,7 +770,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public connectionsGet(param: DefaultApiConnectionsGetRequest = {}, options?: Configuration): Promise<ConnectionsResponse> {
-        return this.api.connectionsGet(param.fromChain, param.toChain, param.fromToken, param.toToken, param.chainTypes, param.allowBridges, param.xLifiApiKey,  options).toPromise();
+        return this.api.connectionsGet(param.fromChain, param.toChain, param.fromToken, param.toToken, param.chainTypes, param.allowBridges, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -778,7 +778,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public gasRefetchGetWithHttpInfo(param: DefaultApiGasRefetchGetRequest, options?: Configuration): Promise<HttpInfo<LIFuelStatus>> {
-        return this.api.gasRefetchGetWithHttpInfo(param.txHash, param.chainId, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasRefetchGetWithHttpInfo(param.txHash, param.chainId, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -786,7 +786,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public gasRefetchGet(param: DefaultApiGasRefetchGetRequest, options?: Configuration): Promise<LIFuelStatus> {
-        return this.api.gasRefetchGet(param.txHash, param.chainId, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasRefetchGet(param.txHash, param.chainId, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -794,7 +794,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public gasStatusGetWithHttpInfo(param: DefaultApiGasStatusGetRequest, options?: Configuration): Promise<HttpInfo<LIFuelStatus>> {
-        return this.api.gasStatusGetWithHttpInfo(param.txHash, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasStatusGetWithHttpInfo(param.txHash, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -802,7 +802,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public gasStatusGet(param: DefaultApiGasStatusGetRequest, options?: Configuration): Promise<LIFuelStatus> {
-        return this.api.gasStatusGet(param.txHash, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasStatusGet(param.txHash, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -810,8 +810,8 @@ export class ObjectDefaultApi {
      * Get a gas suggestion for the specified chain
      * @param param the request object
      */
-    public gasSuggestionChainGetWithHttpInfo(param: DefaultApiGasSuggestionChainGetRequest, options?: Configuration): Promise<HttpInfo<void>> {
-        return this.api.gasSuggestionChainGetWithHttpInfo(param.chain, param.fromChain, param.fromToken, param.xLifiApiKey,  options).toPromise();
+    public gasSuggestionChainGetWithHttpInfo(param: DefaultApiGasSuggestionChainGetRequest, options?: Configuration): Promise<HttpInfo<GasSuggestionResponse>> {
+        return this.api.gasSuggestionChainGetWithHttpInfo(param.chain, param.fromChain, param.fromToken, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -819,8 +819,8 @@ export class ObjectDefaultApi {
      * Get a gas suggestion for the specified chain
      * @param param the request object
      */
-    public gasSuggestionChainGet(param: DefaultApiGasSuggestionChainGetRequest, options?: Configuration): Promise<void> {
-        return this.api.gasSuggestionChainGet(param.chain, param.fromChain, param.fromToken, param.xLifiApiKey,  options).toPromise();
+    public gasSuggestionChainGet(param: DefaultApiGasSuggestionChainGetRequest, options?: Configuration): Promise<GasSuggestionResponse> {
+        return this.api.gasSuggestionChainGet(param.chain, param.fromChain, param.fromToken, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -829,7 +829,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public integratorsIntegratorIdGetWithHttpInfo(param: DefaultApiIntegratorsIntegratorIdGetRequest, options?: Configuration): Promise<HttpInfo<IntegratorResponse>> {
-        return this.api.integratorsIntegratorIdGetWithHttpInfo(param.integratorId, param.xLifiApiKey,  options).toPromise();
+        return this.api.integratorsIntegratorIdGetWithHttpInfo(param.integratorId, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -838,7 +838,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public integratorsIntegratorIdGet(param: DefaultApiIntegratorsIntegratorIdGetRequest, options?: Configuration): Promise<IntegratorResponse> {
-        return this.api.integratorsIntegratorIdGet(param.integratorId, param.xLifiApiKey,  options).toPromise();
+        return this.api.integratorsIntegratorIdGet(param.integratorId, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -847,7 +847,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public integratorsIntegratorIdWithdrawChainIdGetWithHttpInfo(param: DefaultApiIntegratorsIntegratorIdWithdrawChainIdGetRequest, options?: Configuration): Promise<HttpInfo<IntegratorWithdrawalResponse>> {
-        return this.api.integratorsIntegratorIdWithdrawChainIdGetWithHttpInfo(param.integratorId, param.chainId, param.tokenAddresses, param.xLifiApiKey,  options).toPromise();
+        return this.api.integratorsIntegratorIdWithdrawChainIdGetWithHttpInfo(param.integratorId, param.chainId, param.tokenAddresses, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -856,7 +856,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public integratorsIntegratorIdWithdrawChainIdGet(param: DefaultApiIntegratorsIntegratorIdWithdrawChainIdGetRequest, options?: Configuration): Promise<IntegratorWithdrawalResponse> {
-        return this.api.integratorsIntegratorIdWithdrawChainIdGet(param.integratorId, param.chainId, param.tokenAddresses, param.xLifiApiKey,  options).toPromise();
+        return this.api.integratorsIntegratorIdWithdrawChainIdGet(param.integratorId, param.chainId, param.tokenAddresses, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -865,7 +865,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public quoteContractCallPostWithHttpInfo(param: DefaultApiQuoteContractCallPostRequest = {}, options?: Configuration): Promise<HttpInfo<Tools>> {
-        return this.api.quoteContractCallPostWithHttpInfo(param.xLifiApiKey, param.contractCallRequest,  options).toPromise();
+        return this.api.quoteContractCallPostWithHttpInfo(param.xLifiApiKey, param.contractCallRequest, options).toPromise();
     }
 
     /**
@@ -874,7 +874,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public quoteContractCallPost(param: DefaultApiQuoteContractCallPostRequest = {}, options?: Configuration): Promise<Tools> {
-        return this.api.quoteContractCallPost(param.xLifiApiKey, param.contractCallRequest,  options).toPromise();
+        return this.api.quoteContractCallPost(param.xLifiApiKey, param.contractCallRequest, options).toPromise();
     }
 
     /**
@@ -883,7 +883,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public quoteContractCallsPostWithHttpInfo(param: DefaultApiQuoteContractCallsPostRequest = {}, options?: Configuration): Promise<HttpInfo<Tools>> {
-        return this.api.quoteContractCallsPostWithHttpInfo(param.xLifiApiKey, param.contractCallsRequest,  options).toPromise();
+        return this.api.quoteContractCallsPostWithHttpInfo(param.xLifiApiKey, param.contractCallsRequest, options).toPromise();
     }
 
     /**
@@ -892,7 +892,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public quoteContractCallsPost(param: DefaultApiQuoteContractCallsPostRequest = {}, options?: Configuration): Promise<Tools> {
-        return this.api.quoteContractCallsPost(param.xLifiApiKey, param.contractCallsRequest,  options).toPromise();
+        return this.api.quoteContractCallsPost(param.xLifiApiKey, param.contractCallsRequest, options).toPromise();
     }
 
     /**
@@ -901,7 +901,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public quoteGetWithHttpInfo(param: DefaultApiQuoteGetRequest, options?: Configuration): Promise<HttpInfo<Step>> {
-        return this.api.quoteGetWithHttpInfo(param.fromChain, param.toChain, param.fromToken, param.toToken, param.fromAddress, param.fromAmount, param.toAddress, param.order, param.slippage, param.integrator, param.fee, param.referrer, param.allowBridges, param.allowExchanges, param.denyBridges, param.denyExchanges, param.preferBridges, param.preferExchanges, param.allowDestinationCall, param.maxPriceImpact, param.xLifiApiKey,  options).toPromise();
+        return this.api.quoteGetWithHttpInfo(param.fromChain, param.toChain, param.fromToken, param.toToken, param.fromAddress, param.fromAmount, param.toAddress, param.order, param.slippage, param.integrator, param.fee, param.referrer, param.allowBridges, param.allowExchanges, param.denyBridges, param.denyExchanges, param.preferBridges, param.preferExchanges, param.allowDestinationCall, param.maxPriceImpact, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -910,7 +910,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public quoteGet(param: DefaultApiQuoteGetRequest, options?: Configuration): Promise<Step> {
-        return this.api.quoteGet(param.fromChain, param.toChain, param.fromToken, param.toToken, param.fromAddress, param.fromAmount, param.toAddress, param.order, param.slippage, param.integrator, param.fee, param.referrer, param.allowBridges, param.allowExchanges, param.denyBridges, param.denyExchanges, param.preferBridges, param.preferExchanges, param.allowDestinationCall, param.maxPriceImpact, param.xLifiApiKey,  options).toPromise();
+        return this.api.quoteGet(param.fromChain, param.toChain, param.fromToken, param.toToken, param.fromAddress, param.fromAmount, param.toAddress, param.order, param.slippage, param.integrator, param.fee, param.referrer, param.allowBridges, param.allowExchanges, param.denyBridges, param.denyExchanges, param.preferBridges, param.preferExchanges, param.allowDestinationCall, param.maxPriceImpact, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -919,7 +919,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public statusGetWithHttpInfo(param: DefaultApiStatusGetRequest, options?: Configuration): Promise<HttpInfo<StatusResponse>> {
-        return this.api.statusGetWithHttpInfo(param.txHash, param.bridge, param.fromChain, param.toChain, param.xLifiApiKey,  options).toPromise();
+        return this.api.statusGetWithHttpInfo(param.txHash, param.bridge, param.fromChain, param.toChain, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -928,7 +928,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public statusGet(param: DefaultApiStatusGetRequest, options?: Configuration): Promise<StatusResponse> {
-        return this.api.statusGet(param.txHash, param.bridge, param.fromChain, param.toChain, param.xLifiApiKey,  options).toPromise();
+        return this.api.statusGet(param.txHash, param.bridge, param.fromChain, param.toChain, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -937,7 +937,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public tokenGetWithHttpInfo(param: DefaultApiTokenGetRequest, options?: Configuration): Promise<HttpInfo<Array<Token>>> {
-        return this.api.tokenGetWithHttpInfo(param.chain, param.token, param.xLifiApiKey,  options).toPromise();
+        return this.api.tokenGetWithHttpInfo(param.chain, param.token, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -946,7 +946,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public tokenGet(param: DefaultApiTokenGetRequest, options?: Configuration): Promise<Array<Token>> {
-        return this.api.tokenGet(param.chain, param.token, param.xLifiApiKey,  options).toPromise();
+        return this.api.tokenGet(param.chain, param.token, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -955,7 +955,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public tokensGetWithHttpInfo(param: DefaultApiTokensGetRequest = {}, options?: Configuration): Promise<HttpInfo<TokensGet200Response>> {
-        return this.api.tokensGetWithHttpInfo(param.chains, param.chainTypes, param.xLifiApiKey,  options).toPromise();
+        return this.api.tokensGetWithHttpInfo(param.chains, param.chainTypes, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -964,7 +964,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public tokensGet(param: DefaultApiTokensGetRequest = {}, options?: Configuration): Promise<TokensGet200Response> {
-        return this.api.tokensGet(param.chains, param.chainTypes, param.xLifiApiKey,  options).toPromise();
+        return this.api.tokensGet(param.chains, param.chainTypes, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -973,7 +973,7 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public toolsGetWithHttpInfo(param: DefaultApiToolsGetRequest = {}, options?: Configuration): Promise<HttpInfo<Tools>> {
-        return this.api.toolsGetWithHttpInfo(param.xLifiApiKey,  options).toPromise();
+        return this.api.toolsGetWithHttpInfo(param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -982,13 +982,14 @@ export class ObjectDefaultApi {
      * @param param the request object
      */
     public toolsGet(param: DefaultApiToolsGetRequest = {}, options?: Configuration): Promise<Tools> {
-        return this.api.toolsGet(param.xLifiApiKey,  options).toPromise();
+        return this.api.toolsGet(param.xLifiApiKey, options).toPromise();
     }
 
 }
 
 import { ObservableGasApi } from "./ObservableAPI";
-import { GasApiRequestFactory, GasApiResponseProcessor} from "../apis/GasApi";
+import { GasApiRequestFactory, GasApiResponseProcessor } from "../apis/GasApi";
+import { GasSuggestionResponse } from '../models/GasSuggestion';
 
 export interface GasApiGasPricesChainIdGetRequest {
     /**
@@ -1039,7 +1040,7 @@ export class ObjectGasApi {
      * @param param the request object
      */
     public gasPricesChainIdGetWithHttpInfo(param: GasApiGasPricesChainIdGetRequest, options?: Configuration): Promise<HttpInfo<GasPrice>> {
-        return this.api.gasPricesChainIdGetWithHttpInfo(param.chainId, param.refresh, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasPricesChainIdGetWithHttpInfo(param.chainId, param.refresh, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -1048,7 +1049,7 @@ export class ObjectGasApi {
      * @param param the request object
      */
     public gasPricesChainIdGet(param: GasApiGasPricesChainIdGetRequest, options?: Configuration): Promise<GasPrice> {
-        return this.api.gasPricesChainIdGet(param.chainId, param.refresh, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasPricesChainIdGet(param.chainId, param.refresh, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -1057,7 +1058,7 @@ export class ObjectGasApi {
      * @param param the request object
      */
     public gasPricesGetWithHttpInfo(param: GasApiGasPricesGetRequest = {}, options?: Configuration): Promise<HttpInfo<GasPrice>> {
-        return this.api.gasPricesGetWithHttpInfo(param.refresh, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasPricesGetWithHttpInfo(param.refresh, param.xLifiApiKey, options).toPromise();
     }
 
     /**
@@ -1066,7 +1067,7 @@ export class ObjectGasApi {
      * @param param the request object
      */
     public gasPricesGet(param: GasApiGasPricesGetRequest = {}, options?: Configuration): Promise<GasPrice> {
-        return this.api.gasPricesGet(param.refresh, param.xLifiApiKey,  options).toPromise();
+        return this.api.gasPricesGet(param.refresh, param.xLifiApiKey, options).toPromise();
     }
 
 }
