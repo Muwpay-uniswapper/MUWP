@@ -22,6 +22,7 @@ export * from './FeeBalances';
 export * from './FeeCost';
 export * from './GasCost';
 export * from './GasPrice';
+export * from './GasSuggestion';
 export * from './IntegratorResponse';
 export * from './IntegratorWithdrawalResponse';
 export * from './IntegratorWithdrawalResponseTransactionRequest';
@@ -88,6 +89,7 @@ import { FeeBalances } from './FeeBalances';
 import { FeeCost } from './FeeCost';
 import { GasCost } from './GasCost';
 import { GasPrice } from './GasPrice';
+import { GasSuggestionDetails, GasSuggestionResponse } from './GasSuggestion';
 import { IntegratorResponse } from './IntegratorResponse';
 import { IntegratorWithdrawalResponse } from './IntegratorWithdrawalResponse';
 import { IntegratorWithdrawalResponseTransactionRequest } from './IntegratorWithdrawalResponseTransactionRequest';
@@ -191,6 +193,8 @@ let typeMap: { [index: string]: any } = {
     "FeeCost": FeeCost,
     "GasCost": GasCost,
     "GasPrice": GasPrice,
+    "GasSuggestionDetails": GasSuggestionDetails,
+    "GasSuggestionResponse": GasSuggestionResponse,
     "IntegratorResponse": IntegratorResponse,
     "IntegratorWithdrawalResponse": IntegratorWithdrawalResponse,
     "IntegratorWithdrawalResponseTransactionRequest": IntegratorWithdrawalResponseTransactionRequest,

@@ -1,4 +1,4 @@
-import { advancedAPI } from "@/lib/front/data/api";
+import api, { advancedAPI } from "@/lib/front/data/api";
 import { Route, RouteOptions } from "@/lib/li.fi-ts";
 import { z } from 'zod';
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
@@ -95,16 +95,24 @@ export async function POST(request: Request) {
 
         console.log("Fetching routes");
 
-        const queries = input.inputTokens.map(inToken => advancedAPI.advancedRoutesPost({
-            fromAmount: input.inputAmount[inToken.value]?.toString(),
-            fromChainId: input.inputChain,
-            fromTokenAddress: inToken.address,
-            toChainId: input.outputChain,
-            toTokenAddress: input.outputToken.address,
-            fromAddress: input.tempAccount,
-            toAddress: input.toAddress ?? input.fromAddress,
-            options: input.options,
-        }))
+        const queries = input.inputTokens.map(async inToken => {
+            let fromAmountForGas: string | undefined = undefined;
+            if (input.inputChain !== input.outputChain) {
+                const gas = await api.gasSuggestionChainGet(input.outputChain.toString())
+                fromAmountForGas = gas?.recommended?.amount
+            }
+            return await advancedAPI.advancedRoutesPost({
+                fromAmount: input.inputAmount[inToken.value]?.toString(),
+                fromChainId: input.inputChain,
+                fromTokenAddress: inToken.address,
+                toChainId: input.outputChain,
+                toTokenAddress: input.outputToken.address,
+                fromAddress: input.tempAccount,
+                toAddress: input.toAddress ?? input.fromAddress,
+                fromAmountForGas,
+                options: input.options,
+            })
+        })
 
         const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
 
@@ -146,5 +154,8 @@ export async function POST(request: Request) {
                 })
             }
         }
+        return new Response(JSON.stringify({ message: "Unexpected error" }), {
+            status: 500
+        })
     }
 }

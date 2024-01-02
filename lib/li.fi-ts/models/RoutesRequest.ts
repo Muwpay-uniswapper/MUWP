@@ -46,6 +46,7 @@ export class RoutesRequest {
     * The receicing wallet address
     */
     'toAddress'?: string;
+    'fromAmountForGas'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -95,6 +96,12 @@ export class RoutesRequest {
         {
             "name": "toAddress",
             "baseName": "toAddress",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "fromAmountForGas",
+            "baseName": "fromAmountForGas",
             "type": "string",
             "format": ""
         }];
