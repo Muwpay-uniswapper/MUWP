@@ -87,11 +87,24 @@ export const consumeStep = inngest.createFunction(
                 const amount = BigInt(fullStep.action.fromAmount)
 
                 if (allowance < amount) {
-                    const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
+                    try {
+                        const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
 
-                    await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
+                        await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
 
-                    return { transactionRequest, hash, approvalAddress }
+                        return { transactionRequest, hash, approvalAddress }
+                    } catch (e) {
+                        if (e instanceof Error) {
+                            console.error(e.message)
+                        }
+                        const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount], {
+                            maxPriorityFeePerGas: 1n
+                        })
+
+                        await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
+
+                        return { transactionRequest, hash, approvalAddress }
+                    }
                 }
             }
             return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}` }
