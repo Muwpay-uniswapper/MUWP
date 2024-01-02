@@ -53,13 +53,15 @@ export async function POST(request: Request) {
             }
         })
     } catch (e) {
-        return new Response(JSON.stringify({
-            status: "error",
-            message: e.message,
-        }), {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
+        if (e instanceof Error) {
+            return new Response(JSON.stringify({
+                status: "error",
+                message: e.message,
+            }), {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+        }
     }
 }
