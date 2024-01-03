@@ -29,13 +29,18 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
     const formattedAmount = formatUnits(data.source ? BigInt(data.amounts[data.source]) : sum, data.decimals)
 
     return (
-        <>
+        <div className='relative w-full'>
             <div className="cloud gradient">
                 <div>
                     <ChainIcon id={data.chainId} />
                 </div>
             </div>
-            <div className="wrapper gradient">
+            {data.isInput && <div className="wrapper gradient -z-10 !absolute transform scale-90 w-full h-full -translate-y-4 opacity-50">
+                <div className="inner">
+                    <div className="body"></div>
+                </div>
+            </div>}
+            <div className="wrapper gradient w-full">
                 <div className="inner">
                     <div className="body">
                         <div className="icon"> <img src={data.logoURI} alt={data.symbol} className="w-4 h-4 rounded-full" /></div>
@@ -59,7 +64,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                     <Handle type="source" position={Position.Bottom} />
                 </div>
             </div>
-        </>
+        </div>
     );
 });
 

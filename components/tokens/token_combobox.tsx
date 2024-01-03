@@ -18,6 +18,7 @@ import { Token } from "@/lib/front/model/CellLike"
 import { useSwapStore } from "@/lib/front/data/swapStore"
 import { useBreakpoint } from "@/lib/front/media-query";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { useNetwork } from "wagmi";
 
 export function TokenComboboxes({ tokenList }: { tokenList: Token[] }) {
     const tokenCount = useSwapStore((state) => state.inputTokens.length)
@@ -104,7 +105,8 @@ function TokenListContent({
 }) {
 
     const [search, setSearch] = React.useState("")
-    const { inputTokens, setInputToken, outputToken, setOutputToken, removeInputToken } = useSwapStore()
+    const { chain } = useNetwork()
+    const { inputTokens, setInputToken, outputToken, setOutputToken, removeInputToken, outputChain } = useSwapStore()
     const [hydrated, setHydrated] = React.useState(false)
     React.useEffect(() => {
         setHydrated(true)
@@ -127,7 +129,11 @@ function TokenListContent({
             </CommandEmpty>
             <CommandGroup>
                 {tokenList
-                    .filter((token) => !(inputTokens.includes(token) && token !== value && outputToken == token))
+                    .filter((token) => {
+                        if (mode == "input" && chain && token.chainId !== chain.id) return false
+                        if (mode == "output" && outputChain && token.chainId !== outputChain) return false
+                        return !(inputTokens.includes(token) && token !== value && outputToken == token)
+                    })
                     .map((token) => (
                         <CommandItem
                             key={token.value}
@@ -151,6 +157,7 @@ function TokenListContent({
                                 )} />
                             <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
                             {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
+                            {value?.value.toLowerCase?.() === token.value.toLowerCase() && <span className="text-red-500 absolute right-2 cursor-pointer">Remove token</span>}
                         </CommandItem>
                     ))}
             </CommandGroup>

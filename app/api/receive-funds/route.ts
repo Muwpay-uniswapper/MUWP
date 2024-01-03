@@ -22,27 +22,9 @@ export async function POST(request: Request) {
             accountAddress: Hash,
         }).parse(body);
 
-        const client = createPublicClient({
-            chain: extractChain({
-                chains: Object.values(chains),
-                id: input.chainId as any,
-            }),
-            transport: http()
-        })
-
-        const transaction = await client.getTransactionReceipt({
-            hash: input.transactionHash as `0x${string}`,
-        })
-
-        if (!transaction || transaction.status !== "success") {
-            return new Response("Transaction not found", { status: 404 })
-        }
-
         await inngest.send({
             name: "app/funds.transferred",
-            data: {
-                address: input.accountAddress,
-            },
+            data: input,
         })
 
         return new Response(JSON.stringify({

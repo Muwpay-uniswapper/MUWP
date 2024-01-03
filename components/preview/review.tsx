@@ -10,12 +10,12 @@ import { Funnel } from "./funnel";
 import { useAccount, useFeeData, useNetwork, usePublicClient, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 const InitiateResponse = z.object({
     status: z.literal("success"),
     address: z.string(),
     txn: z.any(),
-    approvals: z.array(z.any()),
     id: z.string(),
 });
 
@@ -47,24 +47,34 @@ export function Review({
     const { data } = useFeeData();
     const account = useAccount();
     const { chain } = useNetwork();
+    const router = useRouter();
 
     const sendTxn = async () => {
         setIsSending(true);
 
+        const body: any = {
+            from: account.address,
+            account: tempAccount,
+            chainId: chain?.id,
+            routes,
+        };
+
+        if (typeof data?.maxFeePerGas === "bigint") {
+            body.maxFeePerGas = data?.maxFeePerGas;
+        }
+
+        if (typeof data?.maxPriorityFeePerGas === "bigint") {
+            body.maxPriorityFeePerGas = data?.maxPriorityFeePerGas;
+        }
+
         const _res = fetch("/api/initiate", {
             method: "POST",
-            body: JSON.stringify({
-                from: account.address,
-                account: tempAccount,
-                chainId: chain?.id,
-                routes,
-                maxFeePerGas: data?.maxFeePerGas,
-                maxPriorityFeePerGas: data?.maxPriorityFeePerGas,
-            }),
+            body: JSON.stringify(body),
             headers: {
                 "Content-Type": "application/json"
             }
         }).then((res) => res.json());
+
 
         const res = await new Promise((resolve, reject) => {
             toast.promise(_res, {
@@ -84,7 +94,7 @@ export function Review({
             });
         })
 
-        const { address, approvals, txn } = await InitiateResponse.parseAsync(res);
+        const { address, txn } = await InitiateResponse.parseAsync(res);
 
         // Approve tokens
         let _hash: `0x${string}` | undefined;
@@ -120,13 +130,45 @@ export function Review({
                 id: address,
                 status: 0,
             })
-
-            nextStep(_hash)
         } while (!_hash && counter < 3);
 
         if (!_hash) {
             toast.error("Could not send transaction")
             setIsSending(false);
+            return;
+        }
+
+        counter = 0;
+
+        while (counter > 0) {
+            try {
+                const notifyBackend = await fetch("/api/receive-funds", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        chainId: chain?.id,
+                        transactionHash: _hash,
+                        accountAddress: tempAccount
+                    }),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then((res) => res.json());
+
+                if ((notifyBackend as any).status === "success") {
+                    nextStep(_hash);
+                    break;
+                } else {
+                    counter--;
+                    if (counter === 0) {
+                        toast.error("Could not notify backend after several attempts")
+                    }
+                }
+            } catch (err) {
+                counter--;
+                if (counter === 0) {
+                    toast.error("Could not notify backend after several attempts")
+                }
+            }
         }
     }
 

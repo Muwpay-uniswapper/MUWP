@@ -1,6 +1,8 @@
 import { inngest } from "./client";
 import { z } from "zod";
 import { Route } from "../li.fi-ts";
+import { createPublicClient, extractChain, http } from "viem";
+import * as chains from 'viem/chains'
 
 
 const Address = z
@@ -20,7 +22,7 @@ const Data = z.object({
 });
 
 export const initiateTransfer = inngest.createFunction(
-    { id: "initiate-transfer" },
+    { id: "initiate-transfer", retries: 10 },
     { event: "app/account.created" },
     async ({ event, step }) => {
         const accountData = await z.object({
@@ -30,7 +32,7 @@ export const initiateTransfer = inngest.createFunction(
         const transfer = await step.waitForEvent("wait-for-user-to-select-route", {
             event: "app/transfer.initiate",
             match: "data.address", // the field "data.address" must match
-            timeout: "24h", // wait at most 24h
+            timeout: "72h", // wait at most 24h
         });
         if (!transfer) {
             return await step.sendEvent("app/terminate.account", {
@@ -57,6 +59,25 @@ export const initiateTransfer = inngest.createFunction(
                 }
             })
         }
+
+        await step.run("app/transfer.funds", async () => {
+            const input = funds_transferred?.data
+            const client = createPublicClient({
+                chain: extractChain({
+                    chains: Object.values(chains),
+                    id: input.chainId as any,
+                }),
+                transport: http()
+            })
+
+            const transaction = await client.getTransactionReceipt({
+                hash: input.transactionHash as `0x${string}`,
+            })
+
+            if (!transaction || transaction.status !== "success") {
+                throw new Error("Transaction not found")
+            }
+        })
 
         await step.sendEvent("app/consume.steps", data.routes.map(route => ({
             name: "app/consume.steps",
