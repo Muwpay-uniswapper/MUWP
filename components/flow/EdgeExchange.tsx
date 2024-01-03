@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { EdgeProps, getSmoothStepPath, EdgeLabelRenderer, useReactFlow, getBezierPath } from 'reactflow';
 import { GradientIdContext } from './provider';
+import { UnfoldHorizontal } from 'lucide-react';
 
 const EdgeExchange: FC<EdgeProps> = ({
     id,
@@ -16,17 +17,7 @@ const EdgeExchange: FC<EdgeProps> = ({
     data,
     markerEnd,
 }) => {
-    const gradientId = React.useContext(GradientIdContext);
-
-    // const [edgePath, labelX, labelY] = getSmoothStepPath({
-    //     sourceX,
-    //     sourceY,
-    //     sourcePosition,
-    //     targetX,
-    //     targetY,
-    //     targetPosition,
-    // });
-
+    const { getNode } = useReactFlow();
     const [edgePath, labelX, labelY] = getBezierPath({
         sourceX,
         sourceY,
@@ -66,7 +57,7 @@ const EdgeExchange: FC<EdgeProps> = ({
                     className="nodrag nopan react-flow__controls cursor-pointer"
                     onClick={focus}
                 >
-                    {data.label}
+                    {data.label}{getNode(source)?.data.chainId !== getNode(target)?.data.chainId && <UnfoldHorizontal className='inline ml-1' />}
                 </div>
             </EdgeLabelRenderer>
         </>
