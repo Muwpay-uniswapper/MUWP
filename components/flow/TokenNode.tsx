@@ -1,4 +1,4 @@
-import React, { memo, ReactNode, useContext } from 'react';
+import React, { memo, ReactNode, useContext, useState } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import {
     Select,
@@ -24,20 +24,39 @@ export type TokenNodeData = Token & {
 }
 
 export default memo(({ data }: NodeProps<TokenNodeData>) => {
+    const [hover, setHover] = useState(false);
     const { routes, chosenIndex, choseIndex } = useRouteStore();
     const sum = Object.values(data.amounts).map((v) => BigInt(v)).reduce((a, b) => a + b, 0n);
     const formattedAmount = formatUnits(data.source ? BigInt(data.amounts[data.source]) : sum, data.decimals)
 
     return (
-        <div className='relative w-full'>
+        <div className='relative w-full'
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}>
             <div className="cloud gradient">
                 <div>
                     <ChainIcon id={data.chainId} />
                 </div>
             </div>
-            {data.isInput && <div className="wrapper gradient -z-10 !absolute transform scale-90 w-full h-full -translate-y-4 opacity-50">
+            {data.isInput && <div className={cn("wrapper gradient -z-10 !absolute transform scale-90 w-full h-full opacity-75 transition-all", hover ? "-translate-y-10" : "-translate-y-4")}>
                 <div className="inner">
-                    <div className="body"></div>
+                    <div className="body w-full">
+                        {data.isInput && <Select value={chosenIndex[data.address]?.toString()} onValueChange={value => {
+                            choseIndex(data.address, Number(value))
+                        }}>
+                            <SelectTrigger className='border-none p-0 bg-transparent -translate-y-1/3 !focus:shadow-none' showChevron={false}>
+                                <div className="text-center w-full">
+                                    Show all routes
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent className="w-96">
+                                {routes[data.address]?.map((route, index) => <SelectItem key={index} value={index.toString()} className='w-full'>
+                                    <RouteInfo route={route} index={index} />
+                                </SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        }
+                    </div>
                 </div>
             </div>}
             <div className="wrapper gradient w-full">
@@ -49,17 +68,6 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                             <div className="subline">{(!data.isInput && !data.isSource) && "~"}{formattedAmount.slice(0, 10)}</div>
                         </div>
                     </div>
-                    {data.isInput && <Select value={chosenIndex[data.address]?.toString()} onValueChange={value => {
-                        choseIndex(data.address, Number(value))
-                    }}>
-                        <SelectTrigger className="w-4 h-4 p-0 border-none bg-transparent" />
-                        <SelectContent className="w-96">
-                            {routes[data.address]?.map((route, index) => <SelectItem key={index} value={index.toString()} className='w-full'>
-                                <RouteInfo route={route} index={index} />
-                            </SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    }
                     <Handle type="target" position={Position.Top} />
                     <Handle type="source" position={Position.Bottom} />
                 </div>
