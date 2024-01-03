@@ -35,7 +35,7 @@ export default function PreviewSwap() {
             <Tooltip>
                 <TooltipTrigger>
                     <Fuel className="inline w-6 h-6 mr-1" /> {gasFees.toFixed(2)}$
-                    {gasFees != optimalGasFees && <Badge className="ml-1" variant={gasFees > optimalGasFees ? "destructive" : "secondary"}>{gasFees > optimalGasFees ? "+" : "-"}{((gasFees / optimalGasFees - 1) * 100).toFixed(2)}%</Badge>}
+                    {gasFees != optimalGasFees && <Badge className="ml-1" variant={gasFees > optimalGasFees ? "destructive" : "default"}>{gasFees > optimalGasFees ? "+" : ""}{((gasFees / optimalGasFees - 1) * 100).toFixed(2)}%</Badge>}
                 </TooltipTrigger>
                 <TooltipContent>
                     Total gas fees for all routes
@@ -44,7 +44,7 @@ export default function PreviewSwap() {
             <Tooltip>
                 <TooltipTrigger>
                     <DollarSign className="inline w-6 h-6 mr-1" /> {feeCosts.toFixed(2)}$
-                    {feeCosts != optimalFeeCosts && <Badge className="ml-1" variant={feeCosts > optimalFeeCosts ? "destructive" : "secondary"}>{feeCosts > optimalFeeCosts ? "+" : "-"}{((feeCosts / optimalFeeCosts - 1) * 100).toFixed(2)}%</Badge>}
+                    {feeCosts != optimalFeeCosts && <Badge className="ml-1" variant={feeCosts > optimalFeeCosts ? "destructive" : "default"}>{feeCosts > optimalFeeCosts ? "+" : ""}{((feeCosts / optimalFeeCosts - 1) * 100).toFixed(2)}%</Badge>}
                 </TooltipTrigger>
                 <TooltipContent>
                     Total fees for all routes
@@ -53,7 +53,7 @@ export default function PreviewSwap() {
             <Tooltip>
                 <TooltipTrigger>
                     <Clock className="inline w-6 h-6 mr-1" /> {Math.ceil(duration / 60)} min
-                    {duration != optimalDuration && <Badge className="ml-1" variant={duration > optimalDuration ? "destructive" : "secondary"}>{duration > optimalDuration ? "+" : "-"}{((duration / optimalDuration - 1) * 100).toFixed(2)}%</Badge>}
+                    {duration != optimalDuration && <Badge className="ml-1" variant={duration > optimalDuration ? "destructive" : "default"}>{duration > optimalDuration ? "+" : ""}{((duration / optimalDuration - 1) * 100).toFixed(2)}%</Badge>}
                 </TooltipTrigger>
                 <TooltipContent>
                     Total execution time for all routes. Some steps are executed in parallel.
