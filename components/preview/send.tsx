@@ -15,67 +15,19 @@ export function PreviewSend({
     setHash: (hash: string | undefined) => void,
     nextStep: NextStep
 }) {
-    const { tempAccount, routes: _route } = useRouteStore();
-    const router = useRouter();
-    const { chain } = useNetwork();
-    const { isError, isLoading, error } = useWaitForTransaction({ hash })
+    const { isError, isLoading, error, isSuccess } = useWaitForTransaction({ hash });
 
     React.useEffect(() => {
-        if (!hash) return;
-        if (isError) {
-            toast.error("Could not wait for transaction", {
-                description: <>{error instanceof Error && error.message}</>
-            })
+        if (!isError && !isLoading && isSuccess) {
+            setHash(undefined);
+            nextStep();
         }
-
-        if (hash && !isLoading) {
-            (async () => {
-
-                let retries = 3;
-                while (retries > 0) {
-                    try {
-                        const notifyBackend = await fetch("/api/receive-funds", {
-                            method: "POST",
-                            body: JSON.stringify({
-                                chainId: chain?.id,
-                                transactionHash: hash,
-                                accountAddress: tempAccount
-                            }),
-                            headers: {
-                                "Content-Type": "application/json"
-                            }
-                        }).then((res) => res.json());
-
-                        if ((notifyBackend as any).status === "success") {
-                            router.push("/transactions");
-                            setTimeout(() => {
-                                setHash(undefined);
-                            }, 5000);
-                            break;
-                        } else {
-                            retries--;
-                            if (retries === 0) {
-                                toast.error("Could not notify backend after several attempts")
-                            }
-                        }
-                    } catch (err) {
-                        retries--;
-                        if (retries === 0) {
-                            toast.error("Could not notify backend after several attempts")
-                        }
-                    } finally {
-                        nextStep();
-                    }
-                }
-            })();
-        }
-    }, [hash, isError, isLoading])
+    }, [isError, isLoading, error, isSuccess])
 
     return <div>
         <div className="text-center pb-4">
             <Send className="inline w-8 h-8" />
             <div className="font-bold text-2xl mt-2 mb-4">Sending Transaction...</div>
-            <div>DO NOT CLOSE YOUR BROWSER!</div>
         </div>
     </div>
 }

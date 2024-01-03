@@ -29,14 +29,14 @@ export async function POST(request: Request) {
         account: Address,
         chainId: z.number(),
         routes: z.array(Route.zod),
-        maxFeePerGas: z.coerce.bigint(),
-        maxPriorityFeePerGas: z.coerce.bigint(),
+        maxFeePerGas: z.coerce.bigint().optional(),
+        maxPriorityFeePerGas: z.coerce.bigint().optional(),
     }).parseAsync(body);
 
     const totalGas = input.routes.reduce((acc, route) => acc +
         route
             .steps.map(step => {
-                const gas = step.estimate?.gasCosts?.reduce((acc, gas) => acc + (gas.limit && gas.price ? (BigInt(gas.limit) * BigInt(gas.price)) : BigInt(gas.amount)), 0n) ?? 0n
+                const gas = step.estimate?.gasCosts?.reduce((acc, gas) => acc + (gas.limit && gas.price ? (BigInt(gas.limit ?? "0") * BigInt(gas.price ?? "0")) : BigInt(gas.amount ?? "0")), 0n) ?? 0n
 
                 const fees = step.estimate?.feeCosts?.reduce((acc, fee) => acc + (fee.token.address == zeroAddress ? BigInt(fee.amount ?? "0") : 0n), 0n) ?? 0n
                 return gas + fees
@@ -82,35 +82,6 @@ export async function POST(request: Request) {
         maxPriorityFeePerGas: input.maxPriorityFeePerGas,
     })
 
-    // Prepare `approve()` calls for all tokens that need approval (omit those who don't)
-    const approveArgsList = input.routes
-        .filter(route => route.steps[0].action.fromToken.address !== zeroAddress)
-        .map(route => ({
-            tokenAddress: route.steps[0].action.fromToken.address as `0x${string}`,
-            amount: BigInt(route.steps[0].action.fromAmount)
-        }));
-
-    // Promise all approve transactions
-    const approveTransactions = await Promise.all(
-        approveArgsList.map(args => {
-            const approveData = encodeFunctionData({
-                abi: erc20.abi, // Use ERC20 abi
-                functionName: "approve",
-                args: [chain?.muwpContract, args.amount]
-            });
-
-            return client.prepareTransactionRequest({
-                account: input.from as `0x${string}`,
-                to: args.tokenAddress,
-                value: 0n, // approval function does not require ether,
-                data: approveData,
-                chain: client.chain,
-                maxFeePerGas: input.maxFeePerGas,
-                maxPriorityFeePerGas: input.maxPriorityFeePerGas,
-            });
-        })
-    );
-
     const _id = await inngest.send({
         name: "app/transfer.initiate",
         data: {
@@ -125,8 +96,7 @@ export async function POST(request: Request) {
         status: "success",
         address: input.account,
         txn,
-        id: _id.ids[0],
-        approvals: approveTransactions,
+        id: _id.ids[0]
     }), {
         headers: {
             'Content-Type': 'application/json',

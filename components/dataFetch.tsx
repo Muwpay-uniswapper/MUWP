@@ -5,6 +5,7 @@ import { Chain, Token } from "@/lib/front/model/CellLike";
 import { ChainCombobox } from "@/components/chains/chain-selector";
 import { ChainComboboxDelegate, TokenComboboxDelegate } from "@/lib/front/data/delegate/ComboboxDelegate";
 import api from "@/lib/front/data/api"
+import { muwpChains } from "@/muwp";
 
 export async function TokenSelector({
     id,
@@ -47,14 +48,19 @@ export async function ChainSelector({
 }) {
     const chains = await api.chainsGet()
 
-    const chainList: Chain[] = chains.chains?.map((chain) => {
-        return {
-            value: `${chain.key}:${chain.id}`,
-            label: chain.name,
-            logoURI: chain.logoURI,
-            chainId: chain.id
-        }
-    }) ?? []
+    const chainList: Chain[] = chains.chains?.filter((chain) => {
+        // const muwpChain = muwpChains.find((muwpChain) => muwpChain.id == chain.id)
+        // return muwpChain?.muwpContract != "0x" && muwpChain != undefined
+        return true
+    })
+        .map((chain) => {
+            return {
+                value: `${chain.key}:${chain.id}`,
+                label: chain.name,
+                logoURI: chain.logoURI,
+                chainId: chain.id
+            }
+        }) ?? []
 
     return <ChainCombobox chainList={chainList} mode={mode} />
 }
