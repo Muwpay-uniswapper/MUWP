@@ -1,4 +1,10 @@
 import Transactions from "@/components/transactions/transactions";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'MUWP Pay - Transactions',
+    description: 'See your past transactions with MUWP Pay.'
+}
 
 export default function TransactionsPage() {
     return (

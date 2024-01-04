@@ -51,7 +51,7 @@ export function FindRoutesButton() {
             })
         } catch (e) {
             toast.error("Error fetching routes", {
-                description: <>{e instanceof Error && e.message}</>
+                description: <>{e instanceof Error && e.message}<br />Maybe try a different route!</>
             })
         }
     }
