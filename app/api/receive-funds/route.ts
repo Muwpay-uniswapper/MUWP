@@ -24,7 +24,11 @@ export async function POST(request: Request) {
 
         await inngest.send({
             name: "app/funds.transferred",
-            data: input,
+            data: {
+                transactionHash: input.transactionHash,
+                chainId: input.chainId,
+                address: input.accountAddress,
+            },
         })
 
         return new Response(JSON.stringify({

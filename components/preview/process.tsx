@@ -20,6 +20,7 @@ import { useSwapStore } from "@/lib/front/data/swapStore";
 import Link from "next/link";
 import { erc20ABI, useAccount, useNetwork, usePublicClient, useWalletClient } from "wagmi";
 import { MUWPChain } from "@/muwp";
+import { useRouter } from "next/navigation";
 
 export type NextStep = (opt?: any) => void;
 
@@ -62,8 +63,16 @@ export default function PreviewProcess() {
             setNeedApprovals(false);
         })()
     }, [_route])
+
     const [isSending, setIsSending] = useState(false);
     const [hash, setHash] = useState<string | undefined>();
+    const router = useRouter();
+
+    React.useEffect(() => {
+        if (status == Status.send && !hash) {
+            router.push("/transactions");
+        }
+    }, [status, hash])
 
     return <Dialog open={(status == Status.send || isSending) ? true : undefined}>
         <DialogTrigger className="w-full"><SwapButton status={status} needsApproval={needsApproval} /></DialogTrigger>
@@ -81,7 +90,6 @@ export default function PreviewProcess() {
                     clear();
                     clearSwaps();
                 }} />}
-                {status == Status.send && !hash && <Link href="/transactions">Transactions</Link>}
             </DialogHeader>
         </DialogContent>
     </Dialog>

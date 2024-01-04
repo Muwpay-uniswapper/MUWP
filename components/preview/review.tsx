@@ -96,7 +96,7 @@ export function Review({
 
         const { address, txn } = await InitiateResponse.parseAsync(res);
 
-        // Approve tokens
+        // Sending tx
         let _hash: `0x${string}` | undefined;
         let counter = 0;
         do {
@@ -130,45 +130,33 @@ export function Review({
                 id: address,
                 status: 0,
             })
+
+            console.log(`Transaction sent: ${_hash}`);
+
+            const notifyBackend = await fetch("/api/receive-funds", {
+                method: "POST",
+                body: JSON.stringify({
+                    chainId: chain?.id,
+                    transactionHash: _hash,
+                    accountAddress: tempAccount
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then((res) => res.json());
+
+            console.log(`Backend notified: ${notifyBackend.status}`)
+
+            if ((notifyBackend as any).status === "success") {
+                nextStep(_hash);
+                break;
+            }
         } while (!_hash && counter < 3);
 
         if (!_hash) {
             toast.error("Could not send transaction")
             setIsSending(false);
             return;
-        }
-
-        counter = 0;
-
-        while (counter > 0) {
-            try {
-                const notifyBackend = await fetch("/api/receive-funds", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        chainId: chain?.id,
-                        transactionHash: _hash,
-                        accountAddress: tempAccount
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }).then((res) => res.json());
-
-                if ((notifyBackend as any).status === "success") {
-                    nextStep(_hash);
-                    break;
-                } else {
-                    counter--;
-                    if (counter === 0) {
-                        toast.error("Could not notify backend after several attempts")
-                    }
-                }
-            } catch (err) {
-                counter--;
-                if (counter === 0) {
-                    toast.error("Could not notify backend after several attempts")
-                }
-            }
         }
     }
 

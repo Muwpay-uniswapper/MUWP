@@ -27,7 +27,8 @@ export function Progress({ validUntil }: { validUntil: Date; }) {
     const progressOffset = ((100 - progress) / 100) * circumference;
 
     return <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger className='flex flex-row items-center gap-1'>
+            <span className='tabular-nums'>{timeLeft}</span>
             <svg
                 viewBox="0 0 100 100"
                 className="w-8 h-8"
