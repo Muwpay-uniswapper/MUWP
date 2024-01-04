@@ -2,7 +2,7 @@
 import { BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS } from './baseapi';
 import { Configuration } from '../configuration';
 import { RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo } from '../http/http';
-import { ObjectSerializer } from '../models/ObjectSerializer';
+import { GasSuggestionResponse, ObjectSerializer } from '../models/ObjectSerializer';
 import { ApiException } from './exception';
 import { canConsumeForm, isCodeInRange } from '../util';
 import { SecurityAuthentication } from '../auth/auth';
@@ -1257,18 +1257,22 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to gasSuggestionChainGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-    public async gasSuggestionChainGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<void>> {
+    public async gasSuggestionChainGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<GasSuggestionResponse>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
-            return new HttpInfo(response.httpStatusCode, response.headers, response.body, undefined);
+            const body: GasSuggestionResponse = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "GasSuggestionResponse", ""
+            ) as GasSuggestionResponse;
+            return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
-            const body: void = ObjectSerializer.deserialize(
+            const body: GasSuggestionResponse = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "void", ""
-            ) as void;
+                "GasSuggestionResponse", ""
+            ) as GasSuggestionResponse;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 

@@ -3,7 +3,6 @@ import { Route } from "@/lib/li.fi-ts";
 import { createPublicClient, encodeFunctionData, extractChain, http, zeroAddress } from 'viem'
 import { z } from "zod";
 import { abi } from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
-import erc20 from "@/out/ERC20.sol/ERC20.json";
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
 
@@ -33,16 +32,30 @@ export async function POST(request: Request) {
         maxPriorityFeePerGas: z.coerce.bigint().optional(),
     }).parseAsync(body);
 
-    const totalGas = input.routes.reduce((acc, route) => acc +
-        route
-            .steps.map(step => {
-                const gas = step.estimate?.gasCosts?.reduce((acc, gas) => acc + (gas.limit && gas.price ? (BigInt(gas.limit ?? "0") * BigInt(gas.price ?? "0")) : BigInt(gas.amount ?? "0")), 0n) ?? 0n
+    const totalGas = input.routes.reduce((acc1, route) => {
+        const stepsCost = route.steps.map(step => {
 
-                const fees = step.estimate?.feeCosts?.reduce((acc, fee) => acc + (fee.token.address == zeroAddress ? BigInt(fee.amount ?? "0") : 0n), 0n) ?? 0n
-                return gas + fees
-            })
-            .reduce((acc, gas) => acc + gas, 0n)
-        , 0n)
+            const gasCost = step.estimate?.gasCosts?.reduce((acc2, gas) => {
+                const gasTotal = (gas.token.address == zeroAddress && gas.token.chainId == input.chainId)
+                    ? BigInt(gas.amount ?? "0")
+                    : 0n;
+                return acc2 + gasTotal;
+            }, 0n) ?? 0n;
+
+            const feeCost = step.estimate?.feeCosts?.reduce((acc3, fee) => {
+                const feeTotal = (fee.token.address == zeroAddress && fee.token.chainId == input.chainId)
+                    ? BigInt(fee.amount ?? "0")
+                    : 0n;
+                return acc3 + feeTotal;
+            }, 0n) ?? 0n;
+
+            return gasCost + feeCost;
+        });
+
+        const routeCost = stepsCost.reduce((acc4, cost) => acc4 + cost, 0n);
+        return acc1 + routeCost;
+
+    }, 0n);
 
     const client = createPublicClient({
         chain: extractChain({

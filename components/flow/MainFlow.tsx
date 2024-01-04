@@ -108,7 +108,7 @@ export function Flow() {
                     </defs>
                 </svg>
                 <Panel position="top-right">
-                    {validUntil && <Progress validUntil={validUntil} />}
+                    {validUntil && nodes.length > 0 && <Progress validUntil={validUntil} />}
                 </Panel>
 
                 {nodes.length == 0 && <Panel position="top-center">

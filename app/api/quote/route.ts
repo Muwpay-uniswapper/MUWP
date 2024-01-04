@@ -1,5 +1,5 @@
 import api, { advancedAPI } from "@/lib/front/data/api";
-import { Route, RouteOptions } from "@/lib/li.fi-ts";
+import { GasSuggestionResponse, Route, RouteOptions } from "@/lib/li.fi-ts";
 import { z } from 'zod';
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import { fromHex } from "viem";
@@ -97,11 +97,12 @@ export async function POST(request: Request) {
 
         const queries = input.inputTokens.map(async inToken => {
             let fromAmountForGas: string | undefined = undefined;
+            let gas: GasSuggestionResponse | undefined = undefined;
             if (input.inputChain !== input.outputChain) {
-                const gas = await api.gasSuggestionChainGet(input.outputChain.toString())
+                gas = await api.gasSuggestionChainGet(input.outputChain.toString())
                 fromAmountForGas = gas?.recommended?.amount
             }
-            return await advancedAPI.advancedRoutesPost({
+            let routes = await advancedAPI.advancedRoutesPost({
                 fromAmount: input.inputAmount[inToken.value]?.toString(),
                 fromChainId: input.inputChain,
                 fromTokenAddress: inToken.address,
@@ -111,7 +112,22 @@ export async function POST(request: Request) {
                 toAddress: input.toAddress ?? input.fromAddress,
                 fromAmountForGas,
                 options: input.options,
-            })
+            });
+            if (gas && gas.available === false) {
+                // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
+                routes.routes = routes.routes.filter(route => {
+                    const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
+                    if (chainChanges.length > 1) {
+                        return false;
+                    }
+                    const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
+                    if (stepsAfterChainChange.length > 0) {
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            return routes;
         })
 
         const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
