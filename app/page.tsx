@@ -1,8 +1,13 @@
 import { MainFlow } from "@/components/flow/MainFlow";
 import PreviewProcess from "@/components/preview/process";
 import PreviewSwap from "@/components/previewswap";
-import { SwapButton } from "@/components/swapbutton";
 import { SwapCard } from "@/components/swapcard";
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+	title: 'MUWP Pay - Universal Swapper',
+	description: 'MUWP Pay helps you swap multiple tokens across multiple chains, in a single transaction.'
+}
 
 export default function Home({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
 	const chain = typeof searchParams["chain"] === "string" ? searchParams["chain"] : "1";
