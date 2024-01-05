@@ -73,7 +73,13 @@ export function Review({
             headers: {
                 "Content-Type": "application/json"
             }
-        }).then((res) => res.json())
+        }).then(async (res) => {
+            const body = await res.json();
+            if (!res.ok) {
+                throw new Error(body?.message ?? "Unknown error");
+            }
+            return body
+        })
 
 
         const res = await new Promise((resolve, reject) => {
