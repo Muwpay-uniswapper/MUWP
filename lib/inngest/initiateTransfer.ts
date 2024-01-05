@@ -66,7 +66,7 @@ export const initiateTransfer = inngest.createFunction(
         await step.waitForEvent("wait-for-chain-to-confirm-transaction", {
             event: "app/chain.transaction.confirmed",
             match: "data.address", // the field "data.address" must match
-            timeout: "5min", // wait at most 5 min
+            timeout: "15min", // wait at most 15 min
         });
 
         await step.run("app/transfer.funds", async () => {
