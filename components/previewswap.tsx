@@ -61,7 +61,7 @@ export default function PreviewSwap() {
             </Tooltip>
             <Tooltip>
                 <TooltipTrigger className="flex flex-row gap-1 items-end h-8">
-                    <Clock className="inline w-6 h-6 mr-1" />
+                    <Clock className="inline w-6 h-6" />
                     <div className="flex flex-col items-start">
                         <div id="optimal-duration" className={cn("transition-all duration-700", duration != optimalDuration ? "text-xs opacity-50" : "")}>{optimalDuration > 0 ? `${Math.ceil(optimalDuration / 60)} min` : "N/A"}</div>
                         <div id="duration" className={cn("transition-all duration-700", duration != optimalDuration ? "h-6" : "opacity-0 h-0")}> {duration > 0 ? `${Math.ceil(duration / 60)} min` : "N/A"}</div>
@@ -73,7 +73,8 @@ export default function PreviewSwap() {
                 </TooltipContent>
             </Tooltip>
             <Tooltip>
-                <TooltipTrigger><Layers2 className="inline w-6 h-6 mr-1" /> {steps}</TooltipTrigger>
+                <TooltipTrigger className="flex flex-row gap-1 items-end h-8">
+                    <Layers2 className="inline w-6 h-6" /> {steps}</TooltipTrigger>
                 <TooltipContent>
                     Total number of steps for all routes
                 </TooltipContent>
