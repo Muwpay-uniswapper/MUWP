@@ -119,6 +119,7 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                     target: toNodeId,
                     data: {
                         label: step.tool,
+                        toolDetails: step.toolDetails
                     },
                 });
 
