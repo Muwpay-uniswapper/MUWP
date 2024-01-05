@@ -37,14 +37,14 @@ export async function POST(request: Request) {
 
             const gasCost = step.estimate?.gasCosts?.reduce((acc2, gas) => {
                 const gasTotal = (gas.token.address == zeroAddress && gas.token.chainId == input.chainId)
-                    ? BigInt(gas.amount ?? "0")
+                    ? ((BigInt(gas.amount ?? "0") * 12n) / 10n)
                     : 0n;
                 return acc2 + gasTotal;
             }, 0n) ?? 0n;
 
             const feeCost = step.estimate?.feeCosts?.reduce((acc3, fee) => {
                 const feeTotal = (fee.token.address == zeroAddress && fee.token.chainId == input.chainId)
-                    ? BigInt(fee.amount ?? "0")
+                    ? (BigInt(fee.amount ?? "0"))
                     : 0n;
                 return acc3 + feeTotal;
             }, 0n) ?? 0n;
@@ -54,7 +54,6 @@ export async function POST(request: Request) {
 
         const routeCost = stepsCost.reduce((acc4, cost) => acc4 + cost, 0n);
         return acc1 + routeCost;
-
     }, 0n);
 
     const client = createPublicClient({

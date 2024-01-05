@@ -28,7 +28,7 @@ export function Progress({ validUntil }: { validUntil: Date; }) {
 
     return <Tooltip>
         <TooltipTrigger className='flex flex-row items-center gap-1'>
-            <span className='tabular-nums'>{timeLeft}</span>
+            {totalDuration > 0 && <span className='tabular-nums'>{timeLeft}</span>}
             <svg
                 viewBox="0 0 100 100"
                 className="w-8 h-8"
