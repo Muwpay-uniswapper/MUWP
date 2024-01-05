@@ -123,7 +123,8 @@ export async function POST(request: Request) {
             }), {
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                status: 500
             })
         } else if (e instanceof BaseError) {
             return new Response(JSON.stringify({
@@ -132,7 +133,8 @@ export async function POST(request: Request) {
             }), {
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                status: 500
             })
         } else if (e instanceof Error) {
             console.log(e.message)

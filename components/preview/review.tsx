@@ -73,7 +73,7 @@ export function Review({
             headers: {
                 "Content-Type": "application/json"
             }
-        }).then((res) => res.json());
+        }).then((res) => res.json())
 
 
         const res = await new Promise((resolve, reject) => {
