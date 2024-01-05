@@ -22,7 +22,10 @@ const Data = z.object({
 });
 
 export const initiateTransfer = inngest.createFunction(
-    { id: "initiate-transfer", retries: 10 },
+    {
+        id: "initiate-transfer",
+        retries: 10
+    },
     { event: "app/account.created" },
     async ({ event, step }) => {
         const accountData = await z.object({
@@ -59,6 +62,12 @@ export const initiateTransfer = inngest.createFunction(
                 }
             })
         }
+
+        await step.waitForEvent("wait-for-chain-to-confirm-transaction", {
+            event: "app/chain.transaction.confirmed",
+            match: "data.address", // the field "data.address" must match
+            timeout: "5min", // wait at most 5 min
+        });
 
         await step.run("app/transfer.funds", async () => {
             const input = funds_transferred?.data

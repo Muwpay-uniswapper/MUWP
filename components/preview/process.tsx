@@ -71,6 +71,7 @@ export default function PreviewProcess() {
     React.useEffect(() => {
         if (status == Status.send && !hash) {
             router.push("/transactions");
+            window.location.href = "/transactions";
         }
     }, [status, hash])
 

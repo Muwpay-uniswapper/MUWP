@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         }).parse(body);
 
         await inngest.send({
-            name: "app/funds.transferred",
+            name: "app/chain.transaction.confirmed",
             data: {
                 transactionHash: input.transactionHash,
                 chainId: input.chainId,
