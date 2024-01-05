@@ -7,6 +7,7 @@ import { Clock, DollarSign, Fuel, Layers2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Route } from "@/lib/li.fi-ts";
 import { Badge } from "./ui/badge";
+import { cn } from "@/lib/front/utils";
 
 function calcStats(routes: Route[]) {
     const gasFees = routes.map((route) => Number(route.gasCostUSD)).reduce((a, b) => a + b, 0);
@@ -33,26 +34,38 @@ export default function PreviewSwap() {
     return <Card className="w-full mt-4">
         <CardContent className="flex flex-row justify-between items-center pt-6">
             <Tooltip>
-                <TooltipTrigger>
-                    <Fuel className="inline w-6 h-6 mr-1" /> {gasFees.toFixed(2)}$
-                    {gasFees != optimalGasFees && <Badge className="ml-1" variant={gasFees > optimalGasFees ? "destructive" : "default"}>{gasFees > optimalGasFees ? "+" : ""}{((gasFees / optimalGasFees - 1) * 100).toFixed(2)}%</Badge>}
+                <TooltipTrigger className="flex flex-row gap-1 items-end h-8">
+                    <Fuel className="inline w-6 h-6" />
+                    <div className="flex flex-col items-start">
+                        <div id="optimal-gas" className={cn("transition-all duration-700", gasFees != optimalGasFees ? "text-xs opacity-50" : "")}>{optimalGasFees.toFixed(2)}$</div>
+                        <div id="gas" className={cn("transition-all duration-700", gasFees != optimalGasFees ? "h-6" : "opacity-0 h-0")}> {gasFees.toFixed(2)}$</div>
+                    </div>
+                    {gasFees != optimalGasFees && <Badge variant={gasFees > optimalGasFees ? "destructive" : "default"}>{gasFees > optimalGasFees ? "+" : ""}{((gasFees / optimalGasFees - 1) * 100).toFixed(2)}%</Badge>}
                 </TooltipTrigger>
                 <TooltipContent>
                     Total gas fees for all routes
                 </TooltipContent>
             </Tooltip>
             <Tooltip>
-                <TooltipTrigger>
-                    <DollarSign className="inline w-6 h-6 mr-1" /> {feeCosts.toFixed(2)}$
-                    {feeCosts != optimalFeeCosts && <Badge className="ml-1" variant={feeCosts > optimalFeeCosts ? "destructive" : "default"}>{feeCosts > optimalFeeCosts ? "+" : ""}{((feeCosts / optimalFeeCosts - 1) * 100).toFixed(2)}%</Badge>}
+                <TooltipTrigger className="flex flex-row gap-1 items-end h-8">
+                    <DollarSign className="inline w-6 h-6" />
+                    <div className="flex flex-col items-start">
+                        <div id="optimal-fees" className={cn("transition-all duration-700", feeCosts != optimalFeeCosts ? "text-xs opacity-50" : "")}>{optimalFeeCosts.toFixed(2)}$</div>
+                        <div id="fees" className={cn("transition-all duration-700", feeCosts != optimalFeeCosts ? "h-6" : "opacity-0 h-0")}> {feeCosts.toFixed(2)}$</div>
+                    </div>
+                    {feeCosts != optimalFeeCosts && <Badge variant={feeCosts > optimalFeeCosts ? "destructive" : "default"}>{feeCosts > optimalFeeCosts ? "+" : ""}{((feeCosts / optimalFeeCosts - 1) * 100).toFixed(2)}%</Badge>}
                 </TooltipTrigger>
                 <TooltipContent>
                     Total fees for all routes
                 </TooltipContent>
             </Tooltip>
             <Tooltip>
-                <TooltipTrigger>
-                    <Clock className="inline w-6 h-6 mr-1" /> {Math.ceil(duration / 60)} min
+                <TooltipTrigger className="flex flex-row gap-1 items-end h-8">
+                    <Clock className="inline w-6 h-6 mr-1" />
+                    <div className="flex flex-col items-start">
+                        <div id="optimal-duration" className={cn("transition-all duration-700", duration != optimalDuration ? "text-xs opacity-50" : "")}>{optimalDuration > 0 ? `${Math.ceil(optimalDuration / 60)} min` : "N/A"}</div>
+                        <div id="duration" className={cn("transition-all duration-700", duration != optimalDuration ? "h-6" : "opacity-0 h-0")}> {duration > 0 ? `${Math.ceil(duration / 60)} min` : "N/A"}</div>
+                    </div>
                     {duration != optimalDuration && <Badge className="ml-1" variant={duration > optimalDuration ? "destructive" : "default"}>{duration > optimalDuration ? "+" : ""}{((duration / optimalDuration - 1) * 100).toFixed(2)}%</Badge>}
                 </TooltipTrigger>
                 <TooltipContent>

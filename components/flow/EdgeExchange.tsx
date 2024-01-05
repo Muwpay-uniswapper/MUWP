@@ -2,8 +2,9 @@ import React, { FC } from 'react';
 import { EdgeProps, getSmoothStepPath, EdgeLabelRenderer, useReactFlow, getBezierPath } from 'reactflow';
 import { GradientIdContext } from './provider';
 import { UnfoldHorizontal } from 'lucide-react';
+import { ToolDetails } from '@/lib/li.fi-ts/models/ToolDetails';
 
-const EdgeExchange: FC<EdgeProps> = ({
+const EdgeExchange: FC<EdgeProps & { data: { label: string, toolDetails: ToolDetails } }> = ({
     id,
     style,
     sourceX,
@@ -57,7 +58,8 @@ const EdgeExchange: FC<EdgeProps> = ({
                     className="nodrag nopan react-flow__controls cursor-pointer"
                     onClick={focus}
                 >
-                    {data.label}{getNode(source)?.data.chainId !== getNode(target)?.data.chainId && <UnfoldHorizontal className='inline ml-1' />}
+                    <img src={(data.toolDetails as ToolDetails).logoURI} className='inline w-4 h-4 mr-1' />
+                    {data.toolDetails.name}{getNode(source)?.data.chainId !== getNode(target)?.data.chainId && <UnfoldHorizontal className='inline ml-1' />}
                 </div>
             </EdgeLabelRenderer>
         </>
