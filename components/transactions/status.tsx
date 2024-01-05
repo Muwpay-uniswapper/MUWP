@@ -3,7 +3,6 @@ import { Row } from "@tanstack/react-table"
 import { Route } from "@/lib/li.fi-ts";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { AlertTriangle, LoaderIcon } from "lucide-react";
-import { Separator } from "../ui/separator";
 
 export default function Status({ row }: { row: Row<Transaction> }) {
     const routes = row.getValue("routes") as Route[]
@@ -17,9 +16,9 @@ export default function Status({ row }: { row: Row<Transaction> }) {
         <TooltipTrigger>
             <div className={`capitalize relative ${row.getValue("status")}`}>
                 {
-                    diff > 2 * duration && (row.original.status ?? 0) < routes.length && <AlertTriangle className="w-4 h-4 inline absolute -left-5" />
+                    (diff > (2 * duration)) && (row.original.status ?? 0) < routes.length && <AlertTriangle className="w-4 h-4 inline absolute -left-5" />
                 }
-                {(row.original.status ?? 0) < routes.length && diff <= 2 * duration &&
+                {(row.original.status ?? 0) < routes.length && diff <= (2 * duration) &&
                     <LoaderIcon className="animate-spin w-4 h-4 inline absolute -left-5" />
                 }
                 {row.original.status ?? 0} / {routes.length}
@@ -27,7 +26,7 @@ export default function Status({ row }: { row: Row<Transaction> }) {
         </TooltipTrigger>
         <TooltipContent>
             <p className="text-sm max-w-sm">
-                This transaction has {routes.length} steps. {(row.original.status ?? 0) < routes.length && diff <= 2 * duration ? <span>Some of them are still pending...</span> : <span>If this is taking too long (way more than expected), you can recover your funds or contact support.</span>}
+                This transaction has {routes.length} steps. {(row.original.status ?? 0) < routes.length && diff <= (2 * duration) ? <span>Some of them are still pending...</span> : <span>If this is taking too long (way more than expected), you can recover your funds or contact support.</span>}
             </p>
         </TooltipContent>
     </Tooltip>
