@@ -1,8 +1,6 @@
 import { useRouteStore } from "@/lib/front/data/routeStore";
 import { Send } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React from "react";
-import { toast } from "sonner";
 import { useNetwork, useWaitForTransaction } from "wagmi";
 import { NextStep } from "./process";
 
@@ -15,12 +13,32 @@ export function PreviewSend({
     setHash: (hash: string | undefined) => void,
     nextStep: NextStep
 }) {
+    const { tempAccount } = useRouteStore();
+    const { chain } = useNetwork();
     const { isError, isLoading, error, isSuccess } = useWaitForTransaction({ hash });
 
     React.useEffect(() => {
         if (!isError && !isLoading && isSuccess) {
-            setHash(undefined);
-            nextStep();
+            (async () => {
+                const notifyBackend = await fetch("/api/chain-confirmed", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        chainId: chain?.id,
+                        transactionHash: hash,
+                        accountAddress: tempAccount
+                    }),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then((res) => res.json());
+
+                console.log(`Backend notified: ${notifyBackend.status}`)
+
+                if ((notifyBackend as any).status === "success") {
+                    setHash(undefined);
+                    nextStep();
+                }
+            })()
         }
     }, [isError, isLoading, error, isSuccess])
 
