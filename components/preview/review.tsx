@@ -76,7 +76,7 @@ export function Review({
         }).then(async (res) => {
             const body = await res.json();
             if (!res.ok) {
-                throw new Error(body?.message ?? "Unknown error");
+                throw new Error(body?.error ?? "Unknown error");
             }
             return body
         })
@@ -94,7 +94,7 @@ export function Review({
                     setIsSending(false);
                     return <>
                         <b>Could not load transaction data</b>
-                        {e instanceof Error && e.message}
+                        {e instanceof Error && e.message.split("\n")[0]}
                     </>
                 }
             });
