@@ -143,16 +143,16 @@ export async function POST(request: Request) {
 
             if (matches && matches.length > 1) {
                 const bodyContent = JSON.parse(matches[1].replace(/\\/g, ''));
-                return new Response(JSON.stringify({ message: bodyContent.message }), {
+                return new Response(JSON.stringify({ error: bodyContent.message }), {
                     status: 500
                 })
             } else {
-                return new Response(JSON.stringify({ message: e.message }), {
+                return new Response(JSON.stringify({ error: e.message }), {
                     status: 500
                 })
             }
         }
-        return new Response(JSON.stringify({ message: "Unexpected error" }), {
+        return new Response(JSON.stringify({ error: "Unexpected error" }), {
             status: 500
         })
     }
