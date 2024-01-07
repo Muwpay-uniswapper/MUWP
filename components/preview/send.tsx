@@ -13,7 +13,7 @@ export function PreviewSend({
     setHash: (hash: string | undefined) => void,
     nextStep: NextStep
 }) {
-    const { tempAccount } = useRouteStore();
+    const { tempAccount, transactions, setTransaction } = useRouteStore();
     const { chain } = useNetwork();
     const { isError, isLoading, error, isSuccess } = useWaitForTransaction({ hash });
 
@@ -35,6 +35,14 @@ export function PreviewSend({
                 console.log(`Backend notified: ${notifyBackend.status}`)
 
                 if ((notifyBackend as any).status === "success") {
+                    const tx = transactions.find((transaction) => transaction.id == tempAccount);
+                    if (tx) {
+                        setTransaction({
+                            ...tx,
+                            timestamp: Date.now(), // Reset date
+                        })
+                    }
+
                     setHash(undefined);
                     nextStep();
                 }
