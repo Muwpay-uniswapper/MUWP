@@ -37,10 +37,21 @@ export async function POST(request: Request) {
             const stepsCost = route.steps.map(step => {
 
                 const gasCost = step.estimate?.gasCosts?.reduce((acc2, gas) => {
-                    const gasTotal = (gas.token.address == zeroAddress && gas.token.chainId == input.chainId)
-                        ? ((BigInt(gas.amount ?? "0") * 12n) / 10n)
-                        : 0n;
-                    return acc2 + gasTotal;
+                    if (gas.token.address == zeroAddress && gas.token.chainId == input.chainId) {
+                        const gasAmount = BigInt(gas.amount ?? "0");
+                        const gasLimitTimesPrice = BigInt(gas.limit ?? "0") * BigInt(gas.price ?? "0");
+
+                        // Check if limit * price is bounded by 10 * amount
+                        if (gasLimitTimesPrice >= gasAmount && gasLimitTimesPrice <= 10n * gasAmount) {
+                            // If it's the case, take the biggest
+                            const max = gasLimitTimesPrice > gasAmount ? gasLimitTimesPrice : gasAmount;
+                            return acc2 + max;
+                        } else {
+                            return acc2 + gasAmount;
+                        }
+                    } else {
+                        return acc2;
+                    }
                 }, 0n) ?? 0n;
 
                 const feeCost = step.estimate?.feeCosts?.reduce((acc3, fee) => {
