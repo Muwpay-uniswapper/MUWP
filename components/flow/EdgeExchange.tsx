@@ -4,7 +4,7 @@ import { GradientIdContext } from './provider';
 import { UnfoldHorizontal } from 'lucide-react';
 import { ToolDetails } from '@/lib/li.fi-ts/models/ToolDetails';
 
-const EdgeExchange: FC<EdgeProps & { data: { label: string, toolDetails: ToolDetails } }> = ({
+const EdgeExchange: FC<EdgeProps> = ({
     id,
     style,
     sourceX,
