@@ -5,6 +5,7 @@ import { Chain, Token } from "@/lib/front/model/CellLike";
 import { ChainCombobox } from "@/components/chains/chain-selector";
 import api from "@/lib/front/data/api"
 import { unstable_noStore } from "next/cache";
+import { TokensGet200Response } from "@/lib/li.fi-ts";
 
 export async function TokenSelector({
     id,
@@ -19,8 +20,13 @@ export async function TokenSelector({
     if (typeof chain === "undefined") {
         chain = 1
     }
-
-    const tokens = await api.tokensGet(chain.toString())
+    let tokens: TokensGet200Response
+    try {
+        tokens = await api.tokensGet(chain.toString())
+    } catch (e) {
+        console.log(e)
+        tokens = new TokensGet200Response()
+    }
 
     const tokenList: Token[] = tokens.tokens?.map((token) => {
         return {
