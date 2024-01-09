@@ -4,7 +4,7 @@ import * as store from "@/lib/kv/store";
 import { Step } from "../li.fi-ts";
 import { publicClient } from "@/app/providers";
 import { advancedAPI } from "../front/data/api";
-import { HDAccount, HttpTransport, PublicClient, createPublicClient, createWalletClient, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
+import { HDAccount, HttpTransport, PublicClient, TransactionExecutionError, createPublicClient, createWalletClient, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
 import { WalletClient } from "wagmi";
@@ -125,15 +125,30 @@ export const consumeStep = inngest.createFunction(
 
             console.log("Sending transaction", transactionRequest)
 
-            const hash = await walletClient.sendTransaction({
-                data: transactionRequest.data as `0x${string}`,
-                to: transactionRequest.to as `0x${string}`,
-                value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
-                gas: fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint"),
-                gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
-            })
+            try {
+                const hash = await walletClient.sendTransaction({
+                    data: transactionRequest.data as `0x${string}`,
+                    to: transactionRequest.to as `0x${string}`,
+                    value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
+                    gas: fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint"),
+                    gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
+                })
 
-            return { hash, chainId: transactionRequest.chainId }
+                return { hash, chainId: transactionRequest.chainId }
+            } catch (e) {
+                if (e instanceof TransactionExecutionError) {
+                    const _stored = await store.get(address) as string | object | undefined;
+                    const stored = typeof _stored === "string" ? JSON.parse(_stored) : _stored;
+                    await store.set(address, JSON.stringify({
+                        ...stored,
+                        failed: true,
+                        errors: {
+                            ...stored?.errors,
+                            [_step.id]: e.shortMessage,
+                        }
+                    }))
+                }
+            }
         })
         await step.waitForEvent(`transaction-${hash}`, {
             event: "app/transaction.executed",
@@ -152,6 +167,16 @@ export const consumeStep = inngest.createFunction(
             })
             const tx = await client.getTransactionReceipt({ hash })
             if (tx.status !== "success") {
+                const _stored = await store.get(address) as string | object | undefined;
+                const stored = typeof _stored === "string" ? JSON.parse(_stored) : _stored;
+                await store.set(address, JSON.stringify({
+                    ...stored,
+                    failed: true,
+                    errors: {
+                        ...stored?.errors,
+                        [_step.id]: `Transaction reverted: ${hash}`,
+                    }
+                }))
                 throw new Error("Transaction failed")
             }
         })

@@ -134,7 +134,10 @@ export function Review({
                 routes,
                 timestamp: Date.now(),
                 id: address,
-                status: 0,
+                status: {
+                    completed: 0,
+                    errors: {}
+                },
             })
 
             console.log(`Transaction sent: ${_hash}`);

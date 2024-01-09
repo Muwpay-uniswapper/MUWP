@@ -10,7 +10,12 @@ export type Transaction = {
     routes: Route[];
     id: string;
     timestamp: number;
-    status: number;
+    status: {
+        completed: number;
+        errors?: {
+            [key: string]: string;
+        }
+    }
 };
 
 type RouteStore = {
