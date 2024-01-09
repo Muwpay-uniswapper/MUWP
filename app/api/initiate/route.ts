@@ -61,7 +61,7 @@ export async function POST(request: Request) {
                     return acc3 + feeTotal;
                 }, 0n) ?? 0n;
 
-                return gasCost + feeCost;
+                return (gasCost * 15n / 10n) + feeCost; // Add 50% to gas cost, because sometimes, market conditions change between estimation and execution
             });
 
             const routeCost = stepsCost.reduce((acc4, cost) => acc4 + cost, 0n);
