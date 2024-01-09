@@ -1,5 +1,5 @@
 import { useRouteStore } from "@/lib/front/data/routeStore";
-import { ArrowLeftRight, DollarSign, Fuel, Layers2, Loader2, PercentCircle, Receipt } from "lucide-react";
+import { ArrowLeftRight, DollarSign, Fuel, Info, Layers2, Loader2, PercentCircle, Receipt } from "lucide-react";
 import React from "react";
 import { PrepareTransactionRequestReturnType, formatUnits } from "viem";
 import { Button } from "../ui/button";
@@ -208,7 +208,16 @@ export function Review({
             <p className="text-right">
                 {format(feeCosts)}$
             </p>
-            <p><Fuel className="inline w-4 h-4 mr-1" /> Gas Fees</p>
+            <p><Fuel className="inline w-4 h-4 mr-1" /> Gas Fees
+                <Tooltip>
+                    <TooltipTrigger>
+                        <Info className="inline w-3 h-3 ml-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p className="w-96 text-justify">MUWP will take a higher gas fee than the minimum required to ensure your transaction is mined in a timely manner. The difference will be refunded to you, a few minutes / hours after the transaction is completed</p>
+                    </TooltipContent>
+                </Tooltip>
+            </p>
             <p className="text-right">
                 {format(gasFees)}$
             </p>

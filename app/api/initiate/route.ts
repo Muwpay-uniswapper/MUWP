@@ -33,41 +33,6 @@ export async function POST(request: Request) {
             maxPriorityFeePerGas: z.coerce.bigint().optional(),
         }).parseAsync(body);
 
-        const totalGas = input.routes.reduce((acc1, route) => {
-            const stepsCost = route.steps.map(step => {
-
-                const gasCost = step.estimate?.gasCosts?.reduce((acc2, gas) => {
-                    if (gas.token.address == zeroAddress && gas.token.chainId == input.chainId) {
-                        const gasAmount = BigInt(gas.amount ?? "0");
-                        const gasLimitTimesPrice = BigInt(gas.limit ?? "0") * BigInt(gas.price ?? "0");
-
-                        // Check if limit * price is bounded by 10 * amount
-                        if (gasLimitTimesPrice >= gasAmount && gasLimitTimesPrice <= 10n * gasAmount) {
-                            // If it's the case, take the biggest
-                            const max = gasLimitTimesPrice > gasAmount ? gasLimitTimesPrice : gasAmount;
-                            return acc2 + max;
-                        } else {
-                            return acc2 + gasAmount;
-                        }
-                    } else {
-                        return acc2;
-                    }
-                }, 0n) ?? 0n;
-
-                const feeCost = step.estimate?.feeCosts?.reduce((acc3, fee) => {
-                    const feeTotal = (fee.token.address == zeroAddress && fee.token.chainId == input.chainId)
-                        ? (BigInt(fee.amount ?? "0"))
-                        : 0n;
-                    return acc3 + feeTotal;
-                }, 0n) ?? 0n;
-
-                return (gasCost * 15n / 10n) + feeCost; // Add 50% to gas cost, because sometimes, market conditions change between estimation and execution
-            });
-
-            const routeCost = stepsCost.reduce((acc4, cost) => acc4 + cost, 0n);
-            return acc1 + routeCost;
-        }, 0n);
-
         const client = createPublicClient({
             chain: extractChain({
                 chains: Object.values(chains),
@@ -75,6 +40,50 @@ export async function POST(request: Request) {
             }),
             transport: http()
         })
+
+        const totalGas = (await Promise.all(input.routes.map(async route => {
+            const stepsCost = await Promise.all(route.steps.map(async step => {
+                let gasCost = await step.estimate?.gasCosts?.reduce(async (acc2, gas) => {
+                    if (gas.token.address == zeroAddress && gas.token.chainId == input.chainId) {
+                        const gasAmount = BigInt(gas.amount ?? "0");
+
+                        // Fetch gas price dynamically
+                        const _gasPrice = await client.getGasPrice();
+                        const gasPrice = _gasPrice > BigInt(gas.price ?? "0") ? _gasPrice : BigInt(gas.price ?? "0");
+                        console.log(`Provided gas price: ${gas.price}, dynamic gas price: ${_gasPrice}, chosen gas price: ${gasPrice}`);
+                        const gasLimit = BigInt(gas.limit ?? "0") * gasPrice;
+
+                        // Check if limit * price is bounded by 10 * amount
+                        if (gasLimit >= gasAmount && gasLimit <= 10n * gasAmount) {
+                            // If it's the case, take the biggest
+                            const max = gasLimit > gasAmount ? gasLimit : gasAmount;
+                            return (await acc2) + max;
+                        } else {
+                            return (await acc2) + gasAmount;
+                        }
+                    } else {
+                        return await acc2;
+                    }
+                }, Promise.resolve(0n)) ?? 0n;
+
+                const feeCost = await step.estimate?.feeCosts?.reduce(async (acc3, fee) => {
+                    const feeTotal = (fee.token.address == zeroAddress && fee.token.chainId == input.chainId)
+                        ? (BigInt(fee.amount ?? "0"))
+                        : 0n;
+                    return (await acc3) + feeTotal;
+                }, Promise.resolve(0n)) ?? 0n;
+
+                const chain = muwpChains.find(chain => chain.id === step.action.fromToken.chainId)
+                const mul: number = typeof chain?.fees?.baseFeeMultiplier == "number" ? chain?.fees?.baseFeeMultiplier : 1.5;
+
+                gasCost = gasCost * BigInt(mul * 1000) / 1000n;
+                return 2n * gasCost + feeCost;
+            }));
+
+            const routeCost = stepsCost.reduce((acc4, cost) => acc4 + cost, 0n);
+            return routeCost;
+        }))).reduce((acc1, cost) => acc1 + cost, 0n);
+
         /*
         function transfer(
         address[] memory tokens,
