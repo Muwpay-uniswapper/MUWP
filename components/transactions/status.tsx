@@ -25,7 +25,7 @@ export default function Status({ row }: { row: Row<Transaction> }) {
             </div>
         </TooltipTrigger>
         <TooltipContent>
-            <p className="text-sm max-w-sm">
+            {(row.original.status.completed ?? 0) != routes.length ? <p className="text-sm max-w-sm">
                 This transaction has {routes.length} steps. {(row.original.status.completed ?? 0) < routes.length && diff <= (2 * duration) ? <span>Some of them are still pending...</span> : <span>If this is taking too long (way more than expected, it should have ended {
                     `${Math.round((diff - (2 * duration)) / 60000)} minutes`
                 } ago), you can recover your funds or contact support.</span>}
@@ -37,7 +37,9 @@ export default function Status({ row }: { row: Row<Transaction> }) {
                         </ul>
                     </span>
                 }
-            </p>
+            </p> : <p className="text-sm max-w-sm">
+                This transaction had {routes.length} steps.
+            </p>}
         </TooltipContent>
     </Tooltip>
 }

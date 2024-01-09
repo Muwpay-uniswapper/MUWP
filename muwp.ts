@@ -34,7 +34,7 @@ export const muwpChains: MUWPChain[] = [
     { ...bsc, muwpContract: "0x7031700988931E274B92a084066CbF8f4c62b23b" },
     { ...zkSync, muwpContract: "0x" },
     { ...polygonZkEvm, muwpContract: "0x" },
-    { ...base, muwpContract: "0x" },
+    { ...base, muwpContract: "0x7031700988931E274B92a084066CbF8f4c62b23b" },
     { ...avalanche, muwpContract: "0x7031700988931E274B92a084066CbF8f4c62b23b" },
     { ...linea, muwpContract: "0x" },
     { ...gnosis, muwpContract: "0x" },
