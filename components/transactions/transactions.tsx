@@ -24,9 +24,9 @@ export default function Transactions() {
         for (let i = 0; i < transactions.length; i++) {
             const transaction = transactions[i];
             const l = data ? typeof data[transaction.id] == "string" ? 0 : data[transaction.id] as any : 0
-            if (data && data[transaction.id]) {
+            if (data && data[transaction.id] && (typeof l == "number" || typeof l == "object")) {
                 _txn[i].status = {
-                    completed: typeof l == "number" ? l : l.completed.length,
+                    completed: typeof l == "number" ? l : l.completed?.length,
                     errors: typeof l == "number" ? undefined : l.errors,
                 }
             }
