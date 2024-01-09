@@ -26,7 +26,7 @@ export type NextStep = (opt?: any) => void;
 
 export default function PreviewProcess() {
     const [status, setStatus] = useState<Status>(Status.approvals)
-    const { getRoutes, routes: _route, clear } = useRouteStore();
+    const { getRoutes, routes: _route, clear, chosenIndex } = useRouteStore();
     const { clearSwaps } = useSwapStore();
     const [needsApproval, setNeedApprovals] = useState(true);
     const { data: walletClient } = useWalletClient()
@@ -53,6 +53,8 @@ export default function PreviewProcess() {
                     console.error(e);
                 }
 
+                console.log(allowance)
+
                 const amount = BigInt(route.steps[0].action.fromAmount)
 
                 if (allowance < amount) {
@@ -62,7 +64,7 @@ export default function PreviewProcess() {
             }
             setNeedApprovals(false);
         })()
-    }, [_route])
+    }, [getRoutes()[0]?.id]);
 
     const [isSending, setIsSending] = useState(false);
     const [hash, setHash] = useState<string | undefined>();

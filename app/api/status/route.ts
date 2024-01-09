@@ -18,15 +18,21 @@ export async function POST(request: Request) {
     } = {};
 
     for (const address of input) {
-        const accountInfo = await store.get(address) as string | object | null;
-        const completed: [string] | null = typeof accountInfo === "string" ? JSON.parse(accountInfo).completed
-            : typeof accountInfo === "object" ? (accountInfo as any).completed
-                : null;
+        try {
+            const accountInfo = await store.get(address) as string | object | null;
+            const completed: any | null = typeof accountInfo === "string" ? JSON.parse(accountInfo)
+                : typeof accountInfo === "object" ? (accountInfo as any)
+                    : null;
 
-        if (!completed) {
-            response[address] = 'Account not found';
-        } else {
-            response[address] = completed;
+            if (!completed) {
+                response[address] = 'Account not found';
+            } else {
+                response[address] = completed
+            }
+        } catch (e) {
+            if (e instanceof Error) {
+                response[address] = e.message
+            }
         }
     }
 
