@@ -148,6 +148,7 @@ export const consumeStep = inngest.createFunction(
                         }
                     }))
                 }
+                throw e;
             }
         })
         await step.waitForEvent(`transaction-${hash}`, {

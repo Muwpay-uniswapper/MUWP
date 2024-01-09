@@ -3,9 +3,8 @@ import * as React from "react"
 import { TokenCombobox, TokenComboboxes } from "@/components/tokens/token_combobox";
 import { Chain, Token } from "@/lib/front/model/CellLike";
 import { ChainCombobox } from "@/components/chains/chain-selector";
-import { ChainComboboxDelegate, TokenComboboxDelegate } from "@/lib/front/data/delegate/ComboboxDelegate";
 import api from "@/lib/front/data/api"
-import { muwpChains } from "@/muwp";
+import { unstable_noStore } from "next/cache";
 
 export async function TokenSelector({
     id,
@@ -16,6 +15,7 @@ export async function TokenSelector({
     chain?: number,
     mode: "input" | "output"
 }) {
+    // unstable_noStore()
     if (typeof chain === "undefined") {
         chain = 1
     }
@@ -46,6 +46,7 @@ export async function ChainSelector({
 }: {
     mode: "input" | "output"
 }) {
+    // unstable_noStore()
     const chains = await api.chainsGet()
 
     const chainList: Chain[] = chains.chains?.filter((chain) => {

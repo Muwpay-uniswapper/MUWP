@@ -42,9 +42,9 @@ export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string 
                 <Suspense fallback={<Loader />}>
                     <ChainSelector mode="output" />
                 </Suspense>
-                <Suspense fallback={<Loader />}>
+                {toChain && <Suspense fallback={<Loader />}>
                     <TokenSelector id='to-token' chain={toChain ? parseInt(toChain) : undefined} mode="output" />
-                </Suspense>
+                </Suspense>}
             </div>
             <FindRoutesButton />
         </CardContent>

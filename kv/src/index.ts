@@ -1,3 +1,4 @@
+import { KVNamespace, ExecutionContext } from '@cloudflare/workers-types';
 /**
  * Welcome to Cloudflare Workers! This is your first worker.
  *

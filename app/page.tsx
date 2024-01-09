@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Home({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
 	const chain = typeof searchParams["chain"] === "string" ? searchParams["chain"] : "1";
-	const toChain = typeof searchParams["toChain"] === "string" ? searchParams["toChain"] : chain;
+	const toChain = searchParams["toChain"] as string | undefined;
 	return (
 		<main className="flex flex-col items-center py-2 mt-8">
 			<div className="flex flex-col md:flex-row gap-2 max-w-screen-xl w-full mx-4">
