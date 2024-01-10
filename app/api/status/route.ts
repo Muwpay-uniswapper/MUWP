@@ -14,7 +14,10 @@ export async function POST(request: Request) {
     const input = await Address.parseAsync(body);
 
     const response: {
-        [key: string]: string | [string]
+        [key: string]: string | {
+            completed: string[],
+            errors: string[],
+        }
     } = {};
 
     for (const address of input) {
@@ -27,7 +30,10 @@ export async function POST(request: Request) {
             if (!completed) {
                 response[address] = 'Account not found';
             } else {
-                response[address] = completed
+                response[address] = {
+                    completed: Array.from(new Set(completed.completed)),
+                    errors: completed.errors,
+                }
             }
         } catch (e) {
             if (e instanceof Error) {
