@@ -41,10 +41,12 @@ export const consumeStep = inngest.createFunction(
     },
     { event: "app/consume.steps" },
     async ({ event, step }) => {
-        const { remainingSteps, address } = await z.object({
+        const { remainingSteps, address, id, originalChainId, totalRoutes } = await z.object({
             address: Address,
             remainingSteps: z.array(Step.zod),
+            totalRoutes: z.number().int(),
             id: z.string().optional(),
+            originalChainId: z.number().int(),
         }).parseAsync(event.data);
 
         if (remainingSteps.length === 0) return; // Should not happen, but just in case
@@ -190,6 +192,9 @@ export const consumeStep = inngest.createFunction(
                 data: {
                     address,
                     remainingSteps: _remainingSteps,
+                    totalRoutes,
+                    id,
+                    originalChainId,
                 }
             })
         }
@@ -209,6 +214,20 @@ export const consumeStep = inngest.createFunction(
                 ...info,
                 completed,
             }));
+
+            // Check if all routes are completed
+            if (completed.length === event.data.totalRoutes) {
+                const { walletClient, publicClient } = await getWallet(address, originalChainId);
+                // Send native funds back to user
+                const balance = await publicClient.getBalance({ address: walletClient.account.address })
+                const gas = await publicClient.getGasPrice()
+                const hash = await walletClient.sendTransaction({
+                    to: _step.action.toAddress as `0x${string}`,
+                    value: balance - gas * BigInt(21000),
+                })
+
+                console.log("Sending native funds back to user", hash)
+            }
         })
     },
 );

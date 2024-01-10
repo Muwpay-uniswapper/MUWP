@@ -93,7 +93,9 @@ export const initiateTransfer = inngest.createFunction(
             data: {
                 address: data.address,
                 remainingSteps: route.steps,
+                totalRoutes: data.routes.length,
                 id: route.id,
+                originalChainId: route.steps[0].action.fromChainId,
             }
         })))
     });
