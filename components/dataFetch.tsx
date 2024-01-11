@@ -6,6 +6,7 @@ import { ChainCombobox } from "@/components/chains/chain-selector";
 import api from "@/lib/front/data/api"
 import { unstable_noStore } from "next/cache";
 import { TokensGet200Response } from "@/lib/li.fi-ts";
+import { muwpChains } from "@/muwp";
 
 export async function TokenSelector({
     id,
@@ -56,8 +57,10 @@ export async function ChainSelector({
     const chains = await api.chainsGet()
 
     const chainList: Chain[] = chains.chains?.filter((chain) => {
-        // const muwpChain = muwpChains.find((muwpChain) => muwpChain.id == chain.id)
-        // return muwpChain?.muwpContract != "0x" && muwpChain != undefined
+        if (mode == "input") {
+            const muwpChain = muwpChains.find((muwpChain) => muwpChain.id == chain.id)
+            return muwpChain?.muwpContract != "0x" && muwpChain != undefined
+        }
         return true
     })
         .map((chain) => {
