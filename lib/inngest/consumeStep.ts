@@ -199,7 +199,7 @@ export const consumeStep = inngest.createFunction(
             })
         }
 
-        return await step.run("route-completed", async () => {
+        await step.run("route-completed", async () => {
             const accountInfo = await store.get(address) as string | object | undefined;
             const info = typeof accountInfo === "string" ? JSON.parse(accountInfo) : accountInfo;
 
