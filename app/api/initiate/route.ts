@@ -105,14 +105,19 @@ export async function POST(request: Request) {
 
         const chain = muwpChains.find(chain => chain.id === input.chainId)
 
+        const {
+            maxFeePerGas,
+            maxPriorityFeePerGas
+        } = await client.estimateFeesPerGas()
+
         const txn = await client.prepareTransactionRequest({
             account: input.from as `0x${string}`,
             to: chain?.muwpContract,
             value: totalGas + input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n),
             data,
             chain: client.chain,
-            maxFeePerGas: input.maxFeePerGas,
-            maxPriorityFeePerGas: input.maxPriorityFeePerGas,
+            maxFeePerGas,
+            maxPriorityFeePerGas,
         })
 
         const _id = await inngest.send({
