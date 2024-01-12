@@ -19,7 +19,7 @@ export async function set(key: string, value: string) {
     const url = process.env.KV_WORKER_URL?.trim() as string;
     const secret = process.env.KV_SECRET?.trim() as string;
 
-    await fetch(`${url}/${key}`, {
+    return await fetch(`${url}/${key}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -27,6 +27,12 @@ export async function set(key: string, value: string) {
         },
         body: value,
     })
+        .then(res => {
+            if (res.status !== 200) {
+                throw new Error("Key not found");
+            }
+            return res.text();
+        })
 }
 
 export async function get(key: string) {
