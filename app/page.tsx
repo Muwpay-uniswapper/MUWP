@@ -5,8 +5,8 @@ import { SwapCard } from "@/components/swapcard";
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-	title: 'MUWP Pay - Universal Swapper',
-	description: 'MUWP Pay helps you swap multiple tokens across multiple chains, in a single transaction.'
+	title: 'MUWPay - Universal Swapper',
+	description: 'MUWPay helps you swap multiple tokens across multiple chains, in a single transaction.'
 }
 
 export default function Home({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
