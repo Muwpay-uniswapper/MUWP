@@ -5,7 +5,7 @@ import { cn } from '@/lib/front/utils'
 import { Viewport, Metadata } from 'next'
 import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
-import { VercelToolbar } from '@vercel/toolbar/next';
+// import { VercelToolbar } from '@vercel/toolbar/next';
 import { Suspense } from "react";
 import Footer from '@/components/layout/footer'
 import NextNProgressClient from './progress'
@@ -34,9 +34,9 @@ export default function RootLayout({
 					<div className="bg-home-gradient font-poppins min-h-100vh bg-50 bg-cover bg-no-repeat">
 						<Navbar />
 						{children}
-						<Suspense>
+						{/* <Suspense>
 							<VercelToolbar />
-						</Suspense>
+						</Suspense> */}
 						<Footer />
 					</div>
 				</Providers>
