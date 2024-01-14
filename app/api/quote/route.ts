@@ -96,12 +96,6 @@ export async function POST(request: Request) {
         console.log("Fetching routes");
 
         const queries = input.inputTokens.map(async inToken => {
-            let fromAmountForGas: string | undefined = undefined;
-            let gas: GasSuggestionResponse | undefined = undefined;
-            if (input.inputChain !== input.outputChain) {
-                gas = await api.gasSuggestionChainGet(input.outputChain.toString())
-                fromAmountForGas = gas?.recommended?.amount
-            }
             let routes = await advancedAPI.advancedRoutesPost({
                 fromAmount: input.inputAmount[inToken.value]?.toString(),
                 fromChainId: input.inputChain,
@@ -110,23 +104,20 @@ export async function POST(request: Request) {
                 toTokenAddress: input.outputToken.address,
                 fromAddress: input.tempAccount,
                 toAddress: input.toAddress ?? input.fromAddress,
-                fromAmountForGas,
                 options: input.options,
             });
-            if (gas && gas.available === false) {
-                // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
-                routes.routes = routes.routes.filter(route => {
-                    const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
-                    if (chainChanges.length > 1) {
-                        return false;
-                    }
-                    const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
-                    if (stepsAfterChainChange.length > 0) {
-                        return false;
-                    }
-                    return true;
-                });
-            }
+            // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
+            routes.routes = routes.routes.filter(route => {
+                const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
+                if (chainChanges.length > 1) {
+                    return false;
+                }
+                const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
+                if (stepsAfterChainChange.length > 0) {
+                    return false;
+                }
+                return true;
+            });
             return routes;
         })
 
