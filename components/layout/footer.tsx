@@ -1,5 +1,5 @@
 export default function Footer() {
-    return <footer className="flex flex-col items-center justify-center w-full h-24 border-t mt-12">
+    return <footer className="flex flex-col items-center justify-center w-full h-32 border-t mt-12">
         <a
             className="flex items-center justify-center"
             href="https://muwpay.com"
@@ -9,14 +9,33 @@ export default function Footer() {
             Powered by{' '}
             <img src="/muwpayLogoIcon.svg" alt="muwpay Logo" className="h-4 ml-2" />
         </a>
-        <p className="text-xs mt-4">Prototype made by{' '}
+        <div className="flex justify-center mt-4 space-x-3">
             <a
-                href="https://arguiot.com"
+                href="https://v1.muwp.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="w-48 text-center"
             >
-                Arthur Guiot
+                Single Token
             </a>
-        </p>
+            <span className="text-gray-300">|</span>
+            <a
+                href="mailto:support@muwpay.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-48 text-center"
+            >
+                Support
+            </a>
+            <span className="text-gray-300">|</span>
+            <a
+                href="https://docs.muwp.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-48 text-center"
+            >
+                Docs
+            </a>
+        </div>
     </footer>
 }
