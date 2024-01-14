@@ -53,7 +53,8 @@ function iteratorToStream(iterator: any) {
             if (done) {
                 controller.close()
             } else {
-                controller.enqueue(value)
+                const chunk = new TextEncoder().encode(value)
+                controller.enqueue(chunk)
             }
         },
     })
