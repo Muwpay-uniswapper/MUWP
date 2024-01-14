@@ -1,5 +1,5 @@
-import api, { advancedAPI } from "@/lib/front/data/api";
-import { GasSuggestionResponse, Route, RouteOptions } from "@/lib/li.fi-ts";
+import { advancedAPI } from "@/lib/front/data/api";
+import { Route, RouteOptions } from "@/lib/li.fi-ts";
 import { z } from 'zod';
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import { fromHex } from "viem";
@@ -40,129 +40,158 @@ BigInt.prototype.toJSON = function () {
     return this.toString();
 };
 
+// Can be 'nodejs', but Vercel recommends using 'edge'
+export const runtime = 'edge';
+// Prevents this route's response from being cached
+export const dynamic = 'force-dynamic';
+
+function iteratorToStream(iterator: any) {
+    return new ReadableStream({
+        async pull(controller) {
+            const { value, done } = await iterator.next()
+
+            if (done) {
+                controller.close()
+            } else {
+                controller.enqueue(value)
+            }
+        },
+    })
+}
+
+async function* iterator(promise: () => Promise<string>) {
+    yield '{'; // This way we bypass the Vercel function timeout
+    const response = await promise();
+    yield response.slice(1, -1);
+    yield '}';
+}
+
 export async function POST(request: Request) {
-    try {
-        // Parse the incoming request body as JSON data
-        const body = await request.json();
-        const input = await Input.parseAsync(body);
+    const stream = iteratorToStream(iterator(async () => {
+        try {
+            // Parse the incoming request body as JSON data
+            const body = await request.json();
+            const input = await Input.parseAsync(body);
 
-        console.log("Input parsed successfully");
+            console.log("Input parsed successfully");
 
-        const accountInfo = await store.get(input.tempAccount ?? "") as string | object | null;
-        const _tempAccount = typeof accountInfo === "string" ? JSON.parse(accountInfo)
-            : typeof accountInfo === "object" ? (accountInfo as any)
-                : null;
+            const accountInfo = await store.get(input.tempAccount ?? "") as string | object | null;
+            const _tempAccount = typeof accountInfo === "string" ? JSON.parse(accountInfo)
+                : typeof accountInfo === "object" ? (accountInfo as any)
+                    : null;
 
-        console.log("Account info retrieved successfully");
+            console.log("Account info retrieved successfully");
 
-        if (!input.tempAccount || typeof input.tempAccount == "undefined" || _tempAccount == null || typeof _tempAccount == "undefined" || _tempAccount.index == null || typeof _tempAccount.index == "undefined") {
+            if (!input.tempAccount || typeof input.tempAccount == "undefined" || _tempAccount == null || typeof _tempAccount == "undefined" || _tempAccount.index == null || typeof _tempAccount.index == "undefined") {
 
-            console.log("Account not found, generating new account");
+                console.log("Account not found, generating new account");
 
-            const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
-            const privateKey = fromHex(master_hd, "bytes")
-            const hdKey = HDKey.fromMasterSeed(privateKey)
+                const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
+                const privateKey = fromHex(master_hd, "bytes")
+                const hdKey = HDKey.fromMasterSeed(privateKey)
 
-            // Generate random index using crypto module
-            const bytes = new Uint32Array(1)
-            crypto.getRandomValues(bytes)
+                // Generate random index using crypto module
+                const bytes = new Uint32Array(1)
+                crypto.getRandomValues(bytes)
 
-            const index = bytes[0] % 0x80000000; // Max offset
+                const index = bytes[0] % 0x80000000; // Max offset
 
-            const account = hdKeyToAccount(hdKey, {
-                accountIndex: index,
-            })
-
-            console.log("Account generated successfully");
-
-            await store.set(account.address, JSON.stringify({
-                index,
-            }));
-
-            console.log("Account stored successfully");
-
-            await inngest.send({
-                name: "app/account.created",
-                data: {
-                    address: account.address,
-                },
-            })
-
-            console.log("Account created event sent successfully");
-
-            input.tempAccount = account.address;
-        }
-
-        console.log("Fetching routes");
-
-        const queries = input.inputTokens.map(async inToken => {
-            let routes = await advancedAPI.advancedRoutesPost({
-                fromAmount: input.inputAmount[inToken.value]?.toString(),
-                fromChainId: input.inputChain,
-                fromTokenAddress: inToken.address,
-                toChainId: input.outputChain,
-                toTokenAddress: input.outputToken.address,
-                fromAddress: input.tempAccount,
-                toAddress: input.toAddress ?? input.fromAddress,
-                options: input.options,
-            });
-            // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
-            routes.routes = routes.routes.filter(route => {
-                const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
-                if (chainChanges.length > 1) {
-                    return false;
-                }
-                const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
-                if (stepsAfterChainChange.length > 0) {
-                    return false;
-                }
-                return true;
-            });
-            return routes;
-        })
-
-        const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
-
-        console.log("Routes fetched successfully");
-
-        const routes: {
-            [key: string]: Route[]
-        } = {};
-
-        for (let index = 0; index < rawRoutes.length; index++) {
-            const rawRoute = rawRoutes[index];
-            const _routes = rawRoute.routes;
-            if (!_routes || typeof rawRoute.routes[0].fromAddress == "undefined") {
-                console.log(JSON.stringify(rawRoute.unavailableRoutes?.filteredOut, null, 2));
-                throw new Error(`No route found for ${input.inputTokens[index].value} -> ${input.outputToken.value}`);
-            }
-            const key = rawRoute.routes[0].fromToken.address;
-            routes[key] = _routes;
-        }
-
-
-        return new Response(JSON.stringify({
-            routes,
-            tempAccount: input.tempAccount,
-            validUntil: Date.now() + 1000 * 60 * 5, // 5 minutes
-        }), {
-            headers: { 'content-type': 'application/json' },
-        });
-    } catch (e) {
-        if (e instanceof Error) {
-            console.log(e.message)
-            const bodyPattern = /Body: \"(\{.*\})\"/;
-            const matches = e.message.match(bodyPattern);
-
-            if (matches && matches.length > 1) {
-                const bodyContent = JSON.parse(matches[1].replace(/\\/g, ''));
-                return new Response(JSON.stringify({ message: bodyContent.message }), {
-                    status: 500
+                const account = hdKeyToAccount(hdKey, {
+                    accountIndex: index,
                 })
+
+                console.log("Account generated successfully");
+
+                await store.set(account.address, JSON.stringify({
+                    index,
+                }));
+
+                console.log("Account stored successfully");
+
+                await inngest.send({
+                    name: "app/account.created",
+                    data: {
+                        address: account.address,
+                    },
+                })
+
+                console.log("Account created event sent successfully");
+
+                input.tempAccount = account.address;
             }
+
+            console.log("Fetching routes");
+
+            const queries = input.inputTokens.map(async inToken => {
+                let routes = await advancedAPI.advancedRoutesPost({
+                    fromAmount: input.inputAmount[inToken.value]?.toString(),
+                    fromChainId: input.inputChain,
+                    fromTokenAddress: inToken.address,
+                    toChainId: input.outputChain,
+                    toTokenAddress: input.outputToken.address,
+                    fromAddress: input.tempAccount,
+                    toAddress: input.toAddress ?? input.fromAddress,
+                    options: input.options,
+                });
+                // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
+                routes.routes = routes.routes.filter(route => {
+                    const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
+                    if (chainChanges.length > 1) {
+                        return false;
+                    }
+                    const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
+                    if (stepsAfterChainChange.length > 0) {
+                        return false;
+                    }
+                    return true;
+                });
+                return routes;
+            })
+
+            const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
+
+            console.log("Routes fetched successfully");
+
+            const routes: {
+                [key: string]: Route[]
+            } = {};
+
+            for (let index = 0; index < rawRoutes.length; index++) {
+                const rawRoute = rawRoutes[index];
+                const _routes = rawRoute.routes;
+                if (!_routes || typeof rawRoute.routes[0] == "undefined" || typeof rawRoute.routes[0].fromAddress == "undefined") {
+                    console.log(JSON.stringify(rawRoute.unavailableRoutes?.filteredOut, null, 2));
+                    throw new Error(`No route found for ${input.inputTokens[index].value} -> ${input.outputToken.value}`);
+                }
+                const key = rawRoute.routes[0].fromToken.address;
+                routes[key] = _routes;
+            }
+
+
+            return JSON.stringify({
+                routes,
+                tempAccount: input.tempAccount,
+                validUntil: Date.now() + 1000 * 60 * 5, // 5 minutes
+            })
+        } catch (e) {
+            if (e instanceof Error) {
+                console.log(e.message)
+                const bodyPattern = /Body: \"(\{.*\})\"/;
+                const matches = e.message.match(bodyPattern);
+
+                if (matches && matches.length > 1) {
+                    const bodyContent = JSON.parse(matches[1].replace(/\\/g, ''));
+                    return JSON.stringify({ message: bodyContent.message });
+                }
+            }
+            return JSON.stringify({ message: "Unexpected error" });
         }
-        return new Response(JSON.stringify({ message: "Unexpected error" }), {
-            status: 500
-        })
-    }
+    }));
+
+    return new Response(stream, {
+        headers: {
+            'content-type': 'application/json',
+            'cache-control': 'no-cache',
+        },
+    });
 }
