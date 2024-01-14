@@ -3,7 +3,6 @@
 import { useSwapStore } from "@/lib/front/data/swapStore";
 import { Button } from "../ui/button";
 import { useAccount, useNetwork } from "wagmi";
-import { InputType } from "@/app/api/quote/route";
 import { useRouteStore } from "@/lib/front/data/routeStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
