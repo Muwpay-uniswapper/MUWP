@@ -2,8 +2,11 @@
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract MUWPTransfer {
+    using SafeERC20 for IERC20;
+
     // Function to perform the bulk transfer.
     function transfer(
         address[] memory tokens,
@@ -25,12 +28,7 @@ contract MUWPTransfer {
                 IERC20 token = IERC20(tokens[i]);
                 uint256 allowance = token.allowance(msg.sender, address(this));
                 require(allowance >= amounts[i], "Not enough token allowance");
-                bool _success = token.transferFrom(
-                    msg.sender,
-                    recipient,
-                    amounts[i]
-                );
-                require(_success, "Token transfer failed");
+                token.safeTransferFrom(msg.sender, recipient, amounts[i]);
             }
         }
 
