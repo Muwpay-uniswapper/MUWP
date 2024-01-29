@@ -19,13 +19,21 @@ import { useSwapStore } from "@/lib/front/data/swapStore"
 import { useBreakpoint } from "@/lib/front/media-query";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { useNetwork } from "wagmi";
+import Allocation from "./allocation";
 
-export function TokenComboboxes({ tokenList }: { tokenList: Token[] }) {
-    const tokenCount = useSwapStore((state) => state.inputTokens.length)
+export function TokenComboboxes({ tokenList, mode }: { tokenList: Token[], mode: "input" | "output" }) {
+    const tokenCount = useSwapStore((state) => {
+        const inputTokens = state.inputTokens.filter((token) => token)
+        const outputTokens = state.outputTokens.filter((token) => token)
+        if (mode == "input" && outputTokens.length > 1) return 1
+        if (mode == "output" && inputTokens.length > 1) return 1
+        return 1 + (mode == "input" ? inputTokens.length : outputTokens.length)
+    })
 
     return <>
-        {Array.from(Array(tokenCount + 1).keys()).map((index) => {
-            return <TokenCombobox index={index} tokenList={tokenList} mode="input" />
+        {mode == "output" && tokenCount > 2 && <Allocation />}
+        {Array.from(Array(tokenCount).keys()).map((index) => {
+            return <TokenCombobox index={index} tokenList={tokenList} mode={mode} key={index} />
         })}
     </>
 }
@@ -47,9 +55,9 @@ export function TokenCombobox({
 
     const { isAboveMd } = useBreakpoint("md")
 
-    const { inputTokens, outputToken } = useSwapStore()
+    const { inputTokens, outputTokens: outputToken } = useSwapStore()
 
-    const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
+    const value = mode == "input" ? inputTokens[index ?? 0] : outputToken[index ?? 0]
 
     if (isAboveMd) {
         Container = Dialog
@@ -106,13 +114,13 @@ function TokenListContent({
 
     const [search, setSearch] = React.useState("")
     const { chain } = useNetwork()
-    const { inputTokens, setInputToken, outputToken, setOutputToken, removeInputToken, outputChain } = useSwapStore()
+    const { inputTokens, setInputToken, outputTokens, setOutputToken, removeInputToken, removeOutputToken, outputChain } = useSwapStore()
     const [hydrated, setHydrated] = React.useState(false)
     React.useEffect(() => {
         setHydrated(true)
         setSearch("")
     }, [hydrated])
-    const value = mode == "input" ? inputTokens[index ?? 0] : outputToken
+    const value = mode == "input" ? inputTokens[index ?? 0] : outputTokens[index ?? 0]
 
     return <Command
         className={cn(isAboveMd ? "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5" : "")}
@@ -132,7 +140,10 @@ function TokenListContent({
                     .filter((token) => {
                         if (mode == "input" && chain && token.chainId !== chain.id) return false
                         if (mode == "output" && outputChain && token.chainId !== outputChain) return false
-                        return !(inputTokens.includes(token) && token !== value && outputToken == token)
+                        if (token.value.toLowerCase() == value?.value.toLowerCase()) return true
+                        if (inputTokens.find((_token) => _token?.value.toLowerCase() == token.value.toLowerCase())) return false
+                        if (outputTokens.find((_token) => _token?.value.toLowerCase() == token.value.toLowerCase())) return false
+                        return true
                     })
                     .map((token) => (
                         <CommandItem
@@ -141,11 +152,11 @@ function TokenListContent({
                             onSelect={(currentValue) => {
                                 if (value?.value.toLowerCase() == currentValue) {
                                     if (mode == "input") removeInputToken(index);
-                                    else setOutputToken(null)
+                                    else removeOutputToken(index);
                                 } else {
                                     const token = tokenList.find((token) => token.value.toLowerCase() === currentValue.toLowerCase());
                                     if (token && mode == "input") setInputToken(token, index ?? 0);
-                                    else if (token && mode == "output") setOutputToken(token);
+                                    else if (token && mode == "output") setOutputToken(token, index ?? 0);
                                 }
                                 setOpen(false);
                             }}

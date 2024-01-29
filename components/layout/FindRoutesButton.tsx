@@ -11,7 +11,7 @@ import React from "react";
 
 
 export function FindRoutesButton() {
-    const { inputTokens, outputToken, inputAmount, outputChain, allowDenyBridges, allowDenyExchanges } = useSwapStore();
+    const { inputTokens, outputTokens, inputAmount, outputChain, allowDenyBridges, allowDenyExchanges } = useSwapStore();
     const { fetchRoutes, isFetching, tempAccount, validUntil } = useRouteStore();
     const { chain } = useNetwork();
     const { address } = useAccount();
@@ -27,7 +27,7 @@ export function FindRoutesButton() {
     }, [validUntil, isFetching]);
 
     const onClick = async () => {
-        if (!chain || !outputChain || !address || !outputToken) return;
+        if (!chain || !outputChain || !address || !outputTokens) return;
         try {
             await fetchRoutes({
                 inputAmount,
@@ -38,10 +38,10 @@ export function FindRoutesButton() {
                     value: token.value,
                 })),
                 outputChain,
-                outputToken: {
-                    address: outputToken.address,
-                    value: outputToken.value,
-                },
+                outputTokens: outputTokens.map(token => ({
+                    address: token.address,
+                    value: token.value,
+                })),
                 tempAccount,
                 options: {
                     bridges: allowDenyBridges,

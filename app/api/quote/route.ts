@@ -23,7 +23,7 @@ const Token = z.object({
 
 const Input = z.object({
     inputTokens: z.array(Token).min(1),
-    outputToken: Token,
+    outputTokens: z.array(Token).min(1),
     inputChain: z.number(),
     outputChain: z.number(),
     inputAmount: z.record(z.coerce.bigint()),
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
                     fromChainId: input.inputChain,
                     fromTokenAddress: inToken.address,
                     toChainId: input.outputChain,
-                    toTokenAddress: input.outputToken.address,
+                    toTokenAddress: input.outputTokens[0].address,
                     fromAddress: input.tempAccount,
                     toAddress: input.toAddress ?? input.fromAddress,
                     options: input.options,

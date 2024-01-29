@@ -3,11 +3,9 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/front/utils'
 import { ConnectButton } from '@/components/connectbutton'
 import { ArrowDown } from "lucide-react"
