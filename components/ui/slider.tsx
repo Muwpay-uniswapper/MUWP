@@ -51,15 +51,17 @@ function _Slider(
     )}
     {...otherProps}
   >
-    <SliderPrimitive.Track className="relative h-8 w-full grow overflow-hidden rounded bg-secondary">
+    <SliderPrimitive.Track className="relative h-8 w-full grow overflow-hidden rounded bg-transparent">
       {Array(thumbs + 1).fill(0).map((_, i) => <Tooltip onOpenChange={(open) => {
         open ? setInputValue(props.value && props.value.length == thumbs ? ((i < thumbs ? props.value[i] : 100) - (i > 0 ? props.value[i - 1] : 0)).toString() : i.toString()) : validate(parseInt(inputValue), i)
       }} key={i}>
         <TooltipTrigger asChild>
           <SliderPrimitive.Range
-            className={`absolute text-black text-center h-full ${props.colors && props.colors.length == thumbs ? props.colors[i] : "bg-primary"
-              } rounded ${i == 0 ? "mr-1.5" : (i == thumbs ? "ml-1.5" : "mx-1.5")
+            className={`absolute text-black text-center h-full rounded ${i == 0 ? "mr-1.5" : (i == thumbs ? "ml-1.5" : "mx-1.5")
               }`}
+            style={{
+              backgroundColor: props.colors && props.colors.length - 1 == thumbs ? props.colors[i] : "#fff"
+            }}
             index={i}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}

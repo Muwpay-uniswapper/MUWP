@@ -11,15 +11,17 @@ type SwapStore = {
     setAllowDenyExchanges: (allowDenyExchanges: AllowDenyPrefer) => void;
     inputTokens: Token[];
     outputTokens: Token[];
+    outputDistribution: number[];
     outputChain: number | null;
     inputAmount: { [key: string]: bigint };
     setInputToken: (token: Token, index?: number) => void;
     removeInputToken: (index?: number) => void;
     setOutputToken: (token: Token, index?: number) => void;
     removeOutputToken: (index?: number) => void;
+    setDistribution: (distribution: number[]) => void;
     setOutputChain: (chain: number | null) => void;
     setAmount: (token: Token, amount: bigint) => void;
-    priceOutput: () => { amount: bigint, priceUSD: bigint };
+    priceOutput: (token: Token) => { amount: bigint, priceUSD: bigint };
     clearSwaps: () => void;
 };
 
@@ -51,6 +53,7 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
     setAllowDenyExchanges: (allowDenyExchanges: AllowDenyPrefer) => set({ allowDenyExchanges }),
     inputTokens: [],
     outputTokens: [],
+    outputDistribution: [],
     outputChain: null,
     inputAmount: {},
 
@@ -91,24 +94,46 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
         tokens.splice(index ?? 0, 1);
         return { outputTokens: tokens };
     }),
+    setDistribution: (distribution: number[]) => set({ outputDistribution: distribution }),
     setOutputChain: (chain: number | null) => set({ outputChain: chain, outputTokens: [] }),
     setAmount: (token: Token, amount: bigint) => set((state: SwapStore) => {
         const inputAmount = { ...state.inputAmount };
         inputAmount[token.value] = amount;
         return { inputAmount };
     }),
-    priceOutput: () => {
-        const { inputTokens, inputAmount, outputTokens: outputToken } = get();
-        if (outputToken.length != 1) {
-            return { amount: 0n, priceUSD: 0n };
+    priceOutput: (token: Token) => {
+        const { inputTokens, inputAmount, outputTokens, outputDistribution } = get();
+        if (outputTokens.length == 1) {
+            const priceUSD = inputTokens.reduce((total, token) => {
+                const amount = parseUnits(token.priceUSD?.toString() ?? "", 9) * (inputAmount[token.value] ?? 0n);
+                return total + amount / (10n ** BigInt(token.decimals)); // We keep to 9 decimals
+            }, 0n);
+            // Convert USD to output token
+            const amount = priceUSD * (10n ** BigInt(outputTokens[0].decimals)) / parseUnits(outputTokens[0].priceUSD?.toString() ?? "", 9);
+            return { amount, priceUSD }
+        } else if (outputTokens.length - 1 == outputDistribution.length) {
+            const index = outputTokens.findIndex(t => t.address == token.address && t.chainId == token.chainId);
+            if (index == -1) {
+                return { amount: 0n, priceUSD: 0n };
+            }
+            const percentage = index == outputDistribution.length ? 100 - outputDistribution[index - 1] :
+                index > 0 ? (outputDistribution[index] - outputDistribution[index - 1]) : outputDistribution[index];
+
+            const inputPriceUSD = inputTokens.reduce((total, token) => {
+                const amount = parseUnits(token.priceUSD?.toString() ?? "", 9) * (inputAmount[token.value] ?? 0n);
+                return total + amount / (10n ** BigInt(token.decimals)); // We keep to 9 decimals
+            }, 0n);
+
+            try {
+                const priceUSD = inputPriceUSD * BigInt(Math.round(percentage));
+                // Convert USD to output token
+                const amount = priceUSD * (10n ** BigInt(token.decimals)) / parseUnits(token.priceUSD?.toString() ?? "", 9);
+                return { amount: amount / 100n, priceUSD: priceUSD / 100n }
+            } catch (e) {
+                console.log(e);
+            }
         }
-        const priceUSD = inputTokens.reduce((total, token) => {
-            const amount = parseUnits(token.priceUSD?.toString() ?? "", 9) * (inputAmount[token.value] ?? 0n);
-            return total + amount / (10n ** BigInt(token.decimals)); // We keep to 9 decimals
-        }, 0n);
-        // Convert USD to output token
-        const amount = priceUSD * (10n ** BigInt(outputToken[0].decimals)) / parseUnits(outputToken[0].priceUSD?.toString() ?? "", 9);
-        return { amount, priceUSD }
+        return { amount: 0n, priceUSD: 0n };
     },
     clearSwaps: () => set({
         inputTokens: [],

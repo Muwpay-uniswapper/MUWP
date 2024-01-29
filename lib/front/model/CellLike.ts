@@ -9,7 +9,8 @@ export interface Token extends CellLike {
     ticker: string,
     decimals: number,
     priceUSD?: string,
-    chainId: number
+    chainId: number,
+    color?: string
 };
 
 export interface Chain extends CellLike {
