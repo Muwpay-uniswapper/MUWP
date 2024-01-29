@@ -10,12 +10,13 @@ type SwapStore = {
     toggleAllowDenyExchange: (exchange: string) => void;
     setAllowDenyExchanges: (allowDenyExchanges: AllowDenyPrefer) => void;
     inputTokens: Token[];
-    outputToken: Token | null;
+    outputTokens: Token[];
     outputChain: number | null;
     inputAmount: { [key: string]: bigint };
     setInputToken: (token: Token, index?: number) => void;
     removeInputToken: (index?: number) => void;
-    setOutputToken: (token: Token | null) => void;
+    setOutputToken: (token: Token, index?: number) => void;
+    removeOutputToken: (index?: number) => void;
     setOutputChain: (chain: number | null) => void;
     setAmount: (token: Token, amount: bigint) => void;
     priceOutput: () => { amount: bigint, priceUSD: bigint };
@@ -49,7 +50,7 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
     },
     setAllowDenyExchanges: (allowDenyExchanges: AllowDenyPrefer) => set({ allowDenyExchanges }),
     inputTokens: [],
-    outputToken: null,
+    outputTokens: [],
     outputChain: null,
     inputAmount: {},
 
@@ -76,16 +77,29 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
         tokens.splice(index ?? 0, 1);
         return { inputTokens: tokens, inputAmount };
     }),
-    setOutputToken: (token: Token | null) => set({ outputToken: token }),
-    setOutputChain: (chain: number | null) => set({ outputChain: chain }),
+    setOutputToken: (token: Token, index?: number) => set((state: SwapStore) => {
+        const tokens = [...state.outputTokens];
+        if (index === undefined) {
+            tokens.push(token);
+        } else {
+            tokens[index] = token;
+        }
+        return { outputTokens: tokens };
+    }),
+    removeOutputToken: (index?: number) => set((state: SwapStore) => {
+        const tokens = [...state.outputTokens];
+        tokens.splice(index ?? 0, 1);
+        return { outputTokens: tokens };
+    }),
+    setOutputChain: (chain: number | null) => set({ outputChain: chain, outputTokens: [] }),
     setAmount: (token: Token, amount: bigint) => set((state: SwapStore) => {
         const inputAmount = { ...state.inputAmount };
         inputAmount[token.value] = amount;
         return { inputAmount };
     }),
     priceOutput: () => {
-        const { inputTokens, inputAmount, outputToken } = get();
-        if (!outputToken) {
+        const { inputTokens, inputAmount, outputTokens: outputToken } = get();
+        if (outputToken.length != 1) {
             return { amount: 0n, priceUSD: 0n };
         }
         const priceUSD = inputTokens.reduce((total, token) => {
@@ -93,12 +107,12 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
             return total + amount / (10n ** BigInt(token.decimals)); // We keep to 9 decimals
         }, 0n);
         // Convert USD to output token
-        const amount = priceUSD * (10n ** BigInt(outputToken.decimals)) / parseUnits(outputToken.priceUSD?.toString() ?? "", 9);
+        const amount = priceUSD * (10n ** BigInt(outputToken[0].decimals)) / parseUnits(outputToken[0].priceUSD?.toString() ?? "", 9);
         return { amount, priceUSD }
     },
     clearSwaps: () => set({
         inputTokens: [],
-        outputToken: null,
+        outputTokens: [],
         outputChain: null,
         inputAmount: {},
     })
