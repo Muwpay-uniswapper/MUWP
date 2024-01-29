@@ -6,6 +6,7 @@ import { ChainCombobox } from "@/components/chains/chain-selector";
 import api from "@/lib/front/data/api"
 import { TokensGet200Response } from "@/lib/li.fi-ts";
 import { muwpChains } from "@/muwp";
+import sharp from "sharp"
 
 export async function TokenSelector({
     id,

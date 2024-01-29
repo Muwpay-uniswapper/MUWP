@@ -515,7 +515,7 @@ const SliderRange = React.forwardRef<SliderRangeElement, SliderRangeProps>(
         let offsetStart: number;
         let offsetEnd: number;
 
-        if (valuesCount > 1) {
+        if (valuesCount > 0) {
             if (props.index === 0) {
                 offsetStart = 0;
             } else if (props.index === valuesCount) {

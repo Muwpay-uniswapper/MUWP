@@ -31,7 +31,7 @@ export function PercentageSelector({
     const [inputValue, setInputValue] = React.useState('');
     const inputRef = React.useRef<HTMLInputElement>(null);
 
-    const { inputAmount, setAmount, priceOutput } = useSwapStore()
+    const { inputAmount, setAmount } = useSwapStore()
 
     return <Tooltip onOpenChange={() => {
         setInputValue('');
@@ -120,7 +120,7 @@ export function TokenInput({
     })
     const { inputAmount, setAmount, priceOutput } = useSwapStore()
     const [inputValue, setInputValue] = React.useState('');
-    const _value = mode == "input" ? inputAmount[token.value] ?? 0n : priceOutput().amount;
+    const _value = mode == "input" ? inputAmount[token.value] ?? 0n : priceOutput(token).amount;
     const value = formatUnits(_value, token.decimals);
 
     React.useEffect(() => {
