@@ -145,6 +145,10 @@ export async function POST(request: Request) {
                     // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
                     routes.routes = routes.routes.filter(route => {
                         const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
+                        if (chainChanges.length == 0) {
+                            return true;
+                        }
+
                         if (chainChanges.length > 1) {
                             return false;
                         }
@@ -157,6 +161,7 @@ export async function POST(request: Request) {
                     return routes;
                 })
 
+            console.log(`Fetching ${queries.length} routes`)
             const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
 
             console.log("Routes fetched successfully");

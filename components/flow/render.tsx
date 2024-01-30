@@ -85,7 +85,9 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                     type: "token",
                     data: {
                         ...step.action.fromToken,
-                        isInput: !hasMultipleOutputs && i === 0,
+                        isInput: i === 0,
+                        hasMultipleOutputs,
+                        isOutput: false,
                         amounts: {}
                     },
                 };
@@ -109,7 +111,9 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                         type: "token",
                         data: {
                             ...step.action.toToken,
-                            isInput: hasMultipleOutputs && i === route.steps.length - 1,
+                            isInput: false,
+                            hasMultipleOutputs,
+                            isOutput: i === route.steps.length - 1,
                             amounts: {}
                         },
                     };
