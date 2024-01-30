@@ -17,7 +17,7 @@ export function FormatTokenAddress({ token }: { token: Token }) {
     const shortAddress = `${token.address.slice(0, 6)}...${token.address.slice(-4)}`
     return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1">
         <FileDigit className="inline w-4 h-4" />
-        <a href={`${chain?.blockExplorers?.default.url}/address/${token.address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono">{shortAddress}</a>
+        <a href={`${chain?.blockExplorers?.default.url}/address/${token.address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono" onClick={(e) => e.stopPropagation()}>{shortAddress}</a>
     </div>
 }
 
