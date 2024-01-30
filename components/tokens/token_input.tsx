@@ -181,7 +181,7 @@ export function TokenInput({
             </div>
             <div className="flex flex-row justify-between w-full">
                 {/* <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div> */}
-                <div className="text-sm font-normal text-gray-500 text-left">≈{formatUnits((parseUnits(token.priceUSD?.toString() ?? "", 9) * _value), 9 + token.decimals)} $</div>
+                <div className="text-sm font-normal text-gray-500 text-left">≈{parseFloat(formatUnits((parseUnits(token.priceUSD?.toString() ?? "", 9) * _value), 9 + token.decimals)).toFixed(2)} $</div>
                 {data && <div className="text-sm font-normal text-gray-500 text-right"><Wallet2Icon className="w-3 h-3 inline mr-1" />{formatUnits(data.value, token.decimals).slice(0, 10)} {token.ticker}</div>}
             </div>
         </div>

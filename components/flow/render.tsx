@@ -54,6 +54,11 @@ const getLayoutedElements = (_nodes: { [key: string]: Node<TokenNodeData | Detai
 }
 
 export function renderNodes(initialPoint: { x: number, y: number }, routes: Route[]): { nodes: Node<TokenNodeData | DetailNodeData>[], edges: Edge[] } {
+    // Check if routes have different output tokens
+    const outputTokens = routes.map((route) => route.steps[route.steps.length - 1].action.toToken);
+    const outputTokenSet = new Set(outputTokens.map((token) => hash(token)));
+    const hasMultipleOutputs = outputTokenSet.size > 1;
+
     if (routes.length === 0) {
         return { nodes: [], edges: [] };
     }
@@ -80,7 +85,7 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                     type: "token",
                     data: {
                         ...step.action.fromToken,
-                        isInput: i === 0,
+                        isInput: !hasMultipleOutputs && i === 0,
                         amounts: {}
                     },
                 };
@@ -88,7 +93,9 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
 
             // Use the previous node's ID as the key for the amount, or the node's own ID if it's the first one
             if (!previousNodeId) {
-                (nodes[fromNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] = step.estimate?.fromAmount || "?";
+                const _amount = (nodes[fromNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] ?? "0";
+                const amount = _amount === "?" ? "?" : BigInt(_amount) + BigInt(step.action.fromAmount);
+                (nodes[fromNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] = amount.toString();
             }
 
             // Add or update the target node
@@ -102,7 +109,7 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                         type: "token",
                         data: {
                             ...step.action.toToken,
-                            isInput: false,
+                            isInput: hasMultipleOutputs && i === route.steps.length - 1,
                             amounts: {}
                         },
                     };

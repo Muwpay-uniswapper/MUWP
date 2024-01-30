@@ -24,6 +24,7 @@ const Token = z.object({
 const Input = z.object({
     inputTokens: z.array(Token).min(1),
     outputTokens: z.array(Token).min(1),
+    distribution: z.array(z.number()).min(1),
     inputChain: z.number(),
     outputChain: z.number(),
     inputAmount: z.record(z.coerce.bigint()),
@@ -123,31 +124,38 @@ export async function POST(request: Request) {
 
             console.log("Fetching routes");
 
-            const queries = input.inputTokens.map(async inToken => {
-                let routes = await advancedAPI.advancedRoutesPost({
-                    fromAmount: input.inputAmount[inToken.value]?.toString(),
-                    fromChainId: input.inputChain,
-                    fromTokenAddress: inToken.address,
-                    toChainId: input.outputChain,
-                    toTokenAddress: input.outputTokens[0].address,
-                    fromAddress: input.tempAccount,
-                    toAddress: input.toAddress ?? input.fromAddress,
-                    options: input.options,
-                });
-                // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
-                routes.routes = routes.routes.filter(route => {
-                    const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
-                    if (chainChanges.length > 1) {
-                        return false;
+            const mode = input.outputTokens.length > 1 ? "split" : "single";
+
+            const queries = (mode == "single" ? input.inputTokens : input.outputTokens)
+                .map(async token => {
+                    const req = {
+                        fromAmount: mode == "single" ? input.inputAmount[token.value]?.toString() : (
+                            input.inputAmount[input.inputTokens[0].value] * BigInt(input.distribution[input.outputTokens.findIndex(t => t.address == token.address && t.value == token.value)]) / 100n
+                        ).toString(),
+                        fromChainId: input.inputChain,
+                        fromTokenAddress: mode == "single" ? token.address : input.inputTokens[0].address,
+                        toChainId: input.outputChain,
+                        toTokenAddress: mode == "single" ? input.outputTokens[0].address : token.address,
+                        fromAddress: input.tempAccount,
+                        toAddress: input.toAddress ?? input.fromAddress,
+                        options: input.options,
                     }
-                    const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
-                    if (stepsAfterChainChange.length > 0) {
-                        return false;
-                    }
-                    return true;
-                });
-                return routes;
-            })
+
+                    let routes = await advancedAPI.advancedRoutesPost(req);
+                    // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
+                    routes.routes = routes.routes.filter(route => {
+                        const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
+                        if (chainChanges.length > 1) {
+                            return false;
+                        }
+                        const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
+                        if (stepsAfterChainChange.length > 0) {
+                            return false;
+                        }
+                        return true;
+                    });
+                    return routes;
+                })
 
             const rawRoutes = await Promise.all(queries); // Fetch all routes in parallel
 
@@ -162,9 +170,9 @@ export async function POST(request: Request) {
                 const _routes = rawRoute.routes;
                 if (!_routes || typeof rawRoute.routes[0] == "undefined" || typeof rawRoute.routes[0].fromAddress == "undefined") {
                     console.log(JSON.stringify(rawRoute.unavailableRoutes?.filteredOut, null, 2));
-                    throw new Error(`No route found for ${input.inputTokens[index].value} -> ${input.outputToken.value}`);
+                    throw new Error(`No route found for ${input.inputTokens[mode == "single" ? index : 0].value} -> ${input.outputTokens[mode == "single" ? 0 : index].value}`);
                 }
-                const key = rawRoute.routes[0].fromToken.address;
+                const key = mode == "single" ? rawRoute.routes[0].fromToken.address : rawRoute.routes[0].toToken.address;
                 routes[key] = _routes;
             }
 

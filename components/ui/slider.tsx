@@ -99,7 +99,13 @@ function _Slider(
         </TooltipContent>
       </Tooltip>)}
     </SliderPrimitive.Track>
-    {Array(thumbs).fill(0).map((_, i) => <SliderPrimitive.Thumb key={i} className="block h-5 w-1 rounded border-primary bg-white ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-ew-resize" />)}
+    {Array(thumbs).fill(0).map((_, i) => <SliderPrimitive.Thumb
+      key={i}
+      className="block h-5 w-1 rounded border-primary bg-white ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-ew-resize"
+      onDoubleClick={() => {
+        props.onValueChange?.(Array(thumbs).fill(100 / (thumbs + 1)).map((a, i) => (i + 1) * a));
+      }}
+    />)}
   </SliderPrimitive.Root>
   )
 }
