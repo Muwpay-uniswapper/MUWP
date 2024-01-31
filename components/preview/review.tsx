@@ -32,6 +32,10 @@ export function Review({
 
     const routes = getRoutes()
 
+    const outputTokens = routes.map((route) => route.steps[route.steps.length - 1].action.toToken);
+    const outputTokenSet = new Set(outputTokens.map((token) => token.address));
+    const hasMultipleOutputs = outputTokenSet.size > 1;
+
     const gasFees = routes.map((route) => Number(route.gasCostUSD)).reduce((a, b) => a + b, 0);
     const feeCosts = routes.map((route) => route.steps.map((step) => step.estimate?.feeCosts?.map((fee) => Number(fee.amountUSD))?.reduce((a, b) => a + b, 0) ?? 0).reduce((a, b) => a + b, 0)).reduce((a, b) => a + b, 0);
     let duration = routes.map((route) => route.steps.map((step) => step.estimate?.executionDuration ?? 0).reduce((a, b) => a + b, 0)).reduce((a, b) => Math.max(a, b), 0); // Steps are executed in parallel, so we take the max
@@ -39,9 +43,10 @@ export function Review({
         duration += 3 * 60; // Add 3 min for the transaction to be mined
     }
     const steps = routes.map((route) => route.steps.length).reduce((a, b) => a + b, 0);
-    const sum = routes.reduce((acc, route) => acc + BigInt(route.toAmount), BigInt(0));
+    const sum = routes.reduce((acc, route) => acc + BigInt(hasMultipleOutputs ? route.fromAmount : route.toAmount), 0n);
     const slippage = routes.map((route) => route.steps.map((step) => step.action.slippage ?? 0).reduce((a, b) => Math.max(a, b), 0)).reduce((a, b) => Math.max(a, b), 0);
-    const amountMin = routes.map((route) => BigInt(route.toAmountMin)).reduce((a, b) => a + b, 0n);
+    const _amountMin = routes.map((route) => BigInt(route.toAmountMin));
+    const amountMin = !hasMultipleOutputs ? _amountMin.reduce((a, b) => a + b, 0n) : _amountMin;
 
     const { data: walletClient } = useWalletClient()
     const { data } = useFeeData();
@@ -176,29 +181,54 @@ export function Review({
         </div>
         <div className="flex flex-row justify-evenly items-center max-w-xs mx-auto">
             <div className="flex flex-col gap-2">
-                {routes.map((route) => <Tooltip>
+                {!hasMultipleOutputs ? routes.map((route) => <Tooltip>
                     <TooltipTrigger>
                         <img src={route.fromToken.logoURI} alt={route.fromToken.symbol} className="w-6 h-6 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
                         {formatUnits(BigInt(route.fromAmount), route.fromToken.decimals)} {route.fromToken.symbol}
                     </TooltipContent>
-                </Tooltip>)}
+                </Tooltip>)
+                    : <Tooltip>
+                        <TooltipTrigger>
+                            <img src={routes[0]?.fromToken.logoURI} alt={routes[0]?.fromToken.symbol} className="w-6 h-6 rounded-full" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {formatUnits(sum, routes[0]?.fromToken.decimals)} {routes[0]?.fromToken.symbol}
+                        </TooltipContent>
+                    </Tooltip>
+                }
             </div>
-            <Funnel height={routes.length * 3} />
-            <Tooltip>
-                <TooltipTrigger>
-                    <img src={routes[0]?.toToken.logoURI} alt={routes[0]?.toToken.symbol} className="w-6 h-6 rounded-full" />
-                </TooltipTrigger>
-                <TooltipContent>
-                    {formatUnits(sum, routes[0]?.toToken.decimals)} {routes[0]?.toToken.symbol}
-                </TooltipContent>
-            </Tooltip>
+            <Funnel height={routes.length * 3} reverse={hasMultipleOutputs} />
+            <div className="flex flex-col gap-2">
+                {hasMultipleOutputs ? routes.map((route) => <Tooltip>
+                    <TooltipTrigger>
+                        <img src={route.toToken.logoURI} alt={route.toToken.symbol} className="w-6 h-6 rounded-full" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {formatUnits(BigInt(route.toAmount), route.toToken.decimals)} {route.toToken.symbol}
+                    </TooltipContent>
+                </Tooltip>)
+                    : <Tooltip>
+                        <TooltipTrigger>
+                            <img src={routes[0]?.toToken.logoURI} alt={routes[0]?.toToken.symbol} className="w-6 h-6 rounded-full" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {formatUnits(sum, routes[0]?.toToken.decimals)} {routes[0]?.toToken.symbol}
+                        </TooltipContent>
+                    </Tooltip>
+                }
+            </div>
         </div>
         <div className="grid grid-cols-2 gap-2 my-4">
             <p><Receipt className="inline w-4 h-4 mr-1" />Minimum Output</p>
             <p className="text-right">
-                {format(formatUnits(amountMin, routes[0].toToken.decimals))} {routes[0].toToken.symbol}
+                {typeof amountMin == "bigint"
+                    ? `${format(formatUnits(amountMin, routes[0].toToken.decimals))} ${routes[0].toToken.symbol}`
+                    : (<ul>
+                        {amountMin.map((min, i) => <li key={i}>{format(formatUnits(min, routes[i].toToken.decimals))} {routes[i].toToken.symbol}</li>)}
+                    </ul>)
+                }
             </p>
             <p><PercentCircle className="inline w-4 h-4 mr-1" />Slippage</p>
             <p className="text-right">

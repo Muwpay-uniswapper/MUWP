@@ -1,23 +1,23 @@
 import React from "react";
 import { Position, getSimpleBezierPath } from "reactflow";
 
-export const Funnel = ({ height = 4 }: { height: number }) => {
+export const Funnel = ({ height = 4, reverse = false }: { height: number, reverse: boolean }) => {
     const topBezier = getSimpleBezierPath({
         sourceX: 1,
-        sourceY: 1,
-        sourcePosition: Position.Right,
+        sourceY: reverse ? 5 : 1,
+        sourcePosition: reverse ? Position.Left : Position.Right,
         targetX: 18,
-        targetY: 5,
-        targetPosition: Position.Left
+        targetY: reverse ? 1 : 5,
+        targetPosition: reverse ? Position.Right : Position.Left
     });
 
     const bottomBezier = getSimpleBezierPath({
         sourceX: 1,
-        sourceY: 9,
-        sourcePosition: Position.Right,
+        sourceY: reverse ? 5 : 9,
+        sourcePosition: reverse ? Position.Left : Position.Right,
         targetX: 18,
-        targetY: 5,
-        targetPosition: Position.Left
+        targetY: reverse ? 9 : 5,
+        targetPosition: reverse ? Position.Right : Position.Left
     });
 
     return (
