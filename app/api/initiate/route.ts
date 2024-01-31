@@ -92,16 +92,18 @@ export async function POST(request: Request) {
         address recipient
         ) public payable
             */
+        const args = [
+            input.routes.map(route => route.steps[0].action.fromToken.address),
+            input.routes.map(route => BigInt(route.steps[0].action.fromAmount)),
+            totalGas,
+            input.account,
+        ]
         const data = encodeFunctionData({
             abi,
             functionName: "transfer",
-            args: [
-                input.routes.map(route => route.steps[0].action.fromToken.address),
-                input.routes.map(route => BigInt(route.steps[0].action.fromAmount)),
-                totalGas,
-                input.account,
-            ]
+            args
         })
+
 
         const chain = muwpChains.find(chain => chain.id === input.chainId)
 

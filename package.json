@@ -35,7 +35,7 @@
     "cmdk": "^0.2.0",
     "connectkit": "^1.5.3",
     "dagre": "^0.8.5",
-    "inngest": "^3.6.2",
+    "inngest": "^3.12.0",
     "lucide-react": "^0.292.0",
     "million": "latest",
     "moralis": "^2.23.2",
