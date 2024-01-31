@@ -91,13 +91,17 @@ export const columns: ColumnDef<Transaction>[] = [
         header: "Input",
         cell: ({ row }) => {
             const routes = row.getValue("routes") as Route[]
+            const _inputs = new Set(routes.map((route) => route.fromToken.address))
+            const inputs = Array.from(_inputs).map((address) => routes.find((route) => route.fromToken.address === address)!.fromToken)
             return <div className="flex flex-row gap-1">
-                {routes.map((route) => <Tooltip>
+                {Array.from(inputs).map((route) => <Tooltip>
                     <TooltipTrigger>
-                        <img src={route.fromToken.logoURI} alt={route.fromToken.symbol} className="w-4 h-4 rounded-full" />
+                        <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
-                        {formatUnits(BigInt(route.fromAmount), route.fromToken.decimals)} {route.fromToken.symbol}
+                        {formatUnits(BigInt(
+                            routes.filter((r) => r.fromToken === route).reduce((acc, r) => acc + BigInt(r.fromAmount), 0n)
+                        ), route.decimals)} {route.symbol}
                     </TooltipContent>
                 </Tooltip>)}
             </div>
@@ -108,16 +112,19 @@ export const columns: ColumnDef<Transaction>[] = [
         header: "Output",
         cell: ({ row }) => {
             const routes = row.getValue("routes") as Route[]
-            const sum = routes.reduce((acc, route) => acc + BigInt(route.toAmount), BigInt(0))
+            const _outputs = new Set(routes.map((route) => route.toToken.address))
+            const outputs = Array.from(_outputs).map((address) => routes.find((route) => route.toToken.address === address)!.toToken)
             return <div className="flex flex-row gap-1">
-                <Tooltip>
+                {Array.from(outputs).map((route) => <Tooltip>
                     <TooltipTrigger>
-                        <img src={routes[0].toToken.logoURI} alt={routes[0].toToken.symbol} className="w-4 h-4 rounded-full" />
+                        <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
-                        {formatUnits(sum, routes[0].toToken.decimals)} {routes[0].toToken.symbol}
+                        {formatUnits(BigInt(
+                            routes.filter((r) => r.toToken === route).reduce((acc, r) => acc + BigInt(r.toAmount), 0n)
+                        ), route.decimals)} {route.symbol}
                     </TooltipContent>
-                </Tooltip>
+                </Tooltip>)}
             </div>
         }
     },
