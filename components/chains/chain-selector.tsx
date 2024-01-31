@@ -111,7 +111,7 @@ function ChainListContent({
     isAboveMd: boolean
 }) {
     const [search, setSearch] = React.useState("")
-    const { setOutputChain, inputTokens, removeInputToken, setOutputToken } = useSwapStore()
+    const { setOutputChain, inputTokens, removeInputToken } = useSwapStore()
 
 
     return <Command
@@ -141,7 +141,6 @@ function ChainListContent({
                                     }
                                 } else {
                                     setOutputChain(chain?.chainId ?? null)
-                                    setOutputToken(null)
                                 }
 
                                 setOpen(false);
