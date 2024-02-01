@@ -4,7 +4,7 @@ import ReactFlow, { Connection, DefaultEdgeOptions, Edge, Panel, ReactFlowProvid
 import { Card } from "../ui/card";
 
 import "reactflow/dist/style.css"
-import { useRouteStore } from "@/lib/front/data/routeStore";
+import { useRouteStore } from "@/lib/core/data/routeStore";
 import { hash, renderNodes } from "./render";
 import EdgeExchange from "./EdgeExchange";
 import TokenNode from "./TokenNode";

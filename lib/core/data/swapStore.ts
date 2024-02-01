@@ -1,9 +1,11 @@
 import { create, StoreApi } from 'zustand';
-import { Token } from '@/lib/front/model/CellLike';
+import { Token } from '@/lib/core/model/CellLike';
 import { parseUnits } from "viem";
 import { AllowDenyPrefer } from '@/lib/li.fi-ts';
 
 type SwapStore = {
+    targetAddress?: string;
+    setTargetAddress: (address: string | undefined) => void;
     allowDenyBridges: AllowDenyPrefer;
     toggleAllowDenyBridge: (bridge: string) => void;
     allowDenyExchanges: AllowDenyPrefer;
@@ -26,6 +28,8 @@ type SwapStore = {
 };
 
 export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setState'], get: StoreApi<SwapStore>['getState']) => ({
+    targetAddress: undefined,
+    setTargetAddress: (address: string | undefined) => set({ targetAddress: address }),
     allowDenyBridges: { allow: undefined, deny: [], prefer: undefined },
     toggleAllowDenyBridge: (bridge: string) => {
         set((state: SwapStore) => {
@@ -95,7 +99,7 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
         return { outputTokens: tokens };
     }),
     setDistribution: (distribution: number[]) => set({ outputDistribution: distribution }),
-    setOutputChain: (chain: number | null) => set({ outputChain: chain, outputTokens: [] }),
+    setOutputChain: (chain: number | null) => set({ outputChain: chain, outputTokens: [], targetAddress: undefined }),
     setAmount: (token: Token, amount: bigint) => set((state: SwapStore) => {
         const inputAmount = { ...state.inputAmount };
         inputAmount[token.value] = amount;
@@ -140,5 +144,6 @@ export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setStat
         outputTokens: [],
         outputChain: null,
         inputAmount: {},
+        targetAddress: undefined,
     })
 }));

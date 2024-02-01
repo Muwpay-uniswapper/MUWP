@@ -1,7 +1,7 @@
 import Navbar from '@/components/layout/navbar'
 import './globals.scss'
 import { Inter } from 'next/font/google'
-import { cn } from '@/lib/front/utils'
+import { cn } from '@/lib/core/utils'
 import { Viewport, Metadata } from 'next'
 import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';

@@ -1,20 +1,10 @@
 import { inngest } from "./client";
 import { z } from "zod";
 import { Route } from "../li.fi-ts";
-
-
-const Address = z
-    .string()
-    .refine(value =>
-        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
-        {
-            message: 'Invalid Ethereum address.',
-            path: [], // path is kept empty to indicate whole string should be validated
-        }
-    );
+import { EthereumAddress } from "../core/model/Address";
 
 const Data = z.object({
-    address: Address,
+    address: EthereumAddress,
     route: Route.zod,
 });
 

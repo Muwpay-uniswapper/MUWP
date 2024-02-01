@@ -4,7 +4,7 @@ import * as React from "react"
 import { Check, ChevronDown, Loader2 } from "lucide-react"
 import { useNetwork, useSwitchNetwork } from "wagmi"
 import { Drawer } from 'vaul';
-import { cn } from "@/lib/front/utils"
+import { cn } from "@/lib/core/utils"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -15,9 +15,10 @@ import {
     CommandList,
 } from "@/components/ui/command"
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { Chain } from "@/lib/front/model/CellLike";
-import { useSwapStore } from "@/lib/front/data/swapStore"
-import { useBreakpoint } from "@/lib/front/media-query";
+import { Chain } from "@/lib/core/model/CellLike";
+import { useSwapStore } from "@/lib/core/data/swapStore"
+import { useBreakpoint } from "@/lib/core/media-query";
+import { Input } from "../ui/input";
 
 export function ChainCombobox({
     index,
@@ -37,7 +38,7 @@ export function ChainCombobox({
     const { isAboveMd } = useBreakpoint("md")
 
     const { chain } = useNetwork()
-    const { outputChain } = useSwapStore()
+    const { outputChain, targetAddress, setTargetAddress } = useSwapStore()
     const { pendingChainId, isLoading, reset, switchNetwork } = useSwitchNetwork({
         onSettled: () => {
             reset(); // reset mutation variables (eg. pendingChainId, error
@@ -64,7 +65,7 @@ export function ChainCombobox({
         )
     }
 
-    return (
+    return <>
         <Container open={open} onOpenChange={setOpen}>
             <ContainerTrigger asChild id={`token-combo-${index}`}>
                 <Button
@@ -93,7 +94,10 @@ export function ChainCombobox({
                 <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={switchNetwork} isAboveMd={isAboveMd} />
             </ContainerContent>
         </Container>
-    )
+        {value && mode == "output" && value?.type != "EVM" && <Input placeholder={`Your ${value?.label} address`}
+            value={targetAddress}
+            onChange={(e) => setTargetAddress(e.target.value)} />}
+    </>
 }
 function ChainListContent({
     value,

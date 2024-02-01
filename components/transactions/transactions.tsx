@@ -1,5 +1,5 @@
 "use client";
-import { useRouteStore } from "@/lib/front/data/routeStore";
+import { useRouteStore } from "@/lib/core/data/routeStore";
 import { DataTable } from "../networks/data-table";
 import { columns } from "./columns";
 import useSWR from "swr"

@@ -1,12 +1,12 @@
 "use server";
 import * as React from "react"
 import { TokenComboboxes } from "@/components/tokens/token_combobox";
-import { Chain, Token } from "@/lib/front/model/CellLike";
+import { Chain, Token } from "@/lib/core/model/CellLike";
 import { ChainCombobox } from "@/components/chains/chain-selector";
-import api from "@/lib/front/data/api"
+import api from "@/lib/core/data/api"
 import { TokensGet200Response } from "@/lib/li.fi-ts";
 import { muwpChains } from "@/muwp";
-import sharp from "sharp"
+import { TokenList } from '@uniswap/token-lists'
 
 export async function TokenSelector({
     id,
@@ -29,6 +29,8 @@ export async function TokenSelector({
         tokens = new TokensGet200Response()
     }
 
+    const safeTokens = await fetch("https://gateway.ipfs.io/ipns/tokens.uniswap.org").then((res) => res.json()) as TokenList
+
     const tokenList: Token[] = tokens.tokens?.map((token) => {
         return {
             value: `${token.symbol}:${token.name}:${token.address}`,
@@ -38,7 +40,8 @@ export async function TokenSelector({
             address: token.address,
             ticker: token.symbol,
             decimals: token.decimals,
-            chainId: chain!
+            chainId: chain!,
+            verified: safeTokens.tokens.find((safeToken) => safeToken.address == token.address && safeToken.chainId == token.chainId) != undefined
         }
     }) ?? []
 
@@ -51,7 +54,7 @@ export async function ChainSelector({
     mode: "input" | "output"
 }) {
     // unstable_noStore()
-    const chains = await api.chainsGet("EVM") // Backend not ready for SVM (address issues)
+    const chains = await api.chainsGet("EVM,SVM") // Backend not ready for SVM (address issues)
 
     const chainList: Chain[] = chains.chains?.filter((chain) => {
         if (mode == "input") {
@@ -66,9 +69,20 @@ export async function ChainSelector({
                 value: `${chain.key}:${chain.id}`,
                 label: chain.name,
                 logoURI: chain.logoURI,
-                chainId: chain.id
+                chainId: chain.id,
+                type: chain.chainType as "EVM" | "SVM"
             }
         }) ?? []
+
+    if (mode == "output") {
+        chainList.push({
+            value: "aptos:551", // 551 is the sum of the ASCII values of "aptos"... it's to avoid conflicts with other chains
+            label: "Aptos",
+            logoURI: "https://aptosfoundation.org/brandbook/logomark/SVG/Aptos_mark_WHT.svg",
+            chainId: 551,
+            type: "Aptos"
+        })
+    }
 
     return <ChainCombobox chainList={chainList} mode={mode} />
 }

@@ -5,28 +5,19 @@ import { z } from "zod";
 import { abi } from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
+import { EthereumAddress } from "@/lib/core/model/Address";
 
 BigInt.prototype.toJSON = function () {
     return this.toString();
 };
-
-const Address = z
-    .string()
-    .refine(value =>
-        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
-        {
-            message: 'Invalid Ethereum address.',
-            path: [], // path is kept empty to indicate whole string should be validated
-        }
-    );
 
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
         const input = await z.object({
-            from: Address,
-            account: Address,
+            from: EthereumAddress,
+            account: EthereumAddress,
             chainId: z.number(),
             routes: z.array(Route.zod),
             maxFeePerGas: z.coerce.bigint().optional(),

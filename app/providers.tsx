@@ -17,7 +17,7 @@ import {
 } from '@rainbow-me/rainbowkit/wallets';
 import { configureChains, createConfig, WagmiConfig, useNetwork, useSwitchNetwork } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
-import { useSwapStore } from '@/lib/front/data/swapStore';
+import { useSwapStore } from '@/lib/core/data/swapStore';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { muwpChains } from '@/muwp';

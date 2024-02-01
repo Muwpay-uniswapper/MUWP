@@ -1,11 +1,11 @@
 "use client";
 
-import { useBreakpoint } from "@/lib/front/media-query";
+import { useBreakpoint } from "@/lib/core/media-query";
 import { useState, useEffect } from "react";
-import { cn } from "@/lib/front/utils";
+import { cn } from "@/lib/core/utils";
 import Link from "next/link";
 import { useNetwork } from "wagmi";
-import { useSwapStore } from "@/lib/front/data/swapStore";
+import { useSwapStore } from "@/lib/core/data/swapStore";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);

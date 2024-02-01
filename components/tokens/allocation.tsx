@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Slider } from '../ui/slider';
-import { useSwapStore } from '@/lib/front/data/swapStore';
+import { useSwapStore } from '@/lib/core/data/swapStore';
 import { getColors } from './colour';
 
 const Allocation: React.FC = () => {
