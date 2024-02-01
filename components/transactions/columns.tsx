@@ -1,6 +1,6 @@
 "use client";
 
-import { Transaction } from "@/lib/front/data/routeStore";
+import { Transaction } from "@/lib/core/data/routeStore";
 import { ColumnDef, Row } from "@tanstack/react-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Route } from "@lifi/sdk";

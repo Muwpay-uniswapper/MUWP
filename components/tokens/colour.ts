@@ -1,6 +1,6 @@
 "use server";
 
-import { Token } from "@/lib/front/model/CellLike";
+import { Token } from "@/lib/core/model/CellLike";
 import colors from "tailwindcss/colors";
 import sharp from "sharp";
 

@@ -3,8 +3,8 @@
 import { Bridge } from "@/lib/li.fi-ts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Check, X } from "lucide-react";
-import { useSwapStore } from "@/lib/front/data/swapStore";
-import { cn } from "@/lib/front/utils";
+import { useSwapStore } from "@/lib/core/data/swapStore";
+import { cn } from "@/lib/core/utils";
 
 export function BridgesList({
     bridges

@@ -1,4 +1,4 @@
-import { CellLike, Token, Chain } from "@/lib/front/model/CellLike"
+import { CellLike, Token, Chain } from "@/lib/core/model/CellLike"
 import { useSwapStore } from "../swapStore"
 import { useNetwork, useSwitchNetwork } from "wagmi"
 
@@ -69,7 +69,8 @@ export class ChainComboboxDelegate extends ComboboxDelegate<Chain> {
             label: chain?.name ?? index.toString(),
             logoURI: "",
             value: `${chain?.name}-${chain?.id}`,
-            chainId: chain?.id ?? 1
+            chainId: chain?.id ?? 1,
+            type: "EVM"
         }
     }
 
@@ -94,7 +95,8 @@ export class ChainComboboxDelegate extends ComboboxDelegate<Chain> {
                     chainId: partialChain.id,
                     label: partialChain.name,
                     logoURI: "",
-                    value: `${partialChain?.name}-${partialChain?.id}`
+                    value: `${partialChain?.name}-${partialChain?.id}`,
+                    type: "EVM"
                 }
             })
     }

@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { Check } from "lucide-react"
+import { BadgeCheck, Check } from "lucide-react"
 import { Drawer } from 'vaul';
-import { cn } from "@/lib/front/utils"
+import { cn } from "@/lib/core/utils"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -14,9 +14,9 @@ import {
     CommandList,
 } from "@/components/ui/command"
 import { TokenInput } from "./token_input"
-import { Token } from "@/lib/front/model/CellLike"
-import { useSwapStore } from "@/lib/front/data/swapStore"
-import { useBreakpoint } from "@/lib/front/media-query";
+import { Token } from "@/lib/core/model/CellLike"
+import { useSwapStore } from "@/lib/core/data/swapStore"
+import { useBreakpoint } from "@/lib/core/media-query";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { useNetwork } from "wagmi";
 import Allocation from "./allocation";
@@ -168,6 +168,7 @@ function TokenListContent({
                                 )} />
                             <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
                             {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
+                            {token.verified && <BadgeCheck className="inline scale-75 opacity-50 ml-1" />}
                             {value?.value.toLowerCase?.() === token.value.toLowerCase() && <span className="text-red-500 absolute right-2 cursor-pointer">Remove token</span>}
                         </CommandItem>
                     ))}

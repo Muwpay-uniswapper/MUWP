@@ -1,4 +1,4 @@
-import api from '@/lib/front/data/api';
+import api from '@/lib/core/data/api';
 import { BridgesList } from './bridges';
 import { ExchangesList } from './exchanges';
 

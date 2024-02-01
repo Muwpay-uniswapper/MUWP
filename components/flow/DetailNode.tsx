@@ -5,7 +5,7 @@ import { FeeCost, GasCost, Step, Token } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDownToLine, Diff, DollarSign, Fuel, X } from 'lucide-react';
-import { useRouteStore } from '@/lib/front/data/routeStore';
+import { useRouteStore } from '@/lib/core/data/routeStore';
 
 export type DetailNodeData = Step & {
     edgeId: string;

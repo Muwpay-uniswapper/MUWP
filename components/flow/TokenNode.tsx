@@ -10,9 +10,9 @@ import {
 import { Route, Token } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
 import { ArrowDown, ChevronDown, Clock, DollarSign, Fuel } from 'lucide-react';
-import { useRouteStore } from '@/lib/front/data/routeStore';
+import { useRouteStore } from '@/lib/core/data/routeStore';
 import { Badge } from '../ui/badge';
-import { cn } from '@/lib/front/utils';
+import { cn } from '@/lib/core/utils';
 import { format } from './DetailNode';
 import { ChainIcon } from 'connectkit';
 

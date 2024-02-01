@@ -1,13 +1,13 @@
 import React from "react";
-import { Token } from "@/lib/front/model/CellLike"
-import { useSwapStore } from "@/lib/front/data/swapStore";
+import { Token } from "@/lib/core/model/CellLike"
+import { useSwapStore } from "@/lib/core/data/swapStore";
 import { Chain, formatUnits, parseUnits, zeroAddress } from "viem";
 import { Badge } from "../ui/badge";
 import { useAccount, useBalance, useNetwork } from "wagmi";
 import { BadgeCheck, FileDigit, Wallet2Icon } from "lucide-react";
 import { publicClient } from "@/app/providers";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { cn } from "@/lib/front/utils";
+import { cn } from "@/lib/core/utils";
 
 export function FormatTokenAddress({ token }: { token: Token }) {
     const { chain } = publicClient({ chainId: token.chainId })

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as SliderPrimitive from "./primitives/Slider"
-import { cn } from "@/lib/front/utils"
+import { cn } from "@/lib/core/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip"
 
 function _Slider(

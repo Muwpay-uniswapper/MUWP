@@ -1,17 +1,18 @@
 "use client";
 
-import { useSwapStore } from "@/lib/front/data/swapStore";
+import { useSwapStore } from "@/lib/core/data/swapStore";
 import { Button } from "../ui/button";
 import { useAccount, useNetwork } from "wagmi";
-import { useRouteStore } from "@/lib/front/data/routeStore";
+import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import React from "react";
+import { Input } from "../ui/input";
 
 
 
 export function FindRoutesButton() {
-    const { inputTokens, outputTokens, inputAmount, outputChain, allowDenyBridges, allowDenyExchanges, outputDistribution } = useSwapStore();
+    const { inputTokens, outputTokens, inputAmount, outputChain, allowDenyBridges, allowDenyExchanges, outputDistribution, targetAddress } = useSwapStore();
     const { fetchRoutes, isFetching, tempAccount, validUntil } = useRouteStore();
     const { chain } = useNetwork();
     const { address } = useAccount();
@@ -35,6 +36,7 @@ export function FindRoutesButton() {
             await fetchRoutes({
                 inputAmount,
                 fromAddress: address,
+                toAddress: targetAddress,
                 inputChain: chain.id,
                 inputTokens: inputTokens.map(token => ({
                     address: token.address,
@@ -59,8 +61,10 @@ export function FindRoutesButton() {
         }
     }
 
-    return <Button className="w-full h-full rounded flex justify-center items-center" onClick={onClick} disabled={isFetching}>
-        {isFetching && <Loader2 className="h-6 w-6 animate-spin mx-2" />}
-        Find Routes
-    </Button>
+    return <>
+        <Button className="w-full h-full rounded flex justify-center items-center" onClick={onClick} disabled={isFetching}>
+            {isFetching && <Loader2 className="h-6 w-6 animate-spin mx-2" />}
+            Find Routes
+        </Button>
+    </>
 }

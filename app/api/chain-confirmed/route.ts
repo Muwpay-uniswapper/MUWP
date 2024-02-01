@@ -1,3 +1,4 @@
+import { EthereumAddress } from "@/lib/core/model/Address";
 import { inngest } from "@/lib/inngest/client";
 import { z } from "zod";
 
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
         const input = z.object({
             transactionHash: Hash,
             chainId: z.number(),
-            accountAddress: Hash,
+            accountAddress: EthereumAddress,
         }).parse(body);
 
         await inngest.send({

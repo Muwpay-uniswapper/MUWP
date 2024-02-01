@@ -10,9 +10,11 @@ export interface Token extends CellLike {
     decimals: number,
     priceUSD?: string,
     chainId: number,
-    color?: string
+    color?: string,
+    verified: boolean
 };
 
 export interface Chain extends CellLike {
     chainId: number
+    type: "EVM" | "SVM" | "Aptos"
 }

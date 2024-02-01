@@ -3,28 +3,21 @@ import { z } from "zod";
 import * as store from "@/lib/kv/store";
 import { Step } from "../li.fi-ts";
 import { publicClient } from "@/app/providers";
-import { advancedAPI } from "../front/data/api";
+import { advancedAPI } from "../core/data/api";
 import { HDAccount, HttpTransport, PublicClient, TransactionExecutionError, createPublicClient, createWalletClient, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
 import { WalletClient } from "wagmi";
 import { abi as erc20ABI } from '@/out/ERC20.sol/ERC20.json'
+import { Address, EthereumAddress } from "../core/model/Address";
 
-const Address = z
-    .string()
-    .refine(value =>
-        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
-        {
-            message: 'Invalid Ethereum address.',
-            path: [], // path is kept empty to indicate whole string should be validated
-        }
-    );
+
 const Hash = z.string().refine(value => value.startsWith('0x'), {
     message: "Hash/Hex must start with '0x'",
 });
 
 const transactionRequestSchema = z.object({
-    from: Address, // Ethereum address format
+    from: EthereumAddress, // Ethereum address format
     to: Address, // Ethereum address format
     chainId: z.number().int(), // Chain ID should be an integer
     data: Hash, // Data field should start with 0x followed by hex characters
@@ -42,7 +35,7 @@ export const consumeStep = inngest.createFunction(
     { event: "app/consume.steps" },
     async ({ event, step }) => {
         const { remainingSteps, address, id, originalChainId, totalRoutes } = await z.object({
-            address: Address,
+            address: EthereumAddress,
             remainingSteps: z.array(Step.zod),
             totalRoutes: z.number().int(),
             id: z.string().optional(),

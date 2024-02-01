@@ -3,20 +3,11 @@ import { z } from "zod";
 import { Route } from "../li.fi-ts";
 import { createPublicClient, extractChain, http } from "viem";
 import * as chains from 'viem/chains'
+import { EthereumAddress } from "../core/model/Address";
 
-
-const Address = z
-    .string()
-    .refine(value =>
-        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
-        {
-            message: 'Invalid Ethereum address.',
-            path: [], // path is kept empty to indicate whole string should be validated
-        }
-    );
 
 const Data = z.object({
-    address: Address,
+    address: EthereumAddress,
     routes: z.array(Route.zod),
     totalGas: z.coerce.bigint(),
 });
@@ -29,7 +20,7 @@ export const initiateTransfer = inngest.createFunction(
     { event: "app/account.created" },
     async ({ event, step }) => {
         const accountData = await z.object({
-            address: Address,
+            address: EthereumAddress,
         }).parseAsync(event.data);
 
         const transfer = await step.waitForEvent("wait-for-user-to-select-route", {
