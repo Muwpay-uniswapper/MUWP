@@ -1,7 +1,7 @@
 import { parseUnits } from "viem";
 import { createConfiguration, DefaultApi, AdvancedApi, server2, Step } from "../../lib/li.fi-ts";
-import { expect } from "chai";
 import { LiFi, LifiStep } from '@lifi/sdk'
+import { describe, it, expect } from "bun:test";
 
 describe("Li.Fi API", function () {
     const config = createConfiguration({
@@ -13,14 +13,14 @@ describe("Li.Fi API", function () {
     it("Should get a quote", async function () {
         const res = await api.quoteGet("1", "1", "ETH", "USDC", "0x492804d7740150378be8d4bbf8ce012c5497dea9", parseUnits("1", 18).toString());
 
-        expect(res).to.not.be.undefined;
+        expect(res).toBeDefined();
     });
 
     it("Should fetch tokens", async function () {
         const res = await api.tokensGet("1");
 
-        expect(res.tokens).to.not.be.undefined;
-        expect(res.tokens?.length).to.be.greaterThan(0);
+        expect(res.tokens).toBeDefined();
+        expect(res.tokens?.length).toBeGreaterThan(0);
     });
 
     it("Should fetch routes", async function () {
@@ -35,8 +35,8 @@ describe("Li.Fi API", function () {
         });
 
 
-        expect(routes).to.not.be.undefined;
-        expect(routes.routes?.length).to.be.greaterThan(0);
+        expect(routes).toBeDefined();
+        expect(routes.routes?.length).toBeGreaterThan(0);
     });
 
     it("Should populate steps", async function () {
@@ -52,12 +52,12 @@ describe("Li.Fi API", function () {
 
         const step: Step = routes.routes?.[0].steps?.[0];
 
-        expect(step).to.not.be.undefined;
+        expect(step).toBeDefined();
 
         const populated = await advancedAPI.advancedStepTransactionPost(step);
 
-        expect(populated).to.not.be.undefined;
-        expect(populated.transactionRequest).to.not.be.undefined;
+        expect(populated).toBeDefined();
+        expect(populated.transactionRequest).toBeDefined();
     });
 
     it("Should handle multiple steps", async function () {
@@ -86,17 +86,17 @@ describe("Li.Fi API", function () {
 
         // console.log(JSON.stringify(step1, null, 2));
 
-        expect(step1).to.not.be.undefined;
-        expect(step2).to.not.be.undefined;
+        expect(step1).toBeDefined();
+        expect(step2).toBeDefined();
 
         const populated1 = await advancedAPI.advancedStepTransactionPost(step1);
         const populated2 = await advancedAPI.advancedStepTransactionPost(step2);
 
-        expect(populated1).to.not.be.undefined;
-        expect(populated1.transactionRequest).to.not.be.undefined;
+        expect(populated1).toBeDefined();
+        expect(populated1.transactionRequest).toBeDefined();
 
-        expect(populated2).to.not.be.undefined;
-        expect(populated2.transactionRequest).to.not.be.undefined;
+        expect(populated2).toBeDefined();
+        expect(populated2.transactionRequest).toBeDefined();
     });
 
     it("Should handle serialized payloads", async function () {
@@ -290,8 +290,8 @@ describe("Li.Fi API", function () {
 
         console.log(tx);
 
-        expect(tx).to.not.be.undefined;
-        expect(tx.transactionRequest).to.not.be.undefined;
+        expect(tx).toBeDefined();
+        expect(tx.transactionRequest).toBeDefined();
 
         // const populated1 = await advancedAPI.advancedStepTransactionPost(payload.data.remainingSteps[0] as Step);
 

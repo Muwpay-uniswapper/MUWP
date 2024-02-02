@@ -21,6 +21,7 @@ export async function handleLiFiRoutes(input: InputType, tempAccount: string) {
             }
 
             let routes = await advancedAPI.advancedRoutesPost(req);
+            console.log(`Fetched ${routes.routes.length} routes for ${token.value} -> ${input.outputTokens[0].value}`);
             // Filter routes that (1) contains more than 1 chain change, (2) contains more than 1 step after the first chain change
             routes.routes = routes.routes.filter(route => {
                 const chainChanges = route.steps.filter(step => step.action.fromChainId !== step.action.toChainId);
