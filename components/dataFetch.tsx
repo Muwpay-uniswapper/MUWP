@@ -76,10 +76,10 @@ export async function ChainSelector({
 
     if (mode == "output") {
         chainList.push({
-            value: "aptos:551", // 551 is the sum of the ASCII values of "aptos"... it's to avoid conflicts with other chains
+            value: "aptos:12360001", // 12360001 is the arbitrary chainId for Aptos by cBridge
             label: "Aptos",
             logoURI: "https://aptosfoundation.org/brandbook/logomark/SVG/Aptos_mark_WHT.svg",
-            chainId: 551,
+            chainId: 12360001,
             type: "Aptos"
         })
     }
