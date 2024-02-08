@@ -20,6 +20,7 @@ import { useBreakpoint } from "@/lib/core/media-query";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { useNetwork } from "wagmi";
 import Allocation from "./allocation";
+import { zeroAddress } from "viem";
 
 export function TokenComboboxes({ tokenList, mode }: { tokenList: Token[], mode: "input" | "output" }) {
     const tokenCount = useSwapStore((state) => {
@@ -168,7 +169,7 @@ function TokenListContent({
                                 )} />
                             <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
                             {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
-                            {token.verified && <BadgeCheck className="inline scale-75 opacity-50 ml-1" />}
+                            {(token.verified || token.address == zeroAddress) && <BadgeCheck className="inline scale-75 opacity-50 ml-1" />}
                             {value?.value.toLowerCase?.() === token.value.toLowerCase() && <span className="text-red-500 absolute right-2 cursor-pointer">Remove token</span>}
                         </CommandItem>
                     ))}
