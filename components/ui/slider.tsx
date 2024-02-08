@@ -4,11 +4,13 @@ import * as React from "react"
 import * as SliderPrimitive from "./primitives/Slider"
 import { cn } from "@/lib/core/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip"
+import { Token } from "@/lib/li.fi-ts"
 
 function _Slider(
   props: React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & {
     thumbs?: number;
     colors?: string[];
+    tokens: Token[];
   },
   ref: React.Ref<React.ElementRef<typeof SliderPrimitive.Root>>,
 ) {
@@ -57,7 +59,7 @@ function _Slider(
       }} key={i}>
         <TooltipTrigger asChild>
           <SliderPrimitive.Range
-            className={`absolute text-black text-center h-full rounded ${i == 0 ? "mr-1.5" : (i == thumbs ? "ml-1.5" : "mx-1.5")
+            className={`absolute text-black text-center h-full rounded pt-1 ${i == 0 ? "mr-1.5" : (i == thumbs ? "ml-1.5" : "mx-1.5")
               }`}
             style={{
               backgroundColor: props.colors && props.colors.length - 1 == thumbs ? props.colors[i] : "#fff"
@@ -70,9 +72,10 @@ function _Slider(
             {props.value && props.value.length == thumbs ? ((i < thumbs ? props.value[i] : 100) - (i > 0 ? props.value[i - 1] : 0)) : i}%
           </SliderPrimitive.Range>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="flex flex-row gap-1 items-center">
+          <img src={props.tokens[i]?.logoURI} alt={props.tokens[i]?.symbol} className="w-4 h-4 rounded-full" />
           <input
-            className="text-sm font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-white w-12"
+            className="text-sm font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-white w-12 text-right"
             value={inputValue}
             placeholder="0"
             onChange={e => {

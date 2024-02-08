@@ -26,6 +26,7 @@ const Allocation: React.FC = () => {
         <Slider
             className="h-8"
             colors={outputTokens.map((token) => colors[token.address] ?? "#fff")}
+            tokens={outputTokens}
             value={outputDistribution}
             onValueChange={setDistribution}
             max={100}
