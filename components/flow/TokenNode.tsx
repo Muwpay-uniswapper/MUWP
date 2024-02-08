@@ -23,6 +23,7 @@ export type TokenNodeData = Token & {
     isOutput?: boolean;
     isSource?: boolean;
     source?: string; // Means isTarget
+    isShifted?: boolean;
 }
 
 export default memo(({ data }: NodeProps<TokenNodeData>) => {

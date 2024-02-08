@@ -7,6 +7,7 @@ import api from "@/lib/core/data/api"
 import { TokensGet200Response } from "@/lib/li.fi-ts";
 import { muwpChains } from "@/muwp";
 import { TokenList } from '@uniswap/token-lists'
+import { AptosChainId, getTokensAptosBridge } from "@/lib/layerzero/aptos/omnichains";
 
 export async function TokenSelector({
     id,
@@ -23,7 +24,15 @@ export async function TokenSelector({
     }
     let tokens: TokensGet200Response
     try {
-        tokens = await api.tokensGet(chain.toString())
+        switch (chain) {
+
+            case AptosChainId:
+                tokens = await getTokensAptosBridge()
+                break
+            default:
+                tokens = await api.tokensGet(chain.toString())
+                break
+        }
     } catch (e) {
         console.log(e)
         tokens = new TokensGet200Response()
@@ -76,10 +85,10 @@ export async function ChainSelector({
 
     if (mode == "output") {
         chainList.push({
-            value: "aptos:12360001", // 12360001 is the arbitrary chainId for Aptos by cBridge
+            value: `aptos:${AptosChainId}`, // 12360001 is the arbitrary chainId for Aptos by cBridge
             label: "Aptos",
             logoURI: "https://aptosfoundation.org/brandbook/logomark/SVG/Aptos_mark_WHT.svg",
-            chainId: 12360001,
+            chainId: AptosChainId,
             type: "Aptos"
         })
     }

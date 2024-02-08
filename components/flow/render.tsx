@@ -39,7 +39,6 @@ const getLayoutedElements = (_nodes: { [key: string]: Node<TokenNodeData | Detai
         const nodeWithPosition = dagreGraph.node(node.id);
         node.targetPosition = isHorizontal ? Position.Left : Position.Top;
         node.sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
-
         // We are shifting the dagre node position (anchor=center center) to the top left
         // so it matches the React Flow node anchor point (top left).
         node.position = {
@@ -91,13 +90,16 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                         amounts: {}
                     },
                 };
+            } else if (i === 0) {
+                (nodes[fromNodeId] as Node<TokenNodeData>).data.isShifted = true;
             }
 
             // Use the previous node's ID as the key for the amount, or the node's own ID if it's the first one
             if (!previousNodeId) {
                 const _amount = (nodes[fromNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] ?? "0";
-                const amount = _amount === "?" ? "?" : BigInt(_amount) + BigInt(step.action.fromAmount);
+                const amount = _amount === "?" ? "0" : BigInt(_amount) + BigInt(step.action.fromAmount);
                 (nodes[fromNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] = amount.toString();
+                (nodes[fromNodeId] as Node<TokenNodeData>).data.isInput = i === 0;
             }
 
             // Add or update the target node
@@ -114,13 +116,17 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
                             isInput: false,
                             hasMultipleOutputs,
                             isOutput: i === route.steps.length - 1,
-                            amounts: {}
+                            amounts: {
+                                [fromNodeId]: "0"
+                            }
                         },
                     };
                 }
 
                 // Update the target node's amounts with the amount from the current source node
-                (nodes[toNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] = step.estimate?.toAmount || "?";
+                const _amount = (nodes[toNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] ?? "0";
+                const amount = _amount === "?" ? "0" : BigInt(_amount) + BigInt(step.estimate?.toAmount || "0");
+                (nodes[toNodeId] as Node<TokenNodeData>).data.amounts[fromNodeId] = amount.toString();
 
                 // Add an edge from the source to the target
                 const edgeId = `${fromNodeId}-${toNodeId}`;

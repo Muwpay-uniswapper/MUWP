@@ -169,6 +169,10 @@
 			top: -10px;
 			left: 50%;
 		}
+
+		&.target.left {
+			left: -10px;
+		}
 	}
 
 	&__node {

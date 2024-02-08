@@ -778,7 +778,7 @@ export class ObservableDefaultApi {
      * @param token Address or symbol of the token on the requested chain
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public tokenGetWithHttpInfo(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Observable<HttpInfo<Array<Token>>> {
+    public tokenGetWithHttpInfo(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Observable<HttpInfo<Token>> {
         const requestContextPromise = this.requestFactory.tokenGet(chain, token, xLifiApiKey, _options);
 
         // build promise chain
@@ -804,8 +804,8 @@ export class ObservableDefaultApi {
      * @param token Address or symbol of the token on the requested chain
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public tokenGet(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Observable<Array<Token>> {
-        return this.tokenGetWithHttpInfo(chain, token, xLifiApiKey, _options).pipe(map((apiResponse: HttpInfo<Array<Token>>) => apiResponse.data));
+    public tokenGet(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Observable<Token> {
+        return this.tokenGetWithHttpInfo(chain, token, xLifiApiKey, _options).pipe(map((apiResponse: HttpInfo<Token>) => apiResponse.data));
     }
 
     /**
