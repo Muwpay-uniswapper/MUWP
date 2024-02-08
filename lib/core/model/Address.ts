@@ -30,4 +30,4 @@ export const AptosAddress = z
         }
     );
 
-export const Address = z.union([EthereumAddress, SolanaAddress, AptosAddress]);
+export const Address = z.union([EthereumAddress, SolanaAddress, AptosAddress, z.string()]);

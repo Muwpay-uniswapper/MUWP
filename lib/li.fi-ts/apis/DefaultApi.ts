@@ -1482,13 +1482,13 @@ export class DefaultApiResponseProcessor {
      * @params response Response returned by the server for a request to tokenGet
      * @throws ApiException if the response code was not in [200, 299]
      */
-    public async tokenGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Array<Token>>> {
+    public async tokenGetWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Token>> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
-            const body: Array<Token> = ObjectSerializer.deserialize(
+            const body: Token = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Array<Token>", ""
-            ) as Array<Token>;
+                "Token", ""
+            ) as Token;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
         if (isCodeInRange("400", response.httpStatusCode)) {
@@ -1500,10 +1500,10 @@ export class DefaultApiResponseProcessor {
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
-            const body: Array<Token> = ObjectSerializer.deserialize(
+            const body: Token = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Array<Token>", ""
-            ) as Array<Token>;
+                "Token", ""
+            ) as Token;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 

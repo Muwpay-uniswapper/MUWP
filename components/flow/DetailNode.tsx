@@ -40,7 +40,7 @@ export default memo(({ data }: NodeProps<DetailNodeData>) => {
                     updateNodes(nodes.map((node) => node.id));
                 }} />
                 <CardTitle>Details</CardTitle>
-                <CardDescription>{data.action.fromToken.symbol} to {data.action.toToken.symbol} on {data.tool}</CardDescription>
+                <CardDescription>{data.action.fromToken.symbol} to {data.action.toToken.symbol} on {data.toolDetails.name ?? data.tool}</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-2">
                 <p><Diff className="inline w-4 h-4 mr-1" /> Slippage</p>

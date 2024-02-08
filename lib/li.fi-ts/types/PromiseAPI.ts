@@ -566,7 +566,7 @@ export class PromiseDefaultApi {
      * @param token Address or symbol of the token on the requested chain
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public tokenGet(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Promise<Array<Token>> {
+    public tokenGet(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Promise<Token> {
         const result = this.api.tokenGet(chain, token, xLifiApiKey, _options);
         return result.toPromise();
     }
