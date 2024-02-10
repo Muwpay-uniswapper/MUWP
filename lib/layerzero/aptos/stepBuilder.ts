@@ -14,12 +14,12 @@ export async function FinalAptosStepBuilder({
     fromAddress,
     toAddress,
 }: {
-    target: `0x${string}`;
+    target: `0x${string}` | string;
     fromChainId: number;
-    fromTokenAddress: `0x${string}`;
+    fromTokenAddress: `0x${string}` | string;
     fromAmount: string;
-    fromAddress: `0x${string}`;
-    toAddress: `0x${string}`;
+    fromAddress: `0x${string}` | string;
+    toAddress: `0x${string}` | string;
 }): Promise<Step> {
     const client = createPublicClient({
         chain: extractChain({
@@ -55,12 +55,12 @@ export async function FinalAptosStepBuilder({
             2,
             10000n,
             estimate,
-            "0xedd16b36f2c2a61aced8e42045ce37fa0bf444604577e05b2d0918c7ec9f1744" // Aptos address to receive gas
+            toAddress as `0x${string}` // Aptos address to receive gas
         ]
     )
 
     const [nativeFee, zroFee] = await contract.read.quoteForSend([{
-        refundAddress: "0xD34FDA64241a3D3ba71041AC4BbFc188d795BF15",
+        refundAddress: fromAddress as `0x${string}`,
         zroPaymentAddress: zeroAddress,
     }, adapterParams])
 
@@ -70,10 +70,10 @@ export async function FinalAptosStepBuilder({
     const weth = await contract.read.weth();
 
     gasEstimate += await contract.estimateGas.sendETHToAptos([
-        toAddress,
+        toAddress as `0x${string}`,
         parseEther("1"),
         {
-            refundAddress: fromAddress,
+            refundAddress: fromAddress as `0x${string}`,
             zroPaymentAddress: zeroAddress,
         },
         adapterParams

@@ -1,10 +1,7 @@
-import api, { advancedAPI } from "@/lib/core/data/api";
 import { InputType } from "./route";
-import { Route, Step, StepTypeEnum } from "@/lib/li.fi-ts";
-import { AptosChains, AptosTokensAddress, AvailablePairs, OmnichainAptosBridge, getTokensAptosBridge } from "@/lib/layerzero/aptos/omnichains";
-import { createPublicClient, encodePacked, extractChain, formatUnits, getContract, http, parseUnits, zeroAddress } from "viem";
-import { OmnichainAptosBridgeAbi } from "@/lib/layerzero/aptos/abi";
-import { chains } from "@/app/providers";
+import { Route, Step } from "@/lib/li.fi-ts";
+import { AvailablePairs } from "@/lib/layerzero/aptos/omnichains";
+import { createPublicClient, extractChain, formatUnits, http, parseUnits } from "viem";
 import { nanoid } from "nanoid";
 import { muwpChains } from "@/muwp";
 import { FinalAptosStepBuilder } from "@/lib/layerzero/aptos/stepBuilder";
@@ -39,12 +36,15 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
         transport: http()
     })
 
-    const _routes = queries.map(async req => {
+    const rawRoutes = [];
+    for (let req of queries) {
+
         const previousRoutes: Route[] = [];
 
         const possibilities = AvailablePairs[req.fromChainId];
         if (!possibilities) throw new Error(`No routes available for ${req.fromChainId}`);
         let target = possibilities?.[req.fromTokenAddress.toLowerCase()];
+
         if (!target || target != req.toTokenAddress) {
             const outputToken = Object.entries(AvailablePairs[req.fromChainId]!).find(([_, value]) => value == req.toTokenAddress);
             if (!outputToken) throw new Error(`No route found for ${req.fromTokenAddress} -> ${req.toTokenAddress}`);
@@ -62,7 +62,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
 
             const { routes } = await handleLiFiRoutes(lifiInput, tempAccount);
 
-            previousRoutes.push(...routes[req.fromTokenAddress])
+            previousRoutes.push(...routes[req.fromTokenAddress]);
 
             target = possibilities?.[outputTokenAddress];
         }
@@ -70,23 +70,21 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
         console.log(`Target: ${target}`)
         console.log(`Looking at ${previousRoutes.length} previous routes`)
 
-        const _routes = new Array(Math.max(previousRoutes.length, 1)).map(async (_, i) => {
-            const steps = previousRoutes.length > 0 ? previousRoutes[i].steps : [];
+        const _routes = previousRoutes.map(async prevRoute => {
+            const steps = [...prevRoute.steps];
 
             const finalStep = await FinalAptosStepBuilder({
                 target: target as `0x${string}`,
-                fromChainId: steps.length > 0 ? steps[steps.length - 1].action.toChainId : req.fromChainId,
-                fromTokenAddress: (steps.length > 0 ? steps[steps.length - 1].action.toToken.address : req.fromTokenAddress) as `0x${string}`,
-                fromAmount: (steps.length > 0 ? steps[steps.length - 1].estimate?.toAmount : req.fromAmount) as string,
-                fromAddress: (steps.length > 0 ? steps[steps.length - 1].action.toAddress : req.fromAddress) as `0x${string}`,
-                toAddress: req.toAddress as `0x${string}`,
+                fromChainId: steps[steps.length - 1].action.toChainId ?? req.fromChainId,
+                fromTokenAddress: steps[steps.length - 1].action.toToken.address ?? req.fromTokenAddress,
+                fromAmount: steps[steps.length - 1].estimate?.toAmount ?? req.fromAmount,
+                fromAddress: steps[steps.length - 1].action.toAddress ?? req.fromAddress,
+                toAddress: req.toAddress as `0x${string}`
             })
-
-            steps.push(finalStep);
 
             const route: Route = {
                 id: nanoid(),
-                steps,
+                steps: [...steps, finalStep],
                 fromAmount: steps[0].action.fromAmount,
                 fromChainId: steps[0].action.fromChainId,
                 fromAmountUSD: formatUnits(parseUnits(steps[0].action.fromToken.priceUSD ?? "0", steps[0].action.fromToken.decimals) * BigInt(steps[0].action.fromAmount), steps[0].action.fromToken.decimals * 2),
@@ -106,31 +104,31 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
             return route;
         });
 
-        const routes = await Promise.all(_routes);
-
-        return {
-            routes, unavailableRoutes: { filteredOut: [] }
-        }
-    });
+        rawRoutes.push({
+            routes: await Promise.all(_routes),
+            unavailableRoutes: { filteredOut: [] }
+        });
+    }
 
     console.log(`Fetching ${queries.length} routes`)
 
-    const rawRoutes = await Promise.all(_routes); // Fetch all routes in parallel
-
     console.log(`${rawRoutes.length} Routes fetched successfully`);
+
+    // console.log(JSON.stringify(rawRoutes, null, 2));
 
     const routes: {
         [key: string]: Route[]
     } = {};
 
-    for (let index = 0; index < rawRoutes.length; index++) {
-        const rawRoute = rawRoutes[index];
+    for (let rawRoute of rawRoutes) {
         const _routes = rawRoute.routes;
+        const index = rawRoutes.indexOf(rawRoute);
         if (!_routes || typeof rawRoute.routes[0] == "undefined" || typeof rawRoute.routes[0].fromAddress == "undefined") {
             console.log(JSON.stringify(rawRoute.unavailableRoutes?.filteredOut, null, 2));
-            throw new Error(`No route found for ${input.inputTokens[mode == "single" ? index : 0].value} -> ${input.outputTokens[mode == "single" ? 0 : index].value}`);
+            throw new Error(`No route found for ${input.inputTokens[mode == "single" ? 0 : index].value} -> ${input.outputTokens[mode == "single" ? 0 : index].value}`);
         }
-        const key = mode == "single" ? rawRoute.routes[0].fromToken.address : rawRoute.routes[0].toToken.address;
+
+        const key = mode == "single" ? _routes[0].fromToken.address : _routes[0].toToken.address;
         routes[key] = _routes;
     }
 
