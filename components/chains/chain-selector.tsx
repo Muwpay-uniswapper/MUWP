@@ -19,6 +19,7 @@ import { Chain } from "@/lib/core/model/CellLike";
 import { useSwapStore } from "@/lib/core/data/swapStore"
 import { useBreakpoint } from "@/lib/core/media-query";
 import { Input } from "../ui/input";
+import { AddressSelector } from "./AddressSelector";
 
 export function ChainCombobox({
     index,
@@ -94,9 +95,11 @@ export function ChainCombobox({
                 <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={switchNetwork} isAboveMd={isAboveMd} />
             </ContainerContent>
         </Container>
-        {value && mode == "output" && value?.type != "EVM" && <Input placeholder={`Your ${value?.label} address`}
-            value={targetAddress}
-            onChange={(e) => setTargetAddress(e.target.value)} />}
+        {value && mode == "output" && value?.type != "EVM" && <AddressSelector
+            targetAddress={targetAddress ?? ""}
+            setTargetAddress={setTargetAddress}
+            chain={value!}
+        />}
     </>
 }
 function ChainListContent({

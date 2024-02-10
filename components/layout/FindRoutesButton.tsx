@@ -6,7 +6,7 @@ import { useAccount, useNetwork } from "wagmi";
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "../ui/input";
 
 
@@ -16,11 +16,11 @@ export function FindRoutesButton() {
     const { fetchRoutes, isFetching, tempAccount, validUntil } = useRouteStore();
     const { chain } = useNetwork();
     const { address } = useAccount();
-
+    const [trials, setTrials] = useState(0);
     React.useEffect(() => {
-        const interval = setInterval(() => {
-            if (validUntil && validUntil < new Date() && !isFetching) {
-                onClick();
+        const interval = setInterval(async () => {
+            if (validUntil && validUntil < new Date() && !isFetching && trials <= 3) {
+                await onClick();
             }
         }, 1000);
 
@@ -54,10 +54,15 @@ export function FindRoutesButton() {
                     exchanges: allowDenyExchanges,
                 }
             })
+
+            setTrials(0);
         } catch (e) {
             toast.error("Error fetching routes", {
                 description: <>{e instanceof Error && e.message}<br />Maybe try a different route!</>
             })
+            if (validUntil && validUntil < new Date()) {
+                setTrials(trials + 1);
+            }
         }
     }
 

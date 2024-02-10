@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { createPublicClient, decodeAbiParameters, encodePacked, getContract, http, zeroAddress } from 'viem'
-import { OmnichainAptosBridge } from "./omnichains";
+import { AptosChains, OmnichainAptosBridge } from "./omnichains";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { avalanche, mainnet } from 'viem/chains'
 
@@ -13,7 +13,7 @@ describe("Aptos", () => {
     it("should be able to get quotes", async () => {
         // 1. Create contract instance
         const contract = getContract({
-            address: OmnichainAptosBridge.avalanche as `0x${string}`,
+            address: OmnichainAptosBridge[AptosChains.avalanche] as `0x${string}`,
             abi: OmnichainAptosBridgeAbi,
             // 1a. Insert a single client
             publicClient: client,
@@ -43,11 +43,11 @@ describe("Aptos", () => {
         const uint256Data_2 = hexStr.slice(68, 132);
         const bytesData = hexStr.slice(132);
 
-        function hexToUint16(hex) {
+        function hexToUint16(hex: string) {
             return parseInt(hex, 16);
         }
 
-        function hexToUint256(hex) {
+        function hexToUint256(hex: string) {
             return BigInt("0x" + hex);
         }
 
