@@ -73,7 +73,7 @@ function _Slider(
           </SliderPrimitive.Range>
         </TooltipTrigger>
         <TooltipContent className="flex flex-row gap-1 items-center">
-          <img src={props.tokens[i]?.logoURI} alt={props.tokens[i]?.symbol} className="w-4 h-4 rounded-full" />
+          <img src={props.tokens[i]?.logoURI} alt={props.tokens[i]?.value} className="w-4 h-4 rounded-full" />
           <input
             className="text-sm font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-white w-12 text-right"
             value={inputValue}
