@@ -10,13 +10,14 @@ import * as chains from 'viem/chains'
 import { WalletClient } from "wagmi";
 import { abi as erc20ABI } from '@/out/ERC20.sol/ERC20.json'
 import { Address, EthereumAddress } from "../core/model/Address";
+import { AptosBridgeTxData } from "../layerzero/aptos/txData";
 
 
 const Hash = z.string().refine(value => value.startsWith('0x'), {
     message: "Hash/Hex must start with '0x'",
 });
 
-const transactionRequestSchema = z.object({
+export const transactionRequestSchema = z.object({
     from: EthereumAddress, // Ethereum address format
     to: Address, // Ethereum address format
     chainId: z.number().int(), // Chain ID should be an integer
@@ -55,7 +56,12 @@ export const consumeStep = inngest.createFunction(
                 _step.estimate.toAmountMin = "1"; // 1 output token, which is like 0.00...1 ETH
             }
 
-            const fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
+            let fullStep: Step;
+            if (_step.tool == "layerzero") {
+                fullStep = await AptosBridgeTxData(_step as Step);
+            } else {
+                fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
+            }
             const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
             if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
 

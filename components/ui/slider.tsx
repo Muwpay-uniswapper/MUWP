@@ -4,7 +4,7 @@ import * as React from "react"
 import * as SliderPrimitive from "./primitives/Slider"
 import { cn } from "@/lib/core/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip"
-import { Token } from "@/lib/li.fi-ts"
+import { Token } from "@/lib/core/model/CellLike"
 
 function _Slider(
   props: React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & {

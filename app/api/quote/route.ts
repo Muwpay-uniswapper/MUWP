@@ -71,7 +71,6 @@ export async function POST(request: Request) {
 
             console.log("Fetching routes");
 
-
             const { routes } = await (input.outputChain == AptosChainId ? handleAptosRoutes(input, tempAccount) : handleLiFiRoutes(input, tempAccount));
 
             return JSON.stringify({

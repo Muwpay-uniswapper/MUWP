@@ -8,6 +8,7 @@ import { BadgeCheck, FileDigit, Wallet2Icon } from "lucide-react";
 import { publicClient } from "@/app/providers";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "@/lib/core/utils";
+import { Button } from "../ui/button";
 
 export function FormatTokenAddress({ token }: { token: Token }) {
     const { chain } = publicClient({ chainId: token.chainId })
@@ -142,7 +143,7 @@ export function TokenInput({
         setInputValue(value)
     }
 
-    return <div className="w-full bg-zinc-800">
+    return <div className="w-full bg-zinc-800 relative">
         <div className="flex flex-wrap items-center justify-between p-4 rounded">
             <div className="flex flex-col  items-start w-full">
                 <div className="flex items-center space-x-2">
