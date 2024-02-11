@@ -1,70 +1,26 @@
-import { ResponseContext, RequestContext, HttpFile, HttpInfo } from '../http/http';
+import { HttpInfo } from '../http/http';
 import { Configuration } from '../configuration'
 
-import { Action } from '../models/Action';
-import { AllowDenyPrefer } from '../models/AllowDenyPrefer';
-import { BasicTransaction } from '../models/BasicTransaction';
-import { Bridge } from '../models/Bridge';
-import { BridgeDefinition } from '../models/BridgeDefinition';
 import { BridgesEnum } from '../models/BridgesEnum';
-import { Chain } from '../models/Chain';
-import { ChainMetamask } from '../models/ChainMetamask';
-import { ChainMetamaskNativeCurrency } from '../models/ChainMetamaskNativeCurrency';
 import { ChainsResponse } from '../models/ChainsResponse';
-import { Connection } from '../models/Connection';
 import { ConnectionsResponse } from '../models/ConnectionsResponse';
-import { ContractCall } from '../models/ContractCall';
 import { ContractCallRequest } from '../models/ContractCallRequest';
 import { ContractCallsRequest } from '../models/ContractCallsRequest';
-import { Estimate } from '../models/Estimate';
-import { EstimateData } from '../models/EstimateData';
-import { Exchange } from '../models/Exchange';
-import { ExchangeDefinition } from '../models/ExchangeDefinition';
-import { ExchangesEnum } from '../models/ExchangesEnum';
-import { FeeBalances } from '../models/FeeBalances';
-import { FeeCost } from '../models/FeeCost';
-import { GasCost } from '../models/GasCost';
 import { GasPrice } from '../models/GasPrice';
 import { IntegratorResponse } from '../models/IntegratorResponse';
 import { IntegratorWithdrawalResponse } from '../models/IntegratorWithdrawalResponse';
-import { IntegratorWithdrawalResponseTransactionRequest } from '../models/IntegratorWithdrawalResponseTransactionRequest';
 import { LIFuelStatus } from '../models/LIFuelStatus';
-import { LIFuelStatusStateEnum } from '../models/LIFuelStatusStateEnum';
 import { PossibilitiesResponse } from '../models/PossibilitiesResponse';
-import { PossibilitiesTopicEnum } from '../models/PossibilitiesTopicEnum';
 import { PossiblitiesRequest } from '../models/PossiblitiesRequest';
 import { QuoteBridgesEnum } from '../models/QuoteBridgesEnum';
 import { QuoteExchangesEnum } from '../models/QuoteExchangesEnum';
-import { QuoteGet404Response } from '../models/QuoteGet404Response';
-import { Route } from '../models/Route';
-import { RouteOptions } from '../models/RouteOptions';
 import { RoutesRequest } from '../models/RoutesRequest';
 import { RoutesResponse } from '../models/RoutesResponse';
 import { StatusResponse } from '../models/StatusResponse';
 import { Step } from '../models/Step';
-import { StepRequest } from '../models/StepRequest';
-import { StepRequestAction } from '../models/StepRequestAction';
-import { StepRequestActionFromToken } from '../models/StepRequestActionFromToken';
-import { StepRequestEstimate } from '../models/StepRequestEstimate';
-import { StepRequestEstimateData } from '../models/StepRequestEstimateData';
-import { StepRequestEstimateDataBid } from '../models/StepRequestEstimateDataBid';
-import { StepRequestEstimateFeeCostsInner } from '../models/StepRequestEstimateFeeCostsInner';
-import { StepRequestEstimateGasCostsInner } from '../models/StepRequestEstimateGasCostsInner';
-import { StepRequestEstimateGasCostsInnerToken } from '../models/StepRequestEstimateGasCostsInnerToken';
-import { StepRequestExecution } from '../models/StepRequestExecution';
-import { StepRequestExecutionProcessInner } from '../models/StepRequestExecutionProcessInner';
-import { SupportedChains } from '../models/SupportedChains';
 import { Token } from '../models/Token';
-import { TokenBalances } from '../models/TokenBalances';
-import { TokenRequest } from '../models/TokenRequest';
 import { TokensGet200Response } from '../models/TokensGet200Response';
-import { ToolError } from '../models/ToolError';
 import { Tools } from '../models/Tools';
-import { TransactionInfo } from '../models/TransactionInfo';
-import { TxInfo } from '../models/TxInfo';
-import { UnavailableRoutes } from '../models/UnavailableRoutes';
-import { UnavailableRoutesFailedInner } from '../models/UnavailableRoutesFailedInner';
-import { UnavailableRoutesFilteredOutInner } from '../models/UnavailableRoutesFilteredOutInner';
 import { WalletAnalyticsResponse } from '../models/WalletAnalyticsResponse';
 import { ObservableAdvancedApi } from './ObservableAPI';
 
@@ -554,7 +510,7 @@ export class PromiseDefaultApi {
      * @param token Address or symbol of the token on the requested chain
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
-    public tokenGetWithHttpInfo(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Promise<HttpInfo<Array<Token>>> {
+    public tokenGetWithHttpInfo(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Promise<HttpInfo<Token>> {
         const result = this.api.tokenGetWithHttpInfo(chain, token, xLifiApiKey, _options);
         return result.toPromise();
     }
