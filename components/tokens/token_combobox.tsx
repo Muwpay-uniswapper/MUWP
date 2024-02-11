@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { BadgeCheck, Check } from "lucide-react"
+import { BadgeCheck, Check, XIcon } from "lucide-react"
 import { Drawer } from 'vaul';
 import { cn } from "@/lib/core/utils"
 import { Button } from "@/components/ui/button"
@@ -56,7 +56,7 @@ export function TokenCombobox({
 
     const { isAboveMd } = useBreakpoint("md")
 
-    const { inputTokens, outputTokens: outputToken } = useSwapStore()
+    const { inputTokens, outputTokens: outputToken, removeInputToken, removeOutputToken } = useSwapStore()
 
     const value = mode == "input" ? inputTokens[index ?? 0] : outputToken[index ?? 0]
 
@@ -75,23 +75,36 @@ export function TokenCombobox({
     return (
         <Container open={open} onOpenChange={setOpen}>
             <ContainerTrigger asChild id={`token-combo-${index}`}>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className={cn(
-                        "w-full border h-auto",
-                        value ? "p-0 overflow-clip" : "border-dashed border-gray-300 rounded-md p-2",
-                        !value && (inputTokens.length % 2 == 0) ? "col-span-full" : ""
-                    )}
-                >
-                    {value
-                        ? <TokenInput token={value} mode={mode} />
-                        : <div className="grid gap-2 place-items-center">
-                            <img src="/icons/plus.diamond.fill.svg" alt="plus" className="mr-2 h-8 w-8 opacity-50" />
-                            <div className="opacity-50">Select Token</div>
-                        </div>}
-                </Button>
+                <div className="relative group">
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className={cn(
+                            "w-full border h-auto",
+                            value ? "p-0 overflow-clip" : "border-dashed border-gray-300 rounded-md p-2",
+                            !value && (inputTokens.length % 2 == 0) ? "col-span-full" : ""
+                        )}
+                    >
+                        {value
+                            ? <TokenInput token={value} mode={mode} />
+                            : <div className="grid gap-2 place-items-center">
+                                <img src="/icons/plus.diamond.fill.svg" alt="plus" className="mr-2 h-8 w-8 opacity-50" />
+                                <div className="opacity-50">Select Token</div>
+                            </div>}
+                    </Button>
+                    {value && <Button
+                        variant="outline"
+                        className="rounded-full p-1 h-auto absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 group-hover:opacity-100 opacity-0 transition-opacity duration-200"
+                        onClick={e => {
+                            e.stopPropagation()
+                            if (mode == "input") removeInputToken(index);
+                            else removeOutputToken(index);
+                        }}
+                    >
+                        <XIcon className="w-4 h-4" />
+                    </Button>}
+                </div>
             </ContainerTrigger>
             <ContainerContent side="right">
                 <TokenListContent index={index} tokenList={tokenList} setOpen={setOpen} mode={mode} isAboveMd={isAboveMd} />

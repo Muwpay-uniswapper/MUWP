@@ -42,7 +42,7 @@ function closestColor(rgb: RGB, hexColors: string[]): string {
     let closestColor: string = (rgb.r << 16 | rgb.g << 8 | rgb.b).toString(16).padStart(6, '0');
     for (let i = 0; i < hexColors.length; i++) {
         let distance = colorDistance(rgb, hexColors[i]);
-        if (distance < min) {
+        if (distance < min && distance !== Infinity) {
             min = distance;
             closestColor = hexColors[i];
         }

@@ -1,9 +1,8 @@
 import { InputType } from "./route";
-import { Route, Step } from "@/lib/li.fi-ts";
+import { Route } from "@/lib/li.fi-ts";
 import { AvailablePairs } from "@/lib/layerzero/aptos/omnichains";
-import { createPublicClient, extractChain, formatUnits, http, parseUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import { nanoid } from "nanoid";
-import { muwpChains } from "@/muwp";
 import { FinalAptosStepBuilder } from "@/lib/layerzero/aptos/stepBuilder";
 import { handleLiFiRoutes } from "./fetchRoutesLiFi";
 
@@ -26,15 +25,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
             }
 
             return req;
-        })
-
-    const client = createPublicClient({
-        chain: extractChain({
-            chains: muwpChains,
-            id: input.inputChain
-        }),
-        transport: http()
-    })
+        });
 
     const rawRoutes = [];
     for (let req of queries) {
@@ -70,21 +61,30 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
         console.log(`Target: ${target}`)
         console.log(`Looking at ${previousRoutes.length} previous routes`)
 
+        if (previousRoutes.length == 0) {
+            //@ts-expect-error
+            previousRoutes.push({
+                steps: [],
+                tags: ["RECOMMENDED"]
+            });
+        }
         const _routes = previousRoutes.map(async prevRoute => {
             const steps = [...prevRoute.steps];
 
             const finalStep = await FinalAptosStepBuilder({
                 target: target as `0x${string}`,
-                fromChainId: steps[steps.length - 1].action.toChainId ?? req.fromChainId,
-                fromTokenAddress: steps[steps.length - 1].action.toToken.address ?? req.fromTokenAddress,
-                fromAmount: steps[steps.length - 1].estimate?.toAmount ?? req.fromAmount,
-                fromAddress: steps[steps.length - 1].action.toAddress ?? req.fromAddress,
+                fromChainId: steps[steps.length - 1]?.action.toChainId ?? req.fromChainId,
+                fromTokenAddress: steps[steps.length - 1]?.action.toToken.address ?? req.fromTokenAddress,
+                fromAmount: steps[steps.length - 1]?.estimate?.toAmount ?? req.fromAmount,
+                fromAddress: steps[steps.length - 1]?.action.toAddress ?? req.fromAddress,
                 toAddress: req.toAddress as `0x${string}`
             })
 
+            steps.push(finalStep);
+
             const route: Route = {
                 id: nanoid(),
-                steps: [...steps, finalStep],
+                steps,
                 fromAmount: steps[0].action.fromAmount,
                 fromChainId: steps[0].action.fromChainId,
                 fromAmountUSD: formatUnits(parseUnits(steps[0].action.fromToken.priceUSD ?? "0", steps[0].action.fromToken.decimals) * BigInt(steps[0].action.fromAmount), steps[0].action.fromToken.decimals * 2),
@@ -96,7 +96,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
                 toToken: steps[steps.length - 1].action.toToken,
                 containsSwitchChain: true,
                 fromAddress: steps[0].action.fromAddress,
-                tags: ["RECOMMENDED"],
+                tags: prevRoute.tags,
                 toAddress: steps[steps.length - 1].action.toAddress,
                 gasCostUSD: steps.map(step => step.estimate?.gasCosts?.map(gas => Number(gas.amountUSD ?? "0")).reduce((a, b) => a + b, 0) ?? 0).reduce((a, b) => a + b, 0).toString(),
             }

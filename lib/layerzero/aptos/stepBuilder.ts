@@ -12,7 +12,7 @@ export async function FinalAptosStepBuilder({
     fromTokenAddress,
     fromAmount,
     fromAddress,
-    toAddress,
+    toAddress
 }: {
     target: `0x${string}` | string;
     fromChainId: number;
@@ -29,9 +29,12 @@ export async function FinalAptosStepBuilder({
         transport: http()
     })
 
-    const aptosToken = await getTokensAptosBridge();
-    const fromToken = await api.tokenGet(fromChainId.toString(), fromTokenAddress);
-    const nativeToken = await api.tokenGet(fromChainId.toString(), zeroAddress);
+    const [aptosToken, fromToken, nativeToken, aptosGas] = await Promise.all([
+        getTokensAptosBridge(),
+        api.tokenGet(fromChainId.toString(), fromTokenAddress),
+        api.tokenGet(fromChainId.toString(), zeroAddress),
+        fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json())
+    ]);
 
     console.log(`Fetching routes for ${fromToken.name} -> ${aptosToken.tokens?.find(t => t.address == target)!.name}`);
 
@@ -42,7 +45,6 @@ export async function FinalAptosStepBuilder({
         publicClient: client,
     })
 
-    const aptosGas = await fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json());
     const gasUnits = 1301n;
     const estimate = gasUnits * BigInt(aptosGas.gas_estimate) * 4n;
 
@@ -69,7 +71,7 @@ export async function FinalAptosStepBuilder({
     // if (fromTokenAddress == zeroAddress) {
     const weth = await contract.read.weth();
 
-    gasEstimate += await contract.estimateGas.sendETHToAptos([
+    const rawGasEstimate = await contract.estimateGas.sendETHToAptos([
         toAddress as `0x${string}`,
         parseEther("1"),
         {
@@ -81,27 +83,17 @@ export async function FinalAptosStepBuilder({
         account: weth,
         value: parseEther("1") + nativeFee
     });
-    // } else {
-    //     gasEstimate += await contract.estimateGas.sendToAptos([
-    //         fromTokenAddress,
-    //         toAddress,
-    //         BigInt(fromAmount),
-    //         {
-    //             refundAddress: fromAddress,
-    //             zroPaymentAddress: zeroAddress,
-    //         },
-    //         adapterParams
-    //     ], {
-    //         account: contract.address,
-    //     });
-    // }
+
+    gasEstimate += rawGasEstimate * await client.getGasPrice();
+
+    console.log(`Gas estimate: ${gasEstimate - nativeFee}`);
+    console.log(`Native fee: ${nativeFee}`);
 
     const toToken = aptosToken.tokens?.find(t => t.address == target)!;
     const toAmount = fromToken.decimals > toToken.decimals ? BigInt(fromAmount) / (10n ** BigInt(fromToken.decimals - toToken.decimals)) : BigInt(fromAmount) * (10n ** BigInt(toToken.decimals - fromToken.decimals));
 
     return {
         id: nanoid(),
-
         action: {
             fromAmount: fromAmount,
             fromChainId: fromChainId,
@@ -121,7 +113,7 @@ export async function FinalAptosStepBuilder({
             tool: "layerzero",
             feeCosts: [{
                 amount: nativeFee.toString(),
-                amountUSD: formatUnits(parseUnits(fromToken.priceUSD ?? "0", fromToken.decimals) * nativeFee, fromToken.decimals * 2),
+                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * nativeFee, nativeToken.decimals * 2),
                 included: true,
                 name: "LayerZero (Native)",
                 percentage: (Number(nativeFee * 10000n / BigInt(fromAmount)) / 10000).toString(),
@@ -133,7 +125,7 @@ export async function FinalAptosStepBuilder({
                 amount: gasEstimate.toString(),
                 type: "SEND",
                 token: nativeToken,
-                amountUSD: formatUnits(parseUnits(fromToken.priceUSD ?? "0", fromToken.decimals) * gasEstimate, fromToken.decimals * 2),
+                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * gasEstimate, nativeToken.decimals * 2),
                 estimate: gasEstimate.toString(),
                 price: await client.getGasPrice().then(price => price.toString()),
             }]
