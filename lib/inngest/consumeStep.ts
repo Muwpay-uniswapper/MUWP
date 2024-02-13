@@ -47,10 +47,13 @@ export const consumeStep = inngest.createFunction(
 
         const _step = remainingSteps[0];
 
-        const { transactionRequest, approvalAddress } = await step.run(`approvals-${_step.id}`, async () => {
-            // if (process.env.NODE_ENV !== "production") {
+        const { transactionRequest, approvalAddress, amount } = await step.run(`approvals-${_step.id}`, async () => {
 
-            // }
+            const { walletClient, publicClient } = await getWallet(address, _step.action.fromChainId);
+
+            const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, _step.action.fromChainId, publicClient);
+            _step.action.fromAmount = amount.toString();
+
             _step.action.slippage = 1.0; // 100% slippage
             if (_step.estimate) {
                 _step.estimate.toAmountMin = "1"; // 1 output token, which is like 0.00...1 ETH
@@ -64,8 +67,6 @@ export const consumeStep = inngest.createFunction(
             }
             const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
             if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
-
-            const { walletClient, publicClient } = await getWallet(address, fullStep.transactionRequest.chainId);
 
             if (fullStep.action.fromToken.address !== zeroAddress) {
                 // Approvals
@@ -85,17 +86,15 @@ export const consumeStep = inngest.createFunction(
 
                 const allowance = BigInt(_allowance)
 
-                const amount = BigInt(fullStep.action.fromAmount)
-
                 if (allowance < amount) {
                     const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
 
                     await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
 
-                    return { transactionRequest, hash, approvalAddress }
+                    return { transactionRequest, hash, approvalAddress, amount: amount.toString() }
                 }
             }
-            return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}` }
+            return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`, amount: amount.toString() }
         })
 
         const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
@@ -117,9 +116,9 @@ export const consumeStep = inngest.createFunction(
 
                 const allowance = BigInt(_allowance)
 
-                const amount = BigInt(_step.action.fromAmount)
+                const _amount = BigInt(amount)
 
-                if (allowance < amount) {
+                if (allowance < _amount) {
                     throw new Error("Allowance insufficient")
                 }
             }
@@ -266,4 +265,25 @@ export async function getWallet(address: string, chainId: number): Promise<{
         transport: http()
     });
     return { walletClient, publicClient: client as PublicClient };
+}
+
+export async function getBalance(token: `0x${string}`, address: `0x${string}`, chainId: number, publicClient?: PublicClient): Promise<bigint> {
+    const client = publicClient ?? createPublicClient({
+        chain: extractChain({
+            chains: Object.values(chains),
+            id: chainId as any,
+        }),
+        transport: http()
+    })
+
+    if (token === zeroAddress) {
+        return await client.getBalance({ address });
+    }
+    const contract = getContract({
+        address: token,
+        abi: erc20ABI,
+        publicClient,
+    })
+    const balance = await contract.read.balanceOf([address]);
+    return BigInt(balance as string);
 }
