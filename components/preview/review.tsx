@@ -105,7 +105,8 @@ export function Review({
             });
         })
 
-        const { address, txn } = await InitiateResponse.parseAsync(res);
+        const { address, txn: _txn } = await InitiateResponse.parseAsync(res);
+        const txn = _txn as PrepareTransactionRequestReturnType;
 
         // Sending tx
         let _hash: `0x${string}` | undefined;
@@ -113,7 +114,12 @@ export function Review({
         do {
             counter++;
 
-            const __hash = walletClient?.sendTransaction(txn as PrepareTransactionRequestReturnType);
+            const __hash = walletClient?.sendTransaction({
+                chain: txn.chain,
+                data: txn.data,
+                to: txn.to,
+                value: txn.value
+            });
 
             if (!__hash) continue;
 

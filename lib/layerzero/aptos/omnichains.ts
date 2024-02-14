@@ -8,7 +8,8 @@ export const AptosChains = {
     bsc: 56,
     ethereum: 1,
     optimism: 10,
-    polygon: 137
+    polygon: 137,
+    goerli: 5,
 }
 
 export const OmnichainAptosBridge = {
@@ -17,7 +18,8 @@ export const OmnichainAptosBridge = {
     [AptosChains.bsc]: "0x2762409baa1804d94d8c0bcff8400b78bf915d5b",
     [AptosChains.ethereum]: "0x50002cdfe7ccb0c41f519c6eb0653158d11cd907",
     [AptosChains.optimism]: "0x86bb63148d17d445ed5398ef26aa05bf76dd5b59",
-    [AptosChains.polygon]: "0x488863d609f3a673875a914fbee7508a1de45ec6"
+    [AptosChains.polygon]: "0x488863d609f3a673875a914fbee7508a1de45ec6",
+    [AptosChains.goerli]: "0x7Cff4181f857B06114643D495648A95b3E0B0B81",
 }
 
 export const AptosChainId = 12360001;
@@ -25,7 +27,8 @@ export const AptosChainId = 12360001;
 export const AptosTokensAddress = {
     usdc: "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDC",
     usdt: "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::USDT",
-    weth: "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::WETH"
+    weth: "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::WETH",
+    usdc_test: "0xec84c05cc40950c86d8a8bed19552f1e8ebb783196bb021c916161d22dc179f7::asset::USDC",
 }
 
 export const AvailablePairs: {
@@ -60,6 +63,10 @@ export const AvailablePairs: {
     [AptosChains.polygon]: {
         "0xc2132d05d31c914a87c6611c10748aeb04b58e8f": AptosTokensAddress.usdt,
         "0x2791bca1f2de4661ed88a30c99a7a9449aa84174": AptosTokensAddress.usdc,
+    },
+    [AptosChains.goerli]: {
+        [zeroAddress]: AptosTokensAddress.weth,
+        "0x30c212b53714daf3739ff607aaa8a0a18956f13c": AptosTokensAddress.usdc_test,
     }
 }
 
@@ -94,6 +101,16 @@ export async function getTokensAptosBridge(): Promise<TokensGet200Response> {
                 address: AptosTokensAddress.weth,
                 decimals: 6,
                 priceUSD: await api.tokenGet("1", "WETH").then(res => res.priceUSD),
+                chainId: AptosChainId
+            },
+            {
+                name: "USDC (LayerZero testnet)",
+                symbol: "zgUSDC",
+                coinKey: "zgusdc:aptos:layerzero",
+                logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/aptos/assets/0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa%3A%3Aasset%3A%3AUSDC/logo.png",
+                address: AptosTokensAddress.usdc_test,
+                decimals: 6,
+                priceUSD: "1",
                 chainId: AptosChainId
             }
         ]

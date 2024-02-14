@@ -78,7 +78,7 @@ export default function PreviewProcess() {
     }, [status, hash])
 
     return <Dialog open={(status == Status.send || isSending) ? true : undefined}>
-        <DialogTrigger className="w-full"><SwapButton status={status} needsApproval={needsApproval} /></DialogTrigger>
+        <DialogTrigger className="w-full" asChild><SwapButton status={status} needsApproval={needsApproval} /></DialogTrigger>
         <DialogContent canClose={status != Status.send && isSending != true}>
             <DialogHeader>
                 <DialogTitle>Trade Review</DialogTitle>
