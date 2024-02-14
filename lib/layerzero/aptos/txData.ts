@@ -1,6 +1,6 @@
 import { Step } from "@/lib/li.fi-ts";
 import { muwpChains } from "@/muwp";
-import { TransactionRequest, TransactionSerializable, createPublicClient, encodeFunctionData, encodePacked, extractChain, getContract, http, serializeTransaction, zeroAddress } from "viem";
+import { TransactionRequest, TransactionSerializable, createPublicClient, encodeFunctionData, encodePacked, extractChain, getContract, http, serializeTransaction, toHex, zeroAddress } from "viem";
 import { OmnichainAptosBridge } from "./omnichains";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { z } from "zod";
@@ -36,6 +36,11 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
         ]
     )
 
+    const [nativeFee, zroFee] = await contract.read.quoteForSend([{
+        refundAddress: step.action.fromAddress as `0x${string}`,
+        zroPaymentAddress: zeroAddress,
+    }, adapterParams])
+
     if (step.action.fromToken.address == zeroAddress) {
         const args = [
             step.action.toAddress as `0x${string}`,
@@ -59,10 +64,10 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
             chainId: step.action.fromChainId,
             data: encodedData,
             from: step.action.fromAddress as `0x${string}`,
-            gasLimit: step.estimate?.gasCosts?.[0].amount ?? simulation.request.gas?.toString() ?? "0",
-            gasPrice: step.estimate?.gasCosts?.[0].price ?? simulation.request.gasPrice?.toString() ?? "0",
-            to: step.action.fromToken.address as `0x${string}`,
-            value: step.action.fromAmount,
+            gasLimit: toHex(BigInt(step.estimate?.gasCosts?.[0].amount ?? simulation.request.gas?.toString() ?? "0")),
+            gasPrice: toHex(BigInt(step.estimate?.gasCosts?.[0].price ?? simulation.request.gasPrice?.toString() ?? "0")),
+            to: contract.address,
+            value: toHex(BigInt(step.action.fromAmount) + nativeFee),
         }
 
         return {
@@ -82,7 +87,7 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
         adapterParams
     ] as const
 
-    const simulation = await contract.simulate.sendToAptos(args)
+    // const simulation = await contract.simulate.sendToAptos(args)
 
     const encodedData = encodeFunctionData({
         abi: contract.abi,
@@ -90,14 +95,17 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
         functionName: "sendToAptos"
     })
 
+    const gasPrice = BigInt(step.estimate?.gasCosts?.[0].price /* ?? simulation.request.gasPrice?.toString() */ ?? "0");
+    const gasLimit = BigInt(step.estimate?.gasCosts?.[0].amount /* ?? simulation.request.gas?.toString() */ ?? "0") / gasPrice;
+
     const txRequest: z.infer<typeof transactionRequestSchema> = {
         chainId: step.action.fromChainId,
         data: encodedData,
         from: step.action.fromAddress as `0x${string}`,
-        gasLimit: step.estimate?.gasCosts?.[0].amount ?? simulation.request.gas?.toString() ?? "0",
-        gasPrice: step.estimate?.gasCosts?.[0].price ?? simulation.request.gasPrice?.toString() ?? "0",
-        to: step.action.fromToken.address as `0x${string}`,
-        value: step.action.fromAmount,
+        gasLimit: toHex(gasLimit),
+        gasPrice: toHex(gasPrice),
+        to: contract.address,
+        value: toHex(nativeFee),
     }
 
     return {

@@ -35,7 +35,7 @@ export default function Transactions() {
         return _txn
     }, [data, Object.values(data ?? {})])
 
-    return <div className="w-full px-4 max-w-4xl">
+    return <div className="w-full px-4 max-w-6xl">
         <div className="text-2xl py-4">Pending Transactions</div>
         <DataTable
             columns={columns}

@@ -31,6 +31,18 @@ export async function TokenSelector({
                 break
             default:
                 tokens = await api.tokensGet(chain.toString())
+                if (chain == 5) { // Goerli
+                    tokens.tokens?.push({
+                        address: "0x30c212b53714daf3739Ff607AaA8A0A18956f13c",
+                        chainId: 5,
+                        decimals: 6,
+                        name: "USD Coin (LayerZero)",
+                        priceUSD: "1",
+                        symbol: "zgUSDC",
+                        coinKey: "zgusdc:aptos:layerzero",
+                        logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/aptos/assets/0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa%3A%3Aasset%3A%3AUSDC/logo.png"
+                    })
+                }
                 break
         }
     } catch (e) {

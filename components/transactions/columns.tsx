@@ -9,6 +9,8 @@ import TxActions from "./txActions";
 import Status from "./status";
 import { Button } from "../ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { AptosChainId } from "@/lib/layerzero/aptos/omnichains";
+import { ClaimAptos } from "@/lib/layerzero/aptos/claim";
 
 
 export const columns: ColumnDef<Transaction>[] = [
@@ -126,6 +128,17 @@ export const columns: ColumnDef<Transaction>[] = [
                     </TooltipContent>
                 </Tooltip>)}
             </div>
+        }
+    },
+    {
+        accessorKey: "routes",
+        header: "",
+        cell: ({ row }) => {
+            const output = row.getValue("routes") as Route[]
+            if (output.some((route) => route.toToken.chainId === AptosChainId as any)) {
+                return <ClaimAptos />
+            }
+            return null
         }
     },
     {

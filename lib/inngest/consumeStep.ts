@@ -8,7 +8,7 @@ import { HDAccount, HttpTransport, PublicClient, TransactionExecutionError, crea
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
 import { WalletClient } from "wagmi";
-import { abi as erc20ABI } from '@/out/ERC20.sol/ERC20.json'
+import ERC20 from '@/out/ERC20.sol/ERC20.json';
 import { Address, EthereumAddress } from "../core/model/Address";
 import { AptosBridgeTxData } from "../layerzero/aptos/txData";
 
@@ -51,7 +51,7 @@ export const consumeStep = inngest.createFunction(
 
             const { walletClient, publicClient } = await getWallet(address, _step.action.fromChainId);
 
-            const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, _step.action.fromChainId, publicClient);
+            const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, BigInt(_step.action.fromAmount), _step.action.fromChainId, publicClient);
             _step.action.fromAmount = amount.toString();
 
             _step.action.slippage = 1.0; // 100% slippage
@@ -59,25 +59,16 @@ export const consumeStep = inngest.createFunction(
                 _step.estimate.toAmountMin = "1"; // 1 output token, which is like 0.00...1 ETH
             }
 
-            let fullStep: Step;
-            if (_step.tool == "layerzero") {
-                fullStep = await AptosBridgeTxData(_step as Step);
-            } else {
-                fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
-            }
-            const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
-            if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
-
-            if (fullStep.action.fromToken.address !== zeroAddress) {
+            if (_step.action.fromToken.address !== zeroAddress) {
                 // Approvals
                 const contract = getContract({
-                    address: fullStep.action.fromToken.address as `0x${string}`,
-                    abi: erc20ABI,
+                    address: _step.action.fromToken.address as `0x${string}`,
+                    abi: ERC20.abi,
                     publicClient: publicClient!,
                     walletClient: walletClient!,
                 })
 
-                const approvalAddress = fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`
+                const approvalAddress = _step.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`
 
                 const _allowance = await contract.read.allowance([
                     walletClient.account.address as `0x${string}`,
@@ -90,10 +81,18 @@ export const consumeStep = inngest.createFunction(
                     const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
 
                     await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
-
-                    return { transactionRequest, hash, approvalAddress, amount: amount.toString() }
                 }
             }
+
+            let fullStep: Step;
+            if (_step.tool == "layerzero") {
+                fullStep = await AptosBridgeTxData(_step as Step);
+            } else {
+                fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
+            }
+            const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
+            if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
+
             return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`, amount: amount.toString() }
         })
 
@@ -104,7 +103,7 @@ export const consumeStep = inngest.createFunction(
             if (_step.action.fromToken.address !== zeroAddress) {
                 const contract = getContract({
                     address: _step.action.fromToken.address as `0x${string}`,
-                    abi: erc20ABI,
+                    abi: ERC20.abi,
                     publicClient: publicClient!,
                     walletClient: walletClient!,
                 })
@@ -267,7 +266,7 @@ export async function getWallet(address: string, chainId: number): Promise<{
     return { walletClient, publicClient: client as PublicClient };
 }
 
-export async function getBalance(token: `0x${string}`, address: `0x${string}`, chainId: number, publicClient?: PublicClient): Promise<bigint> {
+export async function getBalance(token: `0x${string}`, address: `0x${string}`, expectedBalance: bigint, chainId: number, publicClient?: PublicClient): Promise<bigint> {
     const client = publicClient ?? createPublicClient({
         chain: extractChain({
             chains: Object.values(chains),
@@ -277,13 +276,18 @@ export async function getBalance(token: `0x${string}`, address: `0x${string}`, c
     })
 
     if (token === zeroAddress) {
-        return await client.getBalance({ address });
+        return expectedBalance; // For ETH, we need to keep some gas, and if transaction is split, no need to check balance
     }
     const contract = getContract({
         address: token,
-        abi: erc20ABI,
-        publicClient,
+        abi: ERC20.abi,
+        publicClient: client,
     })
-    const balance = await contract.read.balanceOf([address]);
-    return BigInt(balance as string);
+    const _balance = await contract.read.balanceOf([address]);
+    const balance = BigInt(_balance as string);
+    // Check if balance is +/- 5% of expected balance
+    if (balance < expectedBalance * BigInt(95) / BigInt(100) || balance > expectedBalance * BigInt(105) / BigInt(100)) {
+        return expectedBalance;
+    }
+    return balance;
 }

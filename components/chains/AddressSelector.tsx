@@ -1,17 +1,5 @@
-import { FewchaWallet } from "fewcha-plugin-wallet-adapter";
-import { ShadowWallet } from "@flipperplatform/wallet-adapter-plugin";
-import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
-import { NightlyWallet } from "@nightlylabs/aptos-wallet-adapter-plugin";
-import { PetraWallet } from "petra-plugin-wallet-adapter";
-import { PontemWallet, PontemWalletName } from "@pontem/wallet-adapter-plugin";
-import { RiseWallet } from "@rise-wallet/wallet-adapter";
-import { TokenPocketWallet } from "@tp-lab/aptos-wallet-adapter";
-import { TrustWallet } from "@trustwallet/aptos-wallet-adapter";
-import { MSafeWalletAdapter } from "@msafe/aptos-wallet-adapter";
-import { WelldoneWallet } from "@welldone-studio/aptos-wallet-adapter";
-import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
-import { OnekeyWallet } from "@onekeyfe/aptos-wallet-adapter";
-import { AptosWalletAdapterProvider, WalletName, useWallet } from "@aptos-labs/wallet-adapter-react";
+
+import { WalletName, useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Chain } from "@/lib/core/model/CellLike";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -20,22 +8,8 @@ import { useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "../ui/command";
 import { cn } from "@/lib/core/utils";
+import { AptosWallets } from "@/app/providers";
 
-export const AptosWallets = [
-    new FewchaWallet(),
-    new ShadowWallet(),
-    new MartianWallet(),
-    new MSafeWalletAdapter(),
-    new NightlyWallet(),
-    new PetraWallet(),
-    new PontemWallet(),
-    new RiseWallet(),
-    new TokenPocketWallet(),
-    new TrustWallet(),
-    new WelldoneWallet(),
-    new OKXWallet(),
-    new OnekeyWallet(),
-];
 
 export function AddressSelector({
     targetAddress,
@@ -46,24 +20,7 @@ export function AddressSelector({
     setTargetAddress: (address: string) => void,
     chain: Chain
 }) {
-    return <AptosWalletAdapterProvider plugins={AptosWallets} onError={(e) => {
-        console.error(e)
-    }}>
-        <InputAddressSelector targetAddress={targetAddress} setTargetAddress={setTargetAddress} chain={chain} />
-    </AptosWalletAdapterProvider>
-}
-
-export function InputAddressSelector({
-    targetAddress,
-    setTargetAddress,
-    chain
-}: {
-    targetAddress: string,
-    setTargetAddress: (address: string) => void,
-    chain: Chain
-}) {
     const { connect, connected, account, wallet, disconnect, isLoading } = useWallet();
-
     useEffect(() => {
         setTargetAddress(connected ? account?.address || "" : "")
     }, [connected])
@@ -72,7 +29,7 @@ export function InputAddressSelector({
         <Input placeholder={`Your ${chain?.label} address`}
             value={targetAddress}
             onChange={(e) => setTargetAddress(e.target.value)} />
-        {!isLoading && <WalletCombobox connect={connect} connected={wallet?.name} disconnect={disconnect} />}
+        <WalletCombobox connect={connect} connected={wallet?.name} disconnect={disconnect} />
     </div>
 }
 
