@@ -82,7 +82,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
 export function RouteInfo({ route, index }: { route: Route, index: number }) {
     return <div className={cn("w-full relative p-4")}>
         {
-            route.tags?.map((tag) => <Badge className="mr-1 mb-1">{tag}</Badge>)
+            route.tags?.map((tag, i) => <Badge className="mr-1 mb-1" key={i}>{tag}</Badge>)
         }
         <div className="flex flex-col items-center justify-center">
             {format(formatUnits(BigInt(route.fromAmount), route.fromToken.decimals))} {route.fromToken.symbol}

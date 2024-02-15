@@ -8,22 +8,19 @@ import { PontemWallet } from "@pontem/wallet-adapter-plugin";
 import { RiseWallet } from "@rise-wallet/wallet-adapter";
 import { TokenPocketWallet } from "@tp-lab/aptos-wallet-adapter";
 import { TrustWallet } from "@trustwallet/aptos-wallet-adapter";
-import { MSafeWalletAdapter } from "@msafe/aptos-wallet-adapter";
 import { WelldoneWallet } from "@welldone-studio/aptos-wallet-adapter";
 import {
-    AptosWalletAdapterProvider,
-    NetworkName,
+    AptosWalletAdapterProvider
 } from "@aptos-labs/wallet-adapter-react";
 import { AutoConnectProvider, useAutoConnect } from "./AutoConnectProvider";
 import { FC, ReactNode } from "react";
 
 const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const { autoConnect } = useAutoConnect();
+    // const { autoConnect } = useAutoConnect();
 
     const wallets = [
         new FewchaWallet(),
         new MartianWallet(),
-        new MSafeWalletAdapter(),
         new NightlyWallet(),
         new PetraWallet(),
         new PontemWallet(),
@@ -36,7 +33,7 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return (
         <AptosWalletAdapterProvider
             plugins={wallets}
-            autoConnect={autoConnect}
+            autoConnect={true}
             onError={(error) => {
                 console.error("Custom error handling", error);
             }}
