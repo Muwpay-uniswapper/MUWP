@@ -9,6 +9,7 @@ import { publicClient } from "@/app/providers";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "@/lib/core/utils";
 import { Button } from "../ui/button";
+import { EthereumAddress } from "@/lib/core/model/Address";
 
 export function FormatTokenAddress({ token }: { token: Token }) {
     const { chain } = publicClient({ chainId: token.chainId })
@@ -116,7 +117,7 @@ export function TokenInput({
     const { chain } = useNetwork()
     const { data } = useBalance({
         address,
-        token: token.address !== zeroAddress ? token.address as `0x${string}` : undefined,
+        token: (token.address !== zeroAddress && EthereumAddress.safeParse(token.address).success) ? token.address as `0x${string}` : undefined,
         chainId: chain?.id
     })
     const { inputAmount, setAmount, priceOutput } = useSwapStore()
