@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { OmnichainAptosBridge, getTokensAptosBridge } from "./omnichains";
+import { OmnichainAptosBridge, RequiredBlockConfirmationAptos, getTokensAptosBridge } from "./omnichains";
 import { createPublicClient, encodePacked, extractChain, formatUnits, getContract, http, parseEther, parseUnits, zeroAddress } from "viem";
 import api from "@/lib/core/data/api";
 import { OmnichainAptosBridgeAbi } from "./abi";
@@ -29,11 +29,12 @@ export async function FinalAptosStepBuilder({
         transport: http()
     })
 
-    const [aptosToken, fromToken, nativeToken, aptosGas] = await Promise.all([
+    const [aptosToken, fromToken, nativeToken, aptosGas, block10Time] = await Promise.all([
         getTokensAptosBridge(),
         api.tokenGet(fromChainId.toString(), fromTokenAddress),
         api.tokenGet(fromChainId.toString(), zeroAddress),
-        fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json())
+        fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json()),
+        client.getBlock().then(async block => block.timestamp - await client.getBlock({ blockNumber: block.number - 10n }).then(block => block.timestamp))
     ]);
 
     console.log(`Fetching routes for ${fromToken.name} -> ${aptosToken.tokens?.find(t => t.address == target)!.name}`);
@@ -92,6 +93,12 @@ export async function FinalAptosStepBuilder({
     const toToken = aptosToken.tokens?.find(t => t.address == target)!;
     const toAmount = fromToken.decimals > toToken.decimals ? BigInt(fromAmount) / (10n ** BigInt(fromToken.decimals - toToken.decimals)) : BigInt(fromAmount) * (10n ** BigInt(toToken.decimals - fromToken.decimals));
 
+    // Time to execute the transaction
+    const confirmations = RequiredBlockConfirmationAptos[fromChainId];
+    const timePerBlock = Number(block10Time) / 10; // Unix timestamp in seconds
+    const extraDelay = 10; // (mempool delay - depends on GAS)
+    const executionDuration = (confirmations + 1) * timePerBlock + extraDelay;
+
     return {
         id: nanoid(),
         action: {
@@ -120,7 +127,7 @@ export async function FinalAptosStepBuilder({
                 token: nativeToken,
                 description: "Native LayerZero fee",
             }],
-            executionDuration: 0,
+            executionDuration,
             gasCosts: [{
                 amount: gasEstimate.toString(),
                 type: "SEND",

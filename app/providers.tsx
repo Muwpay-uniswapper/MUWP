@@ -21,36 +21,7 @@ import { useSwapStore } from '@/lib/core/data/swapStore';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { muwpChains } from '@/muwp';
-import { FewchaWallet } from "fewcha-plugin-wallet-adapter";
-import { ShadowWallet } from "@flipperplatform/wallet-adapter-plugin";
-import { MartianWallet } from "@martianwallet/aptos-wallet-adapter";
-import { NightlyWallet } from "@nightlylabs/aptos-wallet-adapter-plugin";
-import { PetraWallet } from "petra-plugin-wallet-adapter";
-import { PontemWallet } from "@pontem/wallet-adapter-plugin";
-import { RiseWallet } from "@rise-wallet/wallet-adapter";
-import { TokenPocketWallet } from "@tp-lab/aptos-wallet-adapter";
-import { TrustWallet } from "@trustwallet/aptos-wallet-adapter";
-import { MSafeWalletAdapter } from "@msafe/aptos-wallet-adapter";
-import { WelldoneWallet } from "@welldone-studio/aptos-wallet-adapter";
-import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
-import { OnekeyWallet } from "@onekeyfe/aptos-wallet-adapter";
-import { AptosWalletAdapterProvider } from '@aptos-labs/wallet-adapter-react';
-
-export const AptosWallets = [
-    new FewchaWallet(),
-    new ShadowWallet(),
-    new MartianWallet(),
-    new MSafeWalletAdapter(),
-    new NightlyWallet(),
-    new PetraWallet(),
-    new PontemWallet(),
-    new RiseWallet(),
-    new TokenPocketWallet(),
-    new TrustWallet(),
-    new WelldoneWallet(),
-    new OKXWallet(),
-    new OnekeyWallet(),
-];
+import { AptosContext } from './aptosWallet';
 
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
     muwpChains,
@@ -133,14 +104,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     React.useEffect(() => setMounted(true), []);
     return <TooltipProvider skipDelayDuration={250} delayDuration={300}>
         <Toaster richColors />
-        <AptosWalletAdapterProvider plugins={AptosWallets} onError={(e) => {
-            console.error(e)
-        }}>
+        <AptosContext>
             <WagmiConfig config={wagmiConfig}>
                 <RainbowKitProvider chains={chains} appInfo={demoAppInfo} modalSize="compact" coolMode={true} theme={darkTheme()}>
                     {mounted && <State>{children}</State>}
                 </RainbowKitProvider>
             </WagmiConfig>
-        </AptosWalletAdapterProvider >
+        </AptosContext>
     </TooltipProvider>;
 }
