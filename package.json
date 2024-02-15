@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "^1.7.0",
-    "@aptos-labs/wallet-adapter-react": "^2.1.7",
+    "@aptos-labs/wallet-adapter-react": "^2.1.8",
     "@blocto/aptos-wallet-adapter-plugin": "^0.2.8",
     "@flipperplatform/wallet-adapter-plugin": "^0.2.0",
     "@haechi-labs/face-aptos-adapter-plugin": "^0.0.4",

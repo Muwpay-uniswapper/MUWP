@@ -136,7 +136,7 @@ export const columns: ColumnDef<Transaction>[] = [
         cell: ({ row }) => {
             const output = row.getValue("routes") as Route[]
             if (output.some((route) => route.toToken.chainId === AptosChainId as any)) {
-                return <ClaimAptos />
+                return <ClaimAptos tokensAddress={output.filter((route) => route.toToken.chainId === AptosChainId as any).map((route) => route.toToken.address as `0x${string}`)} />
             }
             return null
         }

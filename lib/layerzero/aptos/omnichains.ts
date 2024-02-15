@@ -12,6 +12,14 @@ export const AptosChains = {
     goerli: 5,
 }
 
+export const RequiredBlockConfirmationAptos = {
+    [AptosChains.ethereum]: 15,
+    [AptosChains.avalanche]: 12,
+    [AptosChains.bsc]: 20,
+    [AptosChains.polygon]: 512,
+    [AptosChains.arbitrum]: 20,
+    [AptosChains.optimism]: 20,
+};
 export const OmnichainAptosBridge = {
     [AptosChains.arbitrum]: "0x1bacc2205312534375c8d1801c27d28370656cff",
     [AptosChains.avalanche]: "0xa5972eee0c9b5bbb89a5b16d1d65f94c9ef25166",
