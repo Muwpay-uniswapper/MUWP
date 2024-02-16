@@ -2,7 +2,7 @@ import { inngest } from "@/lib/inngest/client";
 import { Route } from "@/lib/li.fi-ts";
 import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress } from 'viem'
 import { z } from "zod";
-import { abi } from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
+import MUWPTransfer from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
 import { EthereumAddress } from "@/lib/core/model/Address";
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
             input.account,
         ]
         const data = encodeFunctionData({
-            abi,
+            abi: MUWPTransfer.abi,
             functionName: "transfer",
             args
         })

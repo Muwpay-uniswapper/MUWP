@@ -13,12 +13,12 @@ import React, { useState } from "react";
 import { SwapButton } from "../swapbutton";
 import { Approvals } from "./approvals";
 import { useRouteStore } from "@/lib/core/data/routeStore";
-import { getContract, zeroAddress } from "viem";
+import { getContract, zeroAddress, erc20Abi, publicActions } from "viem";
 import { Review } from "./review";
 import { PreviewSend } from "./send";
 import { useSwapStore } from "@/lib/core/data/swapStore";
 import Link from "next/link";
-import { erc20ABI, useAccount, useNetwork, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import { MUWPChain } from "@/muwp";
 import { useRouter } from "next/navigation";
 
@@ -30,25 +30,23 @@ export default function PreviewProcess() {
     const { clearSwaps } = useSwapStore();
     const [needsApproval, setNeedApprovals] = useState(true);
     const { data: walletClient } = useWalletClient()
-    const publicClient = usePublicClient()
-    const account = useAccount()
-    const { chain } = useNetwork()
+    const { address, chain } = useAccount()
     React.useEffect(() => {
         (async () => {
             const routes = getRoutes()
             for (const route of routes) {
                 if (route.fromToken.address === zeroAddress) continue;
+                const client = walletClient!.extend(publicActions);
                 // Check allowance
                 const contract = getContract({
                     address: route.fromToken.address as `0x${string}`,
-                    abi: erc20ABI,
-                    publicClient: publicClient!,
-                    walletClient: walletClient!,
+                    abi: erc20Abi,
+                    client
                 })
 
                 let allowance = 0n
                 try {
-                    allowance = await contract.read.allowance([account.address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
+                    allowance = await contract.read.allowance([address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
                 } catch (e) {
                     console.error(e);
                 }

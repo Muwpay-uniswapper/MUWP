@@ -1,13 +1,16 @@
-import { erc20ABI, useAccount, useNetwork, usePublicClient, useWalletClient } from "wagmi";
+"use client";
+
+import { useAccount, useWalletClient } from "wagmi";
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Loader2, Unlock } from "lucide-react";
 import React, { useState } from "react";
-import { formatUnits, getContract, zeroAddress } from "viem";
+import { erc20Abi, formatUnits, getContract, publicActions, zeroAddress } from "viem";
 import { toast } from "sonner";
 import { MUWPChain } from "@/muwp";
 import { Button } from "../ui/button";
 import { NextStep } from "./process";
 import { Token } from "@/lib/li.fi-ts";
+
 export function Approvals({
     nextStep
 }: {
@@ -15,9 +18,7 @@ export function Approvals({
 }) {
     const { getRoutes, routes: _route } = useRouteStore();
     const { data: walletClient } = useWalletClient()
-    const publicClient = usePublicClient()
-    const account = useAccount();
-    const { chain } = useNetwork();
+    const { chain, address } = useAccount();
 
     const [isWaiting, setWaiting] = useState(-1);
 
@@ -44,22 +45,23 @@ export function Approvals({
         setWaiting(unlimited ? 1 : 0);
 
         const allowance = async () => {
+            if (typeof walletClient === 'undefined') return;
+            const client = walletClient.extend(publicActions);
             // Check allowance
             const contract = getContract({
                 address: toApprove[index].address,
-                abi: erc20ABI,
-                publicClient: publicClient!,
-                walletClient: walletClient!,
+                abi: erc20Abi,
+                client,
             })
 
-            const allowance = await contract.read.allowance([account.address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
+            const allowance = await contract.read.allowance([address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
 
             const amount = unlimited ? (2n ** 256n - 1n) : toApprove[index].amount
 
             if (allowance < amount) {
                 const hash = await contract.write.approve([(chain as MUWPChain).muwpContract, amount])
 
-                await publicClient.waitForTransactionReceipt({ hash })
+                await client.waitForTransactionReceipt({ hash })
             }
         }
         await new Promise((resolve, reject) => {

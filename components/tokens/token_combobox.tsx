@@ -18,7 +18,7 @@ import { Token } from "@/lib/core/model/CellLike"
 import { useSwapStore } from "@/lib/core/data/swapStore"
 import { useBreakpoint } from "@/lib/core/media-query";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { useNetwork } from "wagmi";
+import { useAccount } from "wagmi";
 import Allocation from "./allocation";
 import { zeroAddress } from "viem";
 
@@ -127,7 +127,7 @@ function TokenListContent({
 }) {
 
     const [search, setSearch] = React.useState("")
-    const { chain } = useNetwork()
+    const { chain } = useAccount()
     const { inputTokens, setInputToken, outputTokens, setOutputToken, removeInputToken, removeOutputToken, outputChain } = useSwapStore()
     const [hydrated, setHydrated] = React.useState(false)
     React.useEffect(() => {

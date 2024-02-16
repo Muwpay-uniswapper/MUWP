@@ -1,18 +1,19 @@
+"use client";
+
 import React from "react";
 import { Token } from "@/lib/core/model/CellLike"
 import { useSwapStore } from "@/lib/core/data/swapStore";
-import { Chain, formatUnits, parseUnits, zeroAddress } from "viem";
+import { formatUnits, parseUnits, zeroAddress } from "viem";
 import { Badge } from "../ui/badge";
-import { useAccount, useBalance, useNetwork } from "wagmi";
+import { useAccount, useBalance, useChains } from "wagmi";
 import { BadgeCheck, FileDigit, Wallet2Icon } from "lucide-react";
-import { publicClient } from "@/app/providers";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "@/lib/core/utils";
-import { Button } from "../ui/button";
 import { EthereumAddress } from "@/lib/core/model/Address";
 
 export function FormatTokenAddress({ token }: { token: Token }) {
-    const { chain } = publicClient({ chainId: token.chainId })
+    const chains = useChains()
+    const chain = chains.find(chain => chain.id === token.chainId)
 
     if (token.address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
 
@@ -113,8 +114,7 @@ export function TokenInput({
     token: Token,
     mode: "input" | "output"
 }) {
-    const { address } = useAccount()
-    const { chain } = useNetwork()
+    const { address, chain } = useAccount()
     const { data } = useBalance({
         address,
         token: (token.address !== zeroAddress && EthereumAddress.safeParse(token.address).success) ? token.address as `0x${string}` : undefined,
@@ -157,6 +157,7 @@ export function TokenInput({
                                 style={{
                                     aspectRatio: "32/32",
                                     objectFit: "cover",
+                                    borderRadius: "100%"
                                 }}
                                 width="32"
                             />

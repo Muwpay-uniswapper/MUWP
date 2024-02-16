@@ -2,13 +2,10 @@ import { inngest } from "./client";
 import { z } from "zod";
 import * as store from "@/lib/kv/store";
 import { Step } from "../li.fi-ts";
-import { publicClient } from "@/app/providers";
 import { advancedAPI } from "../core/data/api";
-import { HDAccount, HttpTransport, PublicClient, TransactionExecutionError, createPublicClient, createWalletClient, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
+import { TransactionExecutionError, createPublicClient, createWalletClient, erc20Abi, extractChain, fromHex, getContract, http, publicActions, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
-import { WalletClient } from "wagmi";
-import ERC20 from '@/out/ERC20.sol/ERC20.json';
 import { Address, EthereumAddress } from "../core/model/Address";
 import { AptosBridgeTxData } from "../layerzero/aptos/txData";
 
@@ -49,9 +46,9 @@ export const consumeStep = inngest.createFunction(
 
         const { transactionRequest, approvalAddress, amount } = await step.run(`approvals-${_step.id}`, async () => {
 
-            const { walletClient, publicClient } = await getWallet(address, _step.action.fromChainId);
+            const client = await getWallet(address, _step.action.fromChainId);
 
-            const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, BigInt(_step.action.fromAmount), _step.action.fromChainId, publicClient);
+            const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, BigInt(_step.action.fromAmount), _step.action.fromChainId);
             _step.action.fromAmount = amount.toString();
 
             _step.action.slippage = 1.0; // 100% slippage
@@ -63,24 +60,23 @@ export const consumeStep = inngest.createFunction(
                 // Approvals
                 const contract = getContract({
                     address: _step.action.fromToken.address as `0x${string}`,
-                    abi: ERC20.abi,
-                    publicClient: publicClient!,
-                    walletClient: walletClient!,
+                    abi: erc20Abi,
+                    client,
                 })
 
                 const approvalAddress = _step.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`
 
                 const _allowance = await contract.read.allowance([
-                    walletClient.account.address as `0x${string}`,
-                    approvalAddress
-                ]) as string
+                    client.account.address as `0x${string}`,
+                    approvalAddress as `0x${string}`
+                ])
 
                 const allowance = BigInt(_allowance)
 
                 if (allowance < amount) {
                     const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
 
-                    await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
+                    await client.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
                 }
             }
 
@@ -97,21 +93,20 @@ export const consumeStep = inngest.createFunction(
         })
 
         const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
-            const { walletClient, publicClient } = await getWallet(address, transactionRequest.chainId);
+            const client = await getWallet(address, transactionRequest.chainId);
 
             // Check if allowance is sufficient
             if (_step.action.fromToken.address !== zeroAddress) {
                 const contract = getContract({
                     address: _step.action.fromToken.address as `0x${string}`,
-                    abi: ERC20.abi,
-                    publicClient: publicClient!,
-                    walletClient: walletClient!,
+                    abi: erc20Abi,
+                    client
                 })
 
                 const _allowance = await contract.read.allowance([
-                    walletClient.account.address as `0x${string}`,
-                    approvalAddress
-                ]) as string
+                    client.account.address as `0x${string}`,
+                    approvalAddress as `0x${string}`
+                ])
 
                 const allowance = BigInt(_allowance)
 
@@ -125,7 +120,7 @@ export const consumeStep = inngest.createFunction(
             console.log("Sending transaction", transactionRequest)
 
             try {
-                const hash = await walletClient.sendTransaction({
+                const hash = await client.sendTransaction({
                     data: transactionRequest.data as `0x${string}`,
                     to: transactionRequest.to as `0x${string}`,
                     value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
@@ -214,11 +209,11 @@ export const consumeStep = inngest.createFunction(
 
             // Check if all routes are completed
             if (completed.length === event.data.totalRoutes) {
-                const { walletClient, publicClient } = await getWallet(address, originalChainId);
+                const client = await getWallet(address, originalChainId);
                 // Send native funds back to user
-                const balance = await publicClient.getBalance({ address: walletClient.account.address })
-                const gas = await publicClient.getGasPrice()
-                const hash = await walletClient.sendTransaction({
+                const balance = await client.getBalance({ address: client.account.address })
+                const gas = await client.getGasPrice()
+                const hash = await client.sendTransaction({
                     to: _step.action.toAddress as `0x${string}`,
                     value: balance - gas * BigInt(21000),
                 })
@@ -229,10 +224,7 @@ export const consumeStep = inngest.createFunction(
     },
 );
 
-export async function getWallet(address: string, chainId: number): Promise<{
-    walletClient: WalletClient<HttpTransport, chains.Chain, HDAccount>,
-    publicClient: PublicClient
-}> {
+export async function getWallet(address: string, chainId: number) {
     const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`;
     const privateKey = fromHex(master_hd, "bytes");
     const hdKey = HDKey.fromMasterSeed(privateKey);
@@ -249,25 +241,21 @@ export async function getWallet(address: string, chainId: number): Promise<{
     const account = hdKeyToAccount(hdKey, {
         accountIndex: Number(index),
     });
-
-    const client = createPublicClient({
+    const client = createWalletClient({
+        account,
         chain: extractChain({
             chains: Object.values(chains),
             id: chainId as any,
         }),
         transport: http()
     })
+        .extend(publicActions);
 
-    const walletClient = createWalletClient({
-        account,
-        chain: client.chain,
-        transport: http()
-    });
-    return { walletClient, publicClient: client as PublicClient };
+    return client;
 }
 
-export async function getBalance(token: `0x${string}`, address: `0x${string}`, expectedBalance: bigint, chainId: number, publicClient?: PublicClient): Promise<bigint> {
-    const client = publicClient ?? createPublicClient({
+export async function getBalance(token: `0x${string}`, address: `0x${string}`, expectedBalance: bigint, chainId: number): Promise<bigint> {
+    const client = createPublicClient({
         chain: extractChain({
             chains: Object.values(chains),
             id: chainId as any,
@@ -280,11 +268,11 @@ export async function getBalance(token: `0x${string}`, address: `0x${string}`, e
     }
     const contract = getContract({
         address: token,
-        abi: ERC20.abi,
-        publicClient: client,
+        abi: erc20Abi,
+        client,
     })
     const _balance = await contract.read.balanceOf([address]);
-    const balance = BigInt(_balance as string);
+    const balance = BigInt(_balance);
     // Check if balance is +/- 5% of expected balance
     if (balance < expectedBalance * BigInt(95) / BigInt(100) || balance > expectedBalance * BigInt(105) / BigInt(100)) {
         return expectedBalance;

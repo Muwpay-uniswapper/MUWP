@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Check, ChevronDown, Loader2 } from "lucide-react"
-import { useNetwork, useSwitchNetwork } from "wagmi"
+import { useAccount, useSwitchChain } from "wagmi"
 import { Drawer } from 'vaul';
 import { cn } from "@/lib/core/utils"
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,6 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { Chain } from "@/lib/core/model/CellLike";
 import { useSwapStore } from "@/lib/core/data/swapStore"
 import { useBreakpoint } from "@/lib/core/media-query";
-import { Input } from "../ui/input";
 import { AddressSelector } from "./AddressSelector";
 
 export function ChainCombobox({
@@ -38,18 +37,20 @@ export function ChainCombobox({
 
     const { isAboveMd } = useBreakpoint("md")
 
-    const { chain } = useNetwork()
+    const { chain } = useAccount()
     const { outputChain, targetAddress, setTargetAddress } = useSwapStore()
-    const { pendingChainId, isLoading, reset, switchNetwork } = useSwitchNetwork({
-        onSettled: () => {
-            reset(); // reset mutation variables (eg. pendingChainId, error
-        },
+    const { isPending, reset, switchChain, variables } = useSwitchChain({
+        mutation: {
+            onSettled: () => {
+                reset(); // reset mutation variables (eg. pendingChainId, error
+            },
+        }
     })
 
     const value = chainList.find(_chain =>
         mode == "input" ?
-            (isLoading
-                ? (pendingChainId == _chain.chainId)
+            (isPending
+                ? (variables?.chainId == _chain.chainId)
                 : (chain?.id == _chain.chainId))
             : outputChain == _chain.chainId
     )
@@ -80,7 +81,7 @@ export function ChainCombobox({
                 >
                     {value
                         ? <div className="flex flex-row items-center p-2 relative">
-                            {isLoading && <Loader2 className="h-10 w-10 animate-spin absolute left-1 text-blue-500" />}
+                            {isPending && <Loader2 className="h-10 w-10 animate-spin absolute left-1 text-blue-500" />}
                             <img src={value.logoURI} alt={value.label} className="mr-2 h-8 w-8 rounded-full" />
                             <div className="">{value.label}</div>
                             <ChevronDown />
@@ -92,7 +93,10 @@ export function ChainCombobox({
                 </Button>
             </ContainerTrigger>
             <ContainerContent side="right">
-                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={switchNetwork} isAboveMd={isAboveMd} />
+                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={id => {
+                    if (typeof id === "undefined") return
+                    switchChain({ chainId: id })
+                }} isAboveMd={isAboveMd} />
             </ContainerContent>
         </Container>
         {value && mode == "output" && value?.type != "EVM" && <AddressSelector
