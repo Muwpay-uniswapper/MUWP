@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { ArrowLeftRight, DollarSign, Fuel, Info, Layers2, Loader2, PercentCircle, Receipt } from "lucide-react";
 import React from "react";
@@ -7,7 +9,7 @@ import { NextStep } from "./process";
 import { format } from "../flow/DetailNode";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Funnel } from "./funnel";
-import { useAccount, useFeeData, useNetwork, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, useEstimateFeesPerGas, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -49,10 +51,8 @@ export function Review({
     const amountMin = !hasMultipleOutputs ? _amountMin.reduce((a, b) => a + b, 0n) : _amountMin;
 
     const { data: walletClient } = useWalletClient()
-    const { data } = useFeeData();
+    const { data } = useEstimateFeesPerGas();
     const account = useAccount();
-    const { chain } = useNetwork();
-    const router = useRouter();
 
     const sendTxn = async () => {
         setIsSending(true);
@@ -60,7 +60,7 @@ export function Review({
         const body: any = {
             from: account.address,
             account: tempAccount,
-            chainId: chain?.id,
+            chainId: account.chain?.id,
             routes,
         };
 
@@ -156,7 +156,7 @@ export function Review({
             const notifyBackend = await fetch("/api/receive-funds", {
                 method: "POST",
                 body: JSON.stringify({
-                    chainId: chain?.id,
+                    chainId: account.chain?.id,
                     transactionHash: _hash,
                     accountAddress: tempAccount
                 }),

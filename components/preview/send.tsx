@@ -1,7 +1,9 @@
+"use client";
+
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Send } from "lucide-react";
 import React from "react";
-import { useNetwork, useWaitForTransaction } from "wagmi";
+import { useAccount, useWaitForTransactionReceipt } from "wagmi";
 import { NextStep } from "./process";
 
 export function PreviewSend({
@@ -14,8 +16,8 @@ export function PreviewSend({
     nextStep: NextStep
 }) {
     const { tempAccount, transactions, setTransaction } = useRouteStore();
-    const { chain } = useNetwork();
-    const { isError, isLoading, error, isSuccess } = useWaitForTransaction({ hash });
+    const { chain } = useAccount();
+    const { isError, isLoading, error, isSuccess } = useWaitForTransactionReceipt({ hash });
 
     const [debug, setDebug] = React.useState(false);
 

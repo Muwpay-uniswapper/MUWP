@@ -2,20 +2,18 @@
 
 import { useSwapStore } from "@/lib/core/data/swapStore";
 import { Button } from "../ui/button";
-import { useAccount, useNetwork } from "wagmi";
+import { useAccount } from "wagmi";
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import React, { useState } from "react";
-import { Input } from "../ui/input";
 
 
 
 export function FindRoutesButton() {
     const { inputTokens, outputTokens, inputAmount, outputChain, allowDenyBridges, allowDenyExchanges, outputDistribution, targetAddress } = useSwapStore();
     const { fetchRoutes, isFetching, tempAccount, validUntil } = useRouteStore();
-    const { chain } = useNetwork();
-    const { address } = useAccount();
+    const { address, chain } = useAccount();
     const [trials, setTrials] = useState(0);
     React.useEffect(() => {
         const interval = setInterval(async () => {

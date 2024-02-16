@@ -1,6 +1,8 @@
+"use client";
+
 import { CellLike, Token, Chain } from "@/lib/core/model/CellLike"
 import { useSwapStore } from "../swapStore"
-import { useNetwork, useSwitchNetwork } from "wagmi"
+import { useAccount, useChains, useSwitchChain } from "wagmi"
 
 export class ComboboxDelegate<Value extends CellLike> {
     get keyword() {
@@ -63,7 +65,7 @@ export class ChainComboboxDelegate extends ComboboxDelegate<Chain> {
     }
 
     valueAt(index: number): Chain | undefined {
-        const { chain } = useNetwork();
+        const { chain } = useAccount();
 
         return {
             label: chain?.name ?? index.toString(),
@@ -75,18 +77,19 @@ export class ChainComboboxDelegate extends ComboboxDelegate<Chain> {
     }
 
     setValueAt(index: number, value: Chain) {
-        const { chains, pendingChainId, reset, switchNetwork } = useSwitchNetwork({
-            onSettled: () => {
-                reset(); // reset mutation variables (eg. pendingChainId, error)
-            },
+        const { reset, switchChain } = useSwitchChain({
+            mutation: {
+                onSettled: () => {
+                    reset(); // reset mutation variables (eg. pendingChainId, error)
+                },
+            }
         });
 
-        switchNetwork?.(value.chainId)
+        switchChain({ chainId: value.chainId })
     }
 
     search(search: string, value: Chain): Chain[] {
-        const { chains } = useNetwork();
-
+        const chains = useChains();
         return chains
             .filter((cell) => cell.name.toLowerCase().includes(search.toLowerCase()) && cell.id !== value.chainId)
             .slice(0, 10)

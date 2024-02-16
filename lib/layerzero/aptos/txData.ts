@@ -19,7 +19,7 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
         address: OmnichainAptosBridge[step.action.fromChainId] as `0x${string}`,
         abi: OmnichainAptosBridgeAbi,
         // 1a. Insert a single client
-        publicClient: client,
+        client,
     })
 
     const aptosGas = await fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json());
