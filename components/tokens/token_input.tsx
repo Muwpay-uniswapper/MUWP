@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { Token } from "@/lib/core/model/CellLike"
 import { useSwapStore } from "@/lib/core/data/swapStore";

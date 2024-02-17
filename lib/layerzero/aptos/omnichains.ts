@@ -19,6 +19,7 @@ export const RequiredBlockConfirmationAptos = {
     [AptosChains.polygon]: 512,
     [AptosChains.arbitrum]: 20,
     [AptosChains.optimism]: 20,
+    [AptosChains.goerli]: 15,
 };
 export const OmnichainAptosBridge = {
     [AptosChains.arbitrum]: "0x1bacc2205312534375c8d1801c27d28370656cff",

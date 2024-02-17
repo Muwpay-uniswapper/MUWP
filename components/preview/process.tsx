@@ -36,7 +36,8 @@ export default function PreviewProcess() {
             const routes = getRoutes()
             for (const route of routes) {
                 if (route.fromToken.address === zeroAddress) continue;
-                const client = walletClient!.extend(publicActions);
+                if (typeof walletClient === "undefined") continue;
+                const client = walletClient.extend(publicActions);
                 // Check allowance
                 const contract = getContract({
                     address: route.fromToken.address as `0x${string}`,
