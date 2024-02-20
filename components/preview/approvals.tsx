@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useWalletClient } from "wagmi";
+import { useAccount, useConnections, useSwitchAccount, useWalletClient } from "wagmi";
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Loader2, Unlock } from "lucide-react";
 import React, { useState } from "react";
@@ -16,9 +16,11 @@ export function Approvals({
 }: {
     nextStep: NextStep
 }) {
-    const { getRoutes, routes: _route } = useRouteStore();
+    const { getRoutes, routes: _route, multiWallets } = useRouteStore();
     const { data: walletClient } = useWalletClient()
-    const { chain, address } = useAccount();
+    const { switchAccountAsync } = useSwitchAccount();
+    const connections = useConnections()
+    const { chain } = useAccount();
 
     const [isWaiting, setWaiting] = useState(-1);
 
@@ -54,14 +56,23 @@ export function Approvals({
                 client,
             })
 
-            const allowance = await contract.read.allowance([address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
+            for (const address of multiWallets ?? []) {
+                const allowance = await contract.read.allowance([address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
 
-            const amount = unlimited ? (2n ** 256n - 1n) : toApprove[index].amount
+                const amount = unlimited ? (2n ** 256n - 1n) : toApprove[index].amount
 
-            if (allowance < amount) {
-                const hash = await contract.write.approve([(chain as MUWPChain).muwpContract, amount])
+                if (allowance < amount) {
+                    const connection = connections.find(c => c.accounts.includes(address));
+                    if (connection) {
+                        await switchAccountAsync(connection);
+                    }
 
-                await client.waitForTransactionReceipt({ hash })
+                    const hash = await contract.write.approve([(chain as MUWPChain).muwpContract, amount], {
+                        account: address!
+                    })
+
+                    await client.waitForTransactionReceipt({ hash })
+                }
             }
         }
         await new Promise((resolve, reject) => {
@@ -90,7 +101,7 @@ export function Approvals({
     }
 
     return <div>
-        <div className="text-gray-500 text-sm pb-4 text-center">{index} of {toApprove.length}</div>
+        <div className="text-gray-500 text-sm pb-4 text-center">{index.toString()} of {toApprove.length}</div>
         <div className="text-center pb-4">
             <Unlock className="inline w-8 h-8" />
             <div className="font-bold text-2xl mt-2 mb-4">Unlock {toApprove[index].token.symbol}</div>
