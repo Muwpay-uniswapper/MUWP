@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
     RainbowKitProvider,
-    darkTheme,
+    midnightTheme,
 } from '@rainbow-me/rainbowkit';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,6 +23,7 @@ const config = getDefaultConfig({
     appName: 'MUWPay',
     projectId: projectId,
     chains: muwpChains as any,
+    multiInjectedProviderDiscovery: true,
 })
 
 const queryClient = new QueryClient()
@@ -77,7 +78,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AptosContext>
             <WagmiProvider config={config}>
                 <QueryClientProvider client={queryClient}>
-                    <RainbowKitProvider appInfo={muwpAppInfo} modalSize="compact" coolMode={true} theme={darkTheme()}>
+                    <RainbowKitProvider appInfo={muwpAppInfo} modalSize="compact" coolMode={true} theme={midnightTheme()}>
                         {mounted && <State>{children}</State>}
                     </RainbowKitProvider>
                 </QueryClientProvider>

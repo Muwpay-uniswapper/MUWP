@@ -5,6 +5,7 @@ import api from "@/lib/core/data/api";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { muwpChains } from "@/muwp";
 import { Step, StepTypeEnum } from "@/lib/li.fi-ts";
+import { tokenGet } from "@/lib/core/data/tokenLib";
 
 export async function FinalAptosStepBuilder({
     target,
@@ -21,18 +22,19 @@ export async function FinalAptosStepBuilder({
     fromAddress: `0x${string}` | string;
     toAddress: `0x${string}` | string;
 }): Promise<Step> {
+
     const client = createPublicClient({
         chain: extractChain({
             chains: muwpChains,
             id: fromChainId
         }),
         transport: http()
-    })
+    });
 
     const [aptosToken, fromToken, nativeToken, aptosGas, block10Time] = await Promise.all([
         getTokensAptosBridge(),
-        api.tokenGet(fromChainId.toString(), fromTokenAddress),
-        api.tokenGet(fromChainId.toString(), zeroAddress),
+        tokenGet(fromChainId, fromTokenAddress),
+        tokenGet(fromChainId, zeroAddress),
         fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json()),
         client.getBlock().then(async block => block.timestamp - await client.getBlock({ blockNumber: block.number - 10n }).then(block => block.timestamp))
     ]);
@@ -85,7 +87,9 @@ export async function FinalAptosStepBuilder({
         value: parseEther("1") + nativeFee
     });
 
-    gasEstimate += rawGasEstimate * await client.getGasPrice();
+    const gasPrice = await client.getGasPrice();
+
+    gasEstimate += rawGasEstimate * gasPrice;
 
     console.log(`Gas estimate: ${gasEstimate - nativeFee}`);
     console.log(`Native fee: ${nativeFee}`);
@@ -132,9 +136,9 @@ export async function FinalAptosStepBuilder({
                 amount: gasEstimate.toString(),
                 type: "SEND",
                 token: nativeToken,
-                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * gasEstimate, nativeToken.decimals * 2),
+                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * gasEstimate * gasPrice, nativeToken.decimals * 2),
                 estimate: gasEstimate.toString(),
-                price: await client.getGasPrice().then(price => price.toString()),
+                price: gasPrice.toString(),
             }]
         },
         tool: "layerzero",

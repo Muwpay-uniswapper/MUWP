@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
             const { tempAccount } = await generateAccount(input);
 
-            console.log("Fetching routes");
+            console.log(`Fetching routes for ${input.inputTokens.length} input tokens on ${input.inputChain} and ${input.outputTokens.length} output tokens on ${input.outputChain}`);
 
             const { routes } = await (input.outputChain == AptosChainId ? handleAptosRoutes(input, tempAccount) : handleLiFiRoutes(input, tempAccount));
 

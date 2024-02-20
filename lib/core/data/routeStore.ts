@@ -19,6 +19,7 @@ export type Transaction = {
 };
 
 type RouteStore = {
+    multiWallets: `0x${string}`[] | undefined;
     tempAccount: `0x${string}` | undefined;
     transactions: Transaction[];
     setTransaction: (transaction: Transaction) => void;
@@ -57,6 +58,7 @@ BigInt.prototype.toJSON = function () {
 };
 
 export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteStore>['setState'], get: StoreApi<RouteStore>['getState']) => ({
+    multiWallets: undefined,
     tempAccount: undefined,
     transactions: [],
     setTransaction: (transaction: Transaction) => {

@@ -8,6 +8,7 @@ import { TokensGet200Response } from "@/lib/li.fi-ts";
 import { muwpChains } from "@/muwp";
 import { TokenList } from '@uniswap/token-lists'
 import { AptosChainId, getTokensAptosBridge } from "@/lib/layerzero/aptos/omnichains";
+import { tokensGet } from "@/lib/core/data/tokenLib";
 
 export async function TokenSelector({
     id,
@@ -22,37 +23,12 @@ export async function TokenSelector({
     if (typeof chain === "undefined") {
         chain = 1
     }
-    let tokens: TokensGet200Response
-    try {
-        switch (chain) {
 
-            case AptosChainId:
-                tokens = await getTokensAptosBridge()
-                break
-            default:
-                tokens = await api.tokensGet(chain.toString())
-                if (chain == 5) { // Goerli
-                    tokens.tokens?.push({
-                        address: "0x30c212b53714daf3739Ff607AaA8A0A18956f13c",
-                        chainId: 5,
-                        decimals: 6,
-                        name: "USD Coin (LayerZero)",
-                        priceUSD: "1",
-                        symbol: "zgUSDC",
-                        coinKey: "zgusdc:aptos:layerzero",
-                        logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/aptos/assets/0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa%3A%3Aasset%3A%3AUSDC/logo.png"
-                    })
-                }
-                break
-        }
-    } catch (e) {
-        console.log(e)
-        tokens = new TokensGet200Response()
-    }
+    const tokens = await tokensGet(chain)
 
     const safeTokens = await fetch("https://gateway.ipfs.io/ipns/tokens.uniswap.org").then((res) => res.json()) as TokenList
 
-    const tokenList: Token[] = tokens.tokens?.map((token) => {
+    const tokenList: Token[] = Array.isArray(tokens.tokens) ? tokens.tokens.map((token) => {
         return {
             value: `${token.symbol}:${token.name}:${token.address}`,
             label: token.name,
@@ -64,7 +40,7 @@ export async function TokenSelector({
             chainId: chain!,
             verified: safeTokens.tokens.find((safeToken) => safeToken.address == token.address && safeToken.chainId == token.chainId) != undefined
         }
-    }) ?? []
+    }) : []
 
     return <TokenComboboxes tokenList={tokenList} mode={mode} />
 }
