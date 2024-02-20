@@ -136,7 +136,7 @@ export async function FinalAptosStepBuilder({
                 amount: gasEstimate.toString(),
                 type: "SEND",
                 token: nativeToken,
-                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * gasEstimate * gasPrice, nativeToken.decimals * 2),
+                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * gasEstimate, nativeToken.decimals * 2),
                 estimate: gasEstimate.toString(),
                 price: gasPrice.toString(),
             }]
