@@ -1,5 +1,3 @@
-"use client";
-
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { ArrowLeftRight, DollarSign, Fuel, Info, Layers2, Loader2, PercentCircle, Receipt } from "lucide-react";
 import React from "react";
@@ -12,7 +10,7 @@ import { Funnel } from "./funnel";
 import { useAccount, useEstimateFeesPerGas, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { Wallets } from "./wallets";
 
 const InitiateResponse = z.object({
     status: z.literal("success"),
@@ -32,13 +30,13 @@ export function Review({
 }) {
     const { getRoutes, routes: _route, tempAccount, setTransaction } = useRouteStore();
 
-    const routes = getRoutes()
+    const routes = getRoutes();
 
     const outputTokens = routes.map((route) => route.steps[route.steps.length - 1].action.toToken);
     const outputTokenSet = new Set(outputTokens.map((token) => token.address));
     const hasMultipleOutputs = outputTokenSet.size > 1;
 
-    const gasFees = routes.map((route) => Number(route.gasCostUSD)).reduce((a, b) => a + b, 0);
+    const gasFees = routes.map((route) => Number(route.gasCostUSD ?? "0")).reduce((a, b) => a + b, 0);
     const feeCosts = routes.map((route) => route.steps.map((step) => step.estimate?.feeCosts?.map((fee) => Number(fee.amountUSD))?.reduce((a, b) => a + b, 0) ?? 0).reduce((a, b) => a + b, 0)).reduce((a, b) => a + b, 0);
     let duration = routes.map((route) => route.steps.map((step) => step.estimate?.executionDuration ?? 0).reduce((a, b) => a + b, 0)).reduce((a, b) => Math.max(a, b), 0); // Steps are executed in parallel, so we take the max
     if (duration > 0) {
