@@ -69,7 +69,7 @@ export function ChainCombobox({
 
     return <>
         <Container open={open} onOpenChange={setOpen}>
-            <ContainerTrigger asChild id={`token-combo-${index}`}>
+            <ContainerTrigger asChild id={`${mode}-chain-combo-${index}`}>
                 <Button
                     variant="outline"
                     role="combobox"
