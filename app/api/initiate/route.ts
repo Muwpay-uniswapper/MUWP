@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         const input = await z.object({
-            from: EthereumAddress,
+            from: z.record(z.record(z.coerce.bigint())),
             account: EthereumAddress,
             chainId: z.number(),
             routes: z.array(Route.zod),

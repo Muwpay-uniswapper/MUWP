@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react"
-import { useConnect, useConnections, useConnectors } from "wagmi"
+import { useAccount, useConnect, useConnections, useConnectors, useSwitchAccount } from "wagmi"
 import {
     Accordion,
     AccordionContent,
@@ -18,13 +18,22 @@ import { cn } from "@/lib/core/utils";
 import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AllocationWallet from "./AllocationWallets";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 
 export function Wallets() {
-    const { multiWallets } = useRouteStore();
+    const { multiWallets, gasPayer } = useRouteStore();
     const { connect } = useConnect();
     const connectors = useConnectors();
-    const connections = useConnections()
+    const connections = useConnections();
+    const { address } = useAccount();
+    const { switchAccount } = useSwitchAccount();
     const [accounts, setAccounts] = useState<{ [key: string]: readonly `0x${string}`[] }>({});
 
     // Remove duplicate connectors
@@ -55,6 +64,26 @@ export function Wallets() {
                 <TabsTrigger value="allocation" className="w-full">Allocation</TabsTrigger>
             </TabsList>
             <TabsContent value="wallets">
+                <h3 className="text-lg font-medium mb-2">Gas Payer</h3>
+                <p className="mb-4">Select the wallet you want to use to pay for the swap gas fee. It will be considered as the &quot;main&quot; wallet.</p>
+                <Select value={gasPayer} onValueChange={(value) => {
+                    // Find the connector that has the account
+                    const connector = connections.find((connection) => connection.accounts.includes(value as `0x${string}`));
+                    if (connector) {
+                        switchAccount({ connector: connector?.connector })
+                    }
+                    useRouteStore.setState({ gasPayer: value as `0x${string}` })
+                }}>
+                    <SelectTrigger className="w-wull">
+                        <SelectValue placeholder="Gas Payer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {multiWallets?.map((wallet, index) => <SelectItem key={index} value={wallet} className="pl-7">
+                            {wallet}
+                        </SelectItem>)}
+                    </SelectContent>
+                </Select>
+                <h3 className="text-lg font-medium mb-2 mt-4">Available Wallets</h3>
                 <Accordion type="single" collapsible >
                     {_connectors.map((connector) => (
                         <AccordionItem key={connector.uid} value={connector.uid}>
@@ -94,7 +123,7 @@ export function Wallets() {
                                                     }
                                                     return { multiWallets };
                                                 })
-                                            }} checked={multiWallets?.includes(account)} />
+                                            }} checked={multiWallets?.includes(account)} disabled={account === gasPayer} />
                                             <Label htmlFor={account}>{account}</Label>
                                         </div>
                                     </div>
