@@ -1,15 +1,14 @@
-import React, { memo, ReactNode, useContext, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
 } from "@/components/ui/select"
 import { Route, Token } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
-import { ArrowDown, ChevronDown, Clock, DollarSign, Fuel } from 'lucide-react';
+import { ArrowDown, Clock, DollarSign, Fuel } from 'lucide-react';
 import { useRouteStore } from '@/lib/core/data/routeStore';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/core/utils';

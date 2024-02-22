@@ -41,7 +41,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param toTimestamp The newest timestamp that should be taken into consideration. Defaults to now
      */
     public async analyticsTransfersGet(integrator: string, wallet?: string, status?: string, fromTimestamp?: number, toTimestamp?: number, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'integrator' is not null or undefined
         if (integrator === null || integrator === undefined) {
@@ -105,7 +105,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async analyticsWalletsWalletAddressGet(walletAddress: string, integrator: string, fromTimestamp?: number, toTimestamp?: number, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'walletAddress' is not null or undefined
         if (walletAddress === null || walletAddress === undefined) {
@@ -168,7 +168,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async calldataParseGet(callData: string, chainId?: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'callData' is not null or undefined
         if (callData === null || callData === undefined) {
@@ -217,7 +217,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey The apiKey allows you to authenticate on the API.
      */
     public async chainsGet(chainTypes?: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
 
@@ -260,7 +260,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async connectionsGet(fromChain?: string, toChain?: string, fromToken?: string, toToken?: string, chainTypes?: string, allowBridges?: Array<string>, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
 
@@ -328,7 +328,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async gasRefetchGet(txHash: string, chainId: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'txHash' is not null or undefined
         if (txHash === null || txHash === undefined) {
@@ -381,7 +381,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async gasStatusGet(txHash: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'txHash' is not null or undefined
         if (txHash === null || txHash === undefined) {
@@ -426,7 +426,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async gasSuggestionChainGet(chain: string, fromChain?: string, fromToken?: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'chain' is not null or undefined
         if (chain === null || chain === undefined) {
@@ -477,7 +477,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async integratorsIntegratorIdGet(integratorId: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'integratorId' is not null or undefined
         if (integratorId === null || integratorId === undefined) {
@@ -518,7 +518,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async integratorsIntegratorIdWithdrawChainIdGet(integratorId: string, chainId: string, tokenAddresses?: Array<string>, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'integratorId' is not null or undefined
         if (integratorId === null || integratorId === undefined) {
@@ -570,7 +570,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param contractCallRequest Object describing what tokens to transfer and how to interact with the destination contract.
      */
     public async quoteContractCallPost(xLifiApiKey?: string, contractCallRequest?: ContractCallRequest, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
 
@@ -614,7 +614,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param contractCallsRequest Object describing what tokens to transfer and how to interact with the destination contracts.
      */
     public async quoteContractCallsPost(xLifiApiKey?: string, contractCallsRequest?: ContractCallsRequest, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
 
@@ -677,7 +677,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async quoteGet(fromChain: string, toChain: string, fromToken: string, toToken: string, fromAddress: string, fromAmount: string, toAddress?: string, order?: 'RECOMMENDED' | 'FASTEST' | 'CHEAPEST' | 'SAFEST', slippage?: number, integrator?: string, fee?: number, referrer?: string, allowBridges?: Array<QuoteBridgesEnum>, allowExchanges?: Array<QuoteExchangesEnum>, denyBridges?: Array<QuoteBridgesEnum>, denyExchanges?: Array<QuoteExchangesEnum>, preferBridges?: Array<QuoteBridgesEnum>, preferExchanges?: Array<QuoteExchangesEnum>, allowDestinationCall?: boolean, maxPriceImpact?: number, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'fromChain' is not null or undefined
         if (fromChain === null || fromChain === undefined) {
@@ -862,7 +862,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async statusGet(txHash: string, bridge?: BridgesEnum, fromChain?: string, toChain?: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'txHash' is not null or undefined
         if (txHash === null || txHash === undefined) {
@@ -924,7 +924,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async tokenGet(chain: string, token: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'chain' is not null or undefined
         if (chain === null || chain === undefined) {
@@ -979,7 +979,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async tokensGet(chains?: string, chainTypes?: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
 
@@ -1022,7 +1022,7 @@ export class DefaultApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async toolsGet(xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
         // Path Params

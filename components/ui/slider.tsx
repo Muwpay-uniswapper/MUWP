@@ -4,18 +4,22 @@ import * as React from "react"
 import * as SliderPrimitive from "./primitives/Slider"
 import { cn } from "@/lib/core/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip"
-import { Token } from "@/lib/core/model/CellLike"
 
-function _Slider(
+function _Slider<T>(
   props: React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & {
     thumbs?: number;
     colors?: string[];
-    tokens: Token[];
+    objects?: T[];
+    maps?: (arg0: T, i: number, validate: (newAmount: number, i: number) => void, inputValue: string, setInputValue: (str: string) => void) => React.ReactNode;
   },
   ref: React.Ref<React.ElementRef<typeof SliderPrimitive.Root>>,
 ) {
   const { className, thumbs = 1, ...otherProps } = props;
   const [inputValue, setInputValue] = React.useState("0");
+
+  if (thumbs < 1) {
+    return <div className="text-black text-center rounded w-full pt-1 bg-primary">100%</div>
+  }
 
   const validate = (newAmount: number, i: number) => {
     // Expand
@@ -73,32 +77,7 @@ function _Slider(
           </SliderPrimitive.Range>
         </TooltipTrigger>
         <TooltipContent className="flex flex-row gap-1 items-center">
-          <img src={props.tokens[i]?.logoURI} alt={props.tokens[i]?.value} className="w-4 h-4 rounded-full" />
-          <input
-            className="text-sm font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-white w-12 text-right"
-            value={inputValue}
-            placeholder="0"
-            onChange={e => {
-              const newAmount = parseInt(e.target.value == "" ? "0" : e.target.value);
-              if (isNaN(newAmount) || newAmount > 100 || newAmount < 0) return;
-              setInputValue(newAmount.toString());
-            }}
-            onKeyDown={e => {
-              if (e.key !== 'Enter') return;
-              const newAmount = parseInt(inputValue);
-              validate(newAmount, i);
-            }}
-            onBlur={e => {
-              const newAmount = parseInt(e.target.value == "" ? "0" : e.target.value);
-              if (isNaN(newAmount) || newAmount > 100 || newAmount < 0) return;
-              setInputValue(newAmount.toString());
-              validate(newAmount, i);
-            }}
-            type="text"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-          />
-          %
+          {props.objects && props.maps?.(props.objects[i], i, validate, inputValue, setInputValue)}
         </TooltipContent>
       </Tooltip>)}
     </SliderPrimitive.Track>

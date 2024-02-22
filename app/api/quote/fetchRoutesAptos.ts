@@ -28,7 +28,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
         });
 
     const rawRoutes = [];
-    for (let req of queries) {
+    for (const req of queries) {
 
         const previousRoutes: Route[] = [];
 
@@ -62,7 +62,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
         console.log(`Looking at ${previousRoutes.length} previous routes`)
 
         if (previousRoutes.length == 0) {
-            //@ts-expect-error
+            // @ts-expect-error - Partial route
             previousRoutes.push({
                 steps: [],
                 tags: ["RECOMMENDED"]
@@ -120,7 +120,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
         [key: string]: Route[]
     } = {};
 
-    for (let rawRoute of rawRoutes) {
+    for (const rawRoute of rawRoutes) {
         const _routes = rawRoute.routes;
         const index = rawRoutes.indexOf(rawRoute);
         if (!_routes || typeof rawRoute.routes[0] == "undefined" || typeof rawRoute.routes[0].fromAddress == "undefined") {

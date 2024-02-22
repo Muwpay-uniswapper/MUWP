@@ -64,7 +64,7 @@ export function renderNodes(initialPoint: { x: number, y: number }, routes: Rout
 
     const nodes: { [key: string]: Node<TokenNodeData | DetailNodeData> } = {};
     const edges: Edge[] = [];
-    let point = { ...initialPoint };
+    const point = { ...initialPoint };
 
     for (const route of routes) {
         let previousNodeId: string | null = null;

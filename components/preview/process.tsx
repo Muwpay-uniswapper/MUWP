@@ -3,7 +3,6 @@
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -17,27 +16,24 @@ import { getContract, zeroAddress, erc20Abi, publicActions } from "viem";
 import { Review } from "./review";
 import { PreviewSend } from "./send";
 import { useSwapStore } from "@/lib/core/data/swapStore";
-import Link from "next/link";
 import { useAccount, useWalletClient } from "wagmi";
 import { MUWPChain } from "@/muwp";
 import { useRouter } from "next/navigation";
-import { WalletAccessor, Wallets } from "./wallets";
+import { WalletAccessor } from "./wallets";
 
 export type NextStep = (opt?: any) => void;
 
 export default function PreviewProcess() {
     const [status, setStatus] = useState<Status>(Status.approvals)
-    const { getRoutes, routes: _route, clear, chosenIndex, multiWallets } = useRouteStore();
+    const { getRoutes, routes: _route, clear, multiWallets } = useRouteStore();
     const { clearSwaps } = useSwapStore();
     const [needsApproval, setNeedApprovals] = useState(true);
     const { data: walletClient } = useWalletClient()
     const { address, chain } = useAccount();
 
     React.useEffect(() => {
-        if (address && !(multiWallets?.includes(address))) {
-            const pastWallets: `0x${string}`[] = Array.isArray(multiWallets) ? multiWallets : [];
-            pastWallets.push(address);
-            useRouteStore.setState({ multiWallets: pastWallets });
+        if (address) {
+            useRouteStore.setState({ multiWallets: [address] });
         }
     }, [address]);
 

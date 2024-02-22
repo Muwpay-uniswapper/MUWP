@@ -2,7 +2,7 @@
 
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Card, CardContent } from "./ui/card";
-import React, { useMemo } from "react";
+import React from "react";
 import { Clock, DollarSign, Fuel, Layers2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Route } from "@/lib/li.fi-ts";
@@ -29,7 +29,7 @@ export default function PreviewSwap() {
         return routes.find(route => route.tags?.includes("RECOMMENDED")) ?? routes[0]
     })
     const { gasFees, feeCosts, duration, steps } = calcStats(routes);
-    const { gasFees: optimalGasFees, feeCosts: optimalFeeCosts, duration: optimalDuration, steps: optimalSteps } = calcStats(optimal);
+    const { gasFees: optimalGasFees, feeCosts: optimalFeeCosts, duration: optimalDuration } = calcStats(optimal);
 
     return <Card className="w-full mt-4">
         <CardContent className="flex flex-row justify-between items-center pt-6">

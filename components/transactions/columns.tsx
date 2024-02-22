@@ -16,7 +16,7 @@ import { ClaimAptos } from "@/lib/layerzero/aptos/claim";
 export const columns: ColumnDef<Transaction>[] = [
     {
         accessorKey: "timestamp",
-        sortingFn: (rowA: Row<Transaction>, rowB: Row<Transaction>, columnId: string): number => {
+        sortingFn: (rowA: Row<Transaction>, rowB: Row<Transaction>, _columnId: string): number => {
             const a = new Date(rowA.original.timestamp)
             const b = new Date(rowB.original.timestamp)
             return a > b ? 1 : a < b ? -1 : 0
@@ -96,7 +96,7 @@ export const columns: ColumnDef<Transaction>[] = [
             const _inputs = new Set(routes.map((route) => route.fromToken.address))
             const inputs = Array.from(_inputs).map((address) => routes.find((route) => route.fromToken.address === address)!.fromToken)
             return <div className="flex flex-row gap-1">
-                {Array.from(inputs).map((route) => <Tooltip>
+                {Array.from(inputs).map((route) => <Tooltip key={route.address}>
                     <TooltipTrigger>
                         <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>
@@ -117,7 +117,7 @@ export const columns: ColumnDef<Transaction>[] = [
             const _outputs = new Set(routes.map((route) => route.toToken.address))
             const outputs = Array.from(_outputs).map((address) => routes.find((route) => route.toToken.address === address)!.toToken)
             return <div className="flex flex-row gap-1">
-                {Array.from(outputs).map((route) => <Tooltip>
+                {Array.from(outputs).map((route) => <Tooltip key={route.address}>
                     <TooltipTrigger>
                         <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>

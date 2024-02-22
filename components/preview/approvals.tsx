@@ -26,7 +26,7 @@ export function Approvals({
 
     const [index, setIndex] = useState(0);
 
-    const routes = React.useMemo(() => getRoutes().filter(route => route.fromToken.address !== zeroAddress), [_route])
+    const routes = React.useMemo(() => getRoutes().filter(route => route.fromToken.address !== zeroAddress), [Object.values(_route).flatMap(rs => rs.map(r => r.id)).join(",")])
     const toApprove = React.useMemo(() => {
         const pending: {
             [key: string]: { amount: bigint, token: Token }

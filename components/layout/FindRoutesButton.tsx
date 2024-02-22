@@ -17,6 +17,7 @@ export function FindRoutesButton() {
     const [trials, setTrials] = useState(0);
     React.useEffect(() => {
         const interval = setInterval(async () => {
+            if (process.env.NODE_ENV !== "production") return;
             if (validUntil && validUntil < new Date() && !isFetching && trials <= 3) {
                 await onClick();
             }

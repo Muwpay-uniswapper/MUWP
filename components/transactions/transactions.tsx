@@ -13,7 +13,7 @@ const fetcher = (args: string[]) => {
 }
 
 export default function Transactions() {
-    const { transactions, setTransaction } = useRouteStore();
+    const { transactions } = useRouteStore();
     const { data } = useSWR(["/api/status", transactions.map((tx) => tx.id)], fetcher, {
         refreshInterval: 5000,
     })

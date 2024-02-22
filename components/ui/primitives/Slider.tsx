@@ -599,9 +599,9 @@ const SliderThumbImpl = React.forwardRef<SliderThumbImplElement, SliderThumbImpl
             value === undefined ? 0 : convertValueToPercentage(value, context.min, context.max);
         const label = getLabel(index, context.values.length);
         const orientationSize = size?.[orientation.size];
-        const thumbInBoundsOffset = orientationSize
-            ? getThumbInBoundsOffset(orientationSize, percent, orientation.direction)
-            : 0;
+        // const thumbInBoundsOffset = orientationSize
+        //     ? getThumbInBoundsOffset(orientationSize, percent, orientation.direction)
+        //     : 0;
 
         React.useEffect(() => {
             if (thumb) {

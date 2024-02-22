@@ -10,7 +10,6 @@ import { Funnel } from "./funnel";
 import { useAccount, useEstimateFeesPerGas, useWalletClient } from "wagmi";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Wallets } from "./wallets";
 
 const InitiateResponse = z.object({
     status: z.literal("success"),
@@ -185,7 +184,7 @@ export function Review({
         </div>
         <div className="flex flex-row justify-evenly items-center max-w-xs mx-auto">
             <div className="flex flex-col gap-2">
-                {!hasMultipleOutputs ? routes.map((route) => <Tooltip>
+                {!hasMultipleOutputs ? routes.map((route) => <Tooltip key={route.id}>
                     <TooltipTrigger>
                         <img src={route.fromToken.logoURI} alt={route.fromToken.symbol} className="w-6 h-6 rounded-full" />
                     </TooltipTrigger>
@@ -205,7 +204,7 @@ export function Review({
             </div>
             <Funnel height={routes.length * 3} reverse={hasMultipleOutputs} />
             <div className="flex flex-col gap-2">
-                {hasMultipleOutputs ? routes.map((route) => <Tooltip>
+                {hasMultipleOutputs ? routes.map((route) => <Tooltip key={route.id}>
                     <TooltipTrigger>
                         <img src={route.toToken.logoURI} alt={route.toToken.symbol} className="w-6 h-6 rounded-full" />
                     </TooltipTrigger>

@@ -12,7 +12,7 @@ import { WelldoneWallet } from "@welldone-studio/aptos-wallet-adapter";
 import {
     AptosWalletAdapterProvider
 } from "@aptos-labs/wallet-adapter-react";
-import { AutoConnectProvider, useAutoConnect } from "./AutoConnectProvider";
+import { AutoConnectProvider } from "./AutoConnectProvider";
 import { FC, ReactNode } from "react";
 
 const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {

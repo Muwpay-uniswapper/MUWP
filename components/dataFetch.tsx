@@ -4,10 +4,9 @@ import { TokenComboboxes } from "@/components/tokens/token_combobox";
 import { Chain, Token } from "@/lib/core/model/CellLike";
 import { ChainCombobox } from "@/components/chains/chain-selector";
 import api from "@/lib/core/data/api"
-import { TokensGet200Response } from "@/lib/li.fi-ts";
 import { muwpChains } from "@/muwp";
 import { TokenList } from '@uniswap/token-lists'
-import { AptosChainId, getTokensAptosBridge } from "@/lib/layerzero/aptos/omnichains";
+import { AptosChainId } from "@/lib/layerzero/aptos/omnichains";
 import { tokensGet } from "@/lib/core/data/tokenLib";
 
 export async function TokenSelector({

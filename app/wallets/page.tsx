@@ -1,19 +1,12 @@
 "use client";
-import { Wallets } from "@/components/preview/wallets";
-import { Metadata } from 'next'
+import { WalletAccessor } from "@/components/preview/wallets";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button";
 import React from "react";
-import { X } from "lucide-react";
-import { cn } from "@/lib/core/utils";
-import { Badge } from "@/components/ui/badge";
 
 export default function WalletsPage() {
     const [open, setOpen] = React.useState(false);
@@ -22,7 +15,7 @@ export default function WalletsPage() {
             <div className="flex flex-col md:flex-row gap-2 max-w-screen-xl w-full mx-4">
                 <Dialog open={true}>
                     <DialogContent canClose={!open}>
-
+                        <WalletAccessor />
                         <DialogHeader>
                             <DialogTitle>Trade Review</DialogTitle>
                         </DialogHeader>

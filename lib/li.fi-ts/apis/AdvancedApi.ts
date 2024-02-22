@@ -26,7 +26,7 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
      * @param possiblitiesRequest Object defining preferences regarding chain, exchanges and bridges. Currently available exchanges are: &#x60;1inch&#x60;, &#x60;paraswap&#x60;, &#x60;openocean&#x60;, &#x60;0x&#x60;. Currently available bridges are &#x60;hop&#x60;, &#x60;multichain&#x60;, &#x60;cbridge&#x60;, &#x60;celercircle&#x60;, &#x60;connext&#x60;, &#x60;amarok&#x60;, &#x60;celerim&#x60;, &#x60;hyphen&#x60;, &#x60;optimism&#x60;, &#x60;polygon&#x60;, &#x60;arbitrum&#x60;, &#x60;avalanche&#x60;, &#x60;across&#x60;, &#x60;stargate&#x60;, &#x60;gnosis&#x60; and &#x60;omni&#x60;.
      */
     public async advancedPossibilitiesPost(xLifiApiKey?: string, possiblitiesRequest?: PossiblitiesRequest, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
 
@@ -69,7 +69,7 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async advancedRoutesPost(routesRequest: RoutesRequest, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'routesRequest' is not null or undefined
         if (routesRequest === null || routesRequest === undefined) {
@@ -118,7 +118,7 @@ export class AdvancedApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async advancedStepTransactionPost(step: Step, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'step' is not null or undefined
         if (step === null || step === undefined) {

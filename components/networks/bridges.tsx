@@ -29,6 +29,7 @@ export function BridgesList({
                         onClick={() => {
                             toggleAllowDenyBridge(bridge.key ?? "")
                         }}
+                        key={bridge.key}
                     >
                         {allowDenyBridges.deny?.includes(bridge.key ?? "")
                             ? <X className="absolute -top-2 -right-2 w-5 h-5 p-1 bg-red-400 rounded-full" />

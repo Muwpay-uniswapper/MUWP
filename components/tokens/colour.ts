@@ -12,7 +12,7 @@ type RGB = {
 };
 
 function hexToRgb(hex: string): RGB | null {
-    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
@@ -22,12 +22,12 @@ function hexToRgb(hex: string): RGB | null {
 
 function colorDistance(rgb: RGB, hexColor: string): number {
     if (hexColor == null) return Infinity;
-    let color2RGB = hexToRgb(hexColor);
+    const color2RGB = hexToRgb(hexColor);
     if (!color2RGB) {
         return Infinity;
     }
 
-    let distance = Math.sqrt(
+    const distance = Math.sqrt(
         (rgb.r - color2RGB.r) * (rgb.r - color2RGB.r) +
         (rgb.g - color2RGB.g) * (rgb.g - color2RGB.g) +
         (rgb.b - color2RGB.b) * (rgb.b - color2RGB.b)
@@ -41,7 +41,7 @@ function closestColor(rgb: RGB, hexColors: string[]): string {
     // Set to RGB hex
     let closestColor: string = (rgb.r << 16 | rgb.g << 8 | rgb.b).toString(16).padStart(6, '0');
     for (let i = 0; i < hexColors.length; i++) {
-        let distance = colorDistance(rgb, hexColors[i]);
+        const distance = colorDistance(rgb, hexColors[i]);
         if (distance < min && distance !== Infinity) {
             min = distance;
             closestColor = hexColors[i];

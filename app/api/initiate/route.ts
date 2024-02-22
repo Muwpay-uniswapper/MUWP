@@ -156,7 +156,7 @@ export async function POST(request: Request) {
             })
         } else if (e instanceof Error) {
             console.log(e.message)
-            const bodyPattern = /Body: \"(\{.*\})\"/;
+            const bodyPattern = /Body: "(\{.*\})"/;
             const matches = e.message.match(bodyPattern);
 
             if (matches && matches.length > 1) {

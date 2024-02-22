@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import { createPublicClient, decodeAbiParameters, encodePacked, getContract, http, zeroAddress } from 'viem'
+import { createPublicClient, encodePacked, getContract, http, zeroAddress } from 'viem'
 import { AptosChains, OmnichainAptosBridge } from "./omnichains";
 import { OmnichainAptosBridgeAbi } from "./abi";
-import { avalanche, mainnet } from 'viem/chains'
+import { avalanche } from 'viem/chains'
 
 describe("Aptos", () => {
     const client = createPublicClient({

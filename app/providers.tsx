@@ -15,7 +15,6 @@ import { Toaster } from 'sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { muwpChains } from '@/muwp';
 import { AptosContext } from './aptosWallet';
-import { _chains } from '@rainbow-me/rainbowkit/dist/config/getDefaultConfig';
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID as string;
 

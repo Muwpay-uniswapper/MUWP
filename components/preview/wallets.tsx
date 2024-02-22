@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react"
-import { useConnect, useConnections, useConnectors, useSwitchAccount } from "wagmi"
+import { useConnect, useConnections, useConnectors } from "wagmi"
 import {
     Accordion,
     AccordionContent,
@@ -16,6 +16,9 @@ import { Checkbox } from "../ui/checkbox";
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { cn } from "@/lib/core/utils";
 import { Badge } from "../ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import AllocationWallet from "./AllocationWallets";
+
 
 export function Wallets() {
     const { multiWallets } = useRouteStore();
@@ -42,57 +45,69 @@ export function Wallets() {
     return <>
         <h2 className="text-2xl font-medium mb-4">Multi Wallet</h2>
         <p className="mb-4">Select the wallets you want to use for this transaction.</p>
-        {Array.isArray(multiWallets) && multiWallets.length > 0 && (
-            <div className="text-center font-medium mb-2">{multiWallets.length} wallets selected</div>
-        )}
-        <Accordion type="single" collapsible >
-            {_connectors.map((connector) => (
-                <AccordionItem key={connector.uid} value={connector.uid}>
-                    <AccordionPrimitive.Header className="flex">
-                        {accounts[connector.id]?.length > 0 ? (
-                            <AccordionPrimitive.Trigger
-                                className="flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180"
-                            >
-                                <span>{connector.icon && <img src={connector.icon} className="w-4 h-4 inline mr-1" />} {connector.name} <Status connected={true} auto /></span>
-                                <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
-                            </AccordionPrimitive.Trigger>
-                        ) : (
-                            <div className="flex flex-1 items-center justify-between py-4 font-medium">
-                                <span>
-                                    {connector.icon && <img src={connector.icon} className="w-4 h-4 inline mr-1" />}
-                                    {connector.name}
-                                </span>
-                                <Button onClick={() => connect({ connector })} className="h-4" variant="outline">Connect</Button>
-                            </div>
-                        )}
-                    </AccordionPrimitive.Header>
-                    <AccordionContent>
-                        {accounts[connector.id]?.map((account, index) => (
-                            <div>
-                                <div className="flex items-center space-x-2 my-1">
-                                    <Checkbox id={account} onCheckedChange={(checked) => {
-                                        useRouteStore.setState((state) => {
-                                            let multiWallets = state.multiWallets;
-                                            if (Array.isArray(multiWallets)) {
-                                                if (checked && !multiWallets.includes(account)) {
-                                                    multiWallets.push(account);
-                                                } else {
-                                                    multiWallets.splice(multiWallets.indexOf(account), 1);
-                                                }
-                                            } else {
-                                                multiWallets = [account];
-                                            }
-                                            return { multiWallets };
-                                        })
-                                    }} checked={multiWallets?.includes(account)} />
-                                    <Label htmlFor={account}>{account}</Label>
-                                </div>
-                            </div>
-                        ))}
-                    </AccordionContent>
-                </AccordionItem>
-            ))}
-        </Accordion>
+        <Tabs defaultValue="wallets" className="w-full">
+            <TabsList className="w-full">
+                <TabsTrigger value="wallets" className="w-full">{Array.isArray(multiWallets) && multiWallets.length > 0 ? (
+                    <span>{multiWallets.length} wallets selected</span>
+                ) : (
+                    <span>Select Wallets</span>
+                )}</TabsTrigger>
+                <TabsTrigger value="allocation" className="w-full">Allocation</TabsTrigger>
+            </TabsList>
+            <TabsContent value="wallets">
+                <Accordion type="single" collapsible >
+                    {_connectors.map((connector) => (
+                        <AccordionItem key={connector.uid} value={connector.uid}>
+                            <AccordionPrimitive.Header className="flex">
+                                {accounts[connector.id]?.length > 0 ? (
+                                    <AccordionPrimitive.Trigger
+                                        className="flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180"
+                                    >
+                                        <span>{connector.icon && <img src={connector.icon} className="w-4 h-4 inline mr-1" />} {connector.name} <Status connected={true} auto /></span>
+                                        <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                                    </AccordionPrimitive.Trigger>
+                                ) : (
+                                    <div className="flex flex-1 items-center justify-between py-4 font-medium">
+                                        <span>
+                                            {connector.icon && <img src={connector.icon} className="w-4 h-4 inline mr-1" />}
+                                            {connector.name}
+                                        </span>
+                                        <Button onClick={() => connect({ connector })} className="h-4" variant="outline">Connect</Button>
+                                    </div>
+                                )}
+                            </AccordionPrimitive.Header>
+                            <AccordionContent>
+                                {accounts[connector.id]?.map((account, index) => (
+                                    <div key={index}>
+                                        <div className="flex items-center space-x-2 my-1">
+                                            <Checkbox id={account} onCheckedChange={(checked) => {
+                                                useRouteStore.setState((state) => {
+                                                    let multiWallets = state.multiWallets;
+                                                    if (Array.isArray(multiWallets)) {
+                                                        if (checked && !multiWallets.includes(account)) {
+                                                            multiWallets.push(account);
+                                                        } else {
+                                                            multiWallets.splice(multiWallets.indexOf(account), 1);
+                                                        }
+                                                    } else {
+                                                        multiWallets = [account];
+                                                    }
+                                                    return { multiWallets };
+                                                })
+                                            }} checked={multiWallets?.includes(account)} />
+                                            <Label htmlFor={account}>{account}</Label>
+                                        </div>
+                                    </div>
+                                ))}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </TabsContent>
+            <TabsContent value="allocation">
+                <AllocationWallet />
+            </TabsContent>
+        </Tabs>
     </>
 }
 
@@ -110,7 +125,7 @@ export function WalletAccessor() {
         </div>}
         {!open && <Button variant="ghost" className="relative" onClick={() => setOpen(!open)}>
             Wallets
-            <Badge className="absolute -top-2 -right-4">{multiWallets?.length}</Badge>
+            <Badge className="absolute -top-2 -right-4">{multiWallets?.length ?? 1}</Badge>
         </Button>}
     </div>
 }
