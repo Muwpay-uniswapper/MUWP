@@ -16,7 +16,8 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         const input = await z.object({
-            from: z.record(z.record(z.coerce.bigint())),
+            from: z.record(EthereumAddress, z.record(EthereumAddress, z.coerce.bigint())),
+            gasPayer: EthereumAddress,
             account: EthereumAddress,
             chainId: z.number(),
             routes: z.array(Route.zod),
@@ -76,6 +77,7 @@ export async function POST(request: Request) {
         }))).reduce((acc1, cost) => acc1 + cost, 0n);
 
         /*
+        // For Gas Payer
         function transfer(
         address[] memory tokens,
         uint256[] memory amounts,
@@ -84,8 +86,8 @@ export async function POST(request: Request) {
         ) public payable
             */
         const args = [
-            input.routes.map(route => route.steps[0].action.fromToken.address),
-            input.routes.map(route => BigInt(route.steps[0].action.fromAmount)),
+            input.routes.map(route => route.fromToken.address),
+            input.routes.map(route => input.from[route.fromToken.address][input.gasPayer]),
             totalGas,
             input.account,
         ]
@@ -103,15 +105,18 @@ export async function POST(request: Request) {
             maxPriorityFeePerGas
         } = await client.estimateFeesPerGas()
 
-        const txn = await client.prepareTransactionRequest({
-            account: input.from as `0x${string}`,
+        const txns = [await client.prepareTransactionRequest({
+            account: input.gasPayer as `0x${string}`,
             to: chain?.muwpContract,
             value: totalGas + input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n),
             data,
             chain: client.chain,
             maxFeePerGas,
             maxPriorityFeePerGas,
-        })
+        })]
+
+        // 2. Populate the rest of the transactions
+
 
         const _id = await inngest.send({
             name: "app/transfer.initiate",
@@ -126,7 +131,7 @@ export async function POST(request: Request) {
         return new Response(JSON.stringify({
             status: "success",
             address: input.account,
-            txn,
+            txns,
             id: _id.ids[0]
         }), {
             headers: {
