@@ -33,7 +33,7 @@ export default function PreviewProcess() {
 
     React.useEffect(() => {
         if (address) {
-            useRouteStore.setState({ multiWallets: [address] });
+            useRouteStore.setState({ multiWallets: [address], gasPayer: address });
         }
     }, [address]);
 

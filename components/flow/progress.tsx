@@ -20,7 +20,7 @@ export function Progress({ validUntil }: { validUntil: Date; }) {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [validUntil]);
+    }, [totalDuration, validUntil]);
 
     const radius = 45;
     const circumference = 2 * Math.PI * radius;

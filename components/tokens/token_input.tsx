@@ -9,16 +9,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "@/lib/core/utils";
 import { EthereumAddress } from "@/lib/core/model/Address";
 
-export function FormatTokenAddress({ token }: { token: Token }) {
+export function FormatTokenAddress({ address, chainId }: { address: string, chainId: number }) {
     const chains = useChains()
-    const chain = chains.find(chain => chain.id === token.chainId)
+    const chain = chains.find(chain => chain.id === chainId)
 
-    if (token.address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
+    if (address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
 
-    const shortAddress = `${token.address.slice(0, 6)}...${token.address.slice(-4)}`
+    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`
     return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1">
         <FileDigit className="inline w-4 h-4" />
-        <a href={`${chain?.blockExplorers?.default.url}/address/${token.address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono" onClick={(e) => e.stopPropagation()}>{shortAddress}</a>
+        <a href={`${chain?.blockExplorers?.default.url}/address/${address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono" onClick={(e) => e.stopPropagation()}>{shortAddress}</a>
     </div>
 }
 
@@ -163,7 +163,7 @@ export function TokenInput({
                         <TooltipContent>
                             <div className="text-left p-4">
                                 <div className="text-base font-semibold">{token.label} Token</div>
-                                <FormatTokenAddress token={token} />
+                                <FormatTokenAddress address={token.address} chainId={chain?.id ?? 1} />
                             </div>
                         </TooltipContent>
                     </Tooltip>
