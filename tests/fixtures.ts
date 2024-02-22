@@ -1,6 +1,8 @@
 import { ethers } from 'ethers'
 import { test as base } from '@playwright/test'
 import { injectHeadlessWeb3Provider, Web3ProviderBackend } from 'headless-web3-provider'
+import dotenv from 'dotenv'
+dotenv.config();
 
 type InjectWeb3Provider = (
 	privateKeys?: string[]
