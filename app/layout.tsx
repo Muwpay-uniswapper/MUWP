@@ -6,7 +6,6 @@ import { Viewport, Metadata } from 'next'
 import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
 // import { VercelToolbar } from '@vercel/toolbar/next';
-import { Suspense } from "react";
 import Footer from '@/components/layout/footer'
 import NextNProgressClient from './progress'
 

@@ -1,6 +1,5 @@
 import { EthereumAddress } from "@/lib/core/model/Address";
 import * as store from "@/lib/kv/store";
-import { z } from "zod";
 
 export async function POST(request: Request) {
     const body = await request.json();

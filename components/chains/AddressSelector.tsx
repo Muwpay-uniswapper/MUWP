@@ -1,5 +1,5 @@
 
-import { WalletName, useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Chain } from "@/lib/core/model/CellLike";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";

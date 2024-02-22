@@ -1,7 +1,6 @@
 import { fromHex, toHex } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as store from "@/lib/kv/store";
-import { z } from "zod";
 import { EthereumAddress } from '@/lib/core/model/Address';
 
 

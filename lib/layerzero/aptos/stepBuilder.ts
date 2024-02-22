@@ -1,7 +1,6 @@
 import { nanoid } from "nanoid";
 import { OmnichainAptosBridge, RequiredBlockConfirmationAptos, getTokensAptosBridge } from "./omnichains";
 import { createPublicClient, encodePacked, extractChain, formatUnits, getContract, http, parseEther, parseUnits, zeroAddress } from "viem";
-import api from "@/lib/core/data/api";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { muwpChains } from "@/muwp";
 import { Step, StepTypeEnum } from "@/lib/li.fi-ts";
@@ -64,7 +63,7 @@ export async function FinalAptosStepBuilder({
         ]
     )
 
-    const [nativeFee, zroFee] = await contract.read.quoteForSend([{
+    const [nativeFee, _zroFee] = await contract.read.quoteForSend([{
         refundAddress: fromAddress as `0x${string}`,
         zroPaymentAddress: zeroAddress,
     }, adapterParams])
@@ -94,7 +93,8 @@ export async function FinalAptosStepBuilder({
     console.log(`Gas estimate: ${gasEstimate - nativeFee}`);
     console.log(`Native fee: ${nativeFee}`);
 
-    const toToken = aptosToken.tokens?.find(t => t.address == target)!;
+    const toToken = aptosToken.tokens?.find(t => t.address == target);
+    if (!toToken) throw new Error(`Token not found: ${target}`);
     const toAmount = fromToken.decimals > toToken.decimals ? BigInt(fromAmount) / (10n ** BigInt(fromToken.decimals - toToken.decimals)) : BigInt(fromAmount) * (10n ** BigInt(toToken.decimals - fromToken.decimals));
 
     // Time to execute the transaction

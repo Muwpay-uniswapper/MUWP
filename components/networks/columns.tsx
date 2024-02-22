@@ -54,7 +54,7 @@ export const columns: ColumnDef<Exchange>[] = [
         header: "Supported Chains",
         cell: ({ row }) => (
             <div className="flex flex-row gap-1">
-                {row.original.supportedChains?.map((chain) => <Tooltip>
+                {row.original.supportedChains?.map((chain) => <Tooltip key={chain} >
                     <TooltipTrigger>
                         <ChainIcon id={chain} key={chain} />
                     </TooltipTrigger>

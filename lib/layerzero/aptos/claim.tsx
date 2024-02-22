@@ -1,6 +1,6 @@
 import { WalletCombobox } from "@/components/chains/AddressSelector";
 import { Button } from "@/components/ui/button";
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import { Aptos, AptosConfig } from "@aptos-labs/ts-sdk";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useEffect, useState } from "react";
 

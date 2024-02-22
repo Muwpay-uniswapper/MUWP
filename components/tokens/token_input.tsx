@@ -138,7 +138,7 @@ export function TokenInput({
     }
 
     // format the number when unfocusing
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const handleBlur = (_e: React.FocusEvent<HTMLInputElement>) => {
         setInputValue(value)
     }
 

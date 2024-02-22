@@ -1,6 +1,6 @@
 import { Step } from "@/lib/li.fi-ts";
 import { muwpChains } from "@/muwp";
-import { TransactionRequest, TransactionSerializable, createPublicClient, encodeFunctionData, encodePacked, extractChain, getContract, http, serializeTransaction, toHex, zeroAddress } from "viem";
+import { createPublicClient, encodeFunctionData, encodePacked, extractChain, getContract, http, toHex, zeroAddress } from "viem";
 import { OmnichainAptosBridge } from "./omnichains";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { z } from "zod";
@@ -36,7 +36,7 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
         ]
     )
 
-    const [nativeFee, zroFee] = await contract.read.quoteForSend([{
+    const [nativeFee, _zroFee] = await contract.read.quoteForSend([{
         refundAddress: step.action.fromAddress as `0x${string}`,
         zroPaymentAddress: zeroAddress,
     }, adapterParams])

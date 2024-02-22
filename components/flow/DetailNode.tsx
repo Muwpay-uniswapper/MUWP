@@ -1,7 +1,6 @@
-import React, { memo, ReactNode } from 'react';
-import { Handle, NodeProps, Position, useEdgesState, useNodesState, useReactFlow, useUpdateNodeInternals } from 'reactflow';
-import { FiCloud } from 'react-icons/fi';
-import { FeeCost, GasCost, Step, Token } from '@/lib/li.fi-ts';
+import React, { memo } from 'react';
+import { NodeProps, useReactFlow, useUpdateNodeInternals } from 'reactflow';
+import { FeeCost, GasCost, Step } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDownToLine, Diff, DollarSign, Fuel, X } from 'lucide-react';
@@ -12,7 +11,7 @@ export type DetailNodeData = Step & {
 }
 
 export const format = (n?: number | string) => {
-    if (!n || typeof n == undefined) return "?";
+    if (!n || typeof n == "undefined") return "?";
     if (typeof n === "number") {
         return Math.round(n * 1000) / 1000;
     }
