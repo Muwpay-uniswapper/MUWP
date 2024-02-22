@@ -52,19 +52,22 @@ export function State({ children }: { children: React.ReactNode }) {
         }
 
         setHydrated(true);
-    }, [hydrated, chainId, chain]);
+    }, [hydrated, chainId, chain, toChainId, outputChain, switchChain, setOutputChain]);
 
     React.useEffect(() => {
         if (!hydrated) return;
-        if (typeof window !== 'undefined') {
-            const newParams = new URLSearchParams(window.location.search);
-            if (chain) newParams.set('chain', chain.id.toString());
-            if (outputChain) newParams.set('toChain', outputChain.toString());
 
-            // Just append the new params to the path.
-            router.push(`${window.location.pathname}?${newParams.toString()}`);
-        }
-    }, [chain, outputChain, router]);
+        const newParams = new URLSearchParams(searchParams.toString());
+        if (chain) newParams.set('chain', chain.id.toString());
+        if (outputChain) newParams.set('toChain', outputChain.toString());
+
+        // Just append the new params to the path.
+        router.replace(`/?${newParams.toString()}`, {
+            scroll: false
+        });
+
+        console.log(`-> ${newParams.toString()}`);
+    }, [chain, hydrated, outputChain, router, searchParams]);
 
     return children;
 }

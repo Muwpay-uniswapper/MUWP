@@ -217,3 +217,7 @@ n
 .vercel
 .env*.local
 *.cpuprofile
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

@@ -52,7 +52,9 @@ export function FindRoutesButton() {
                     bridges: allowDenyBridges,
                     exchanges: allowDenyExchanges,
                 }
-            })
+            });
+
+            console.log("Routes fetched");
 
             setTrials(0);
         } catch (e) {

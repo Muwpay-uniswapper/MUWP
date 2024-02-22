@@ -74,17 +74,18 @@ export function TokenCombobox({
 
     return (
         <Container open={open} onOpenChange={setOpen}>
-            <ContainerTrigger asChild id={`token-combo-${index}`}>
+            <ContainerTrigger asChild id={`${mode}-token-combo-${index}`}>
                 <div className="relative group">
                     <Button
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
                         className={cn(
-                            "w-full border h-auto",
+                            "w-full border h-auto cursor-pointer",
                             value ? "p-0 overflow-clip" : "border-dashed border-gray-300 rounded-md p-2",
                             !value && (inputTokens.length % 2 == 0) ? "col-span-full" : ""
                         )}
+                        asChild
                     >
                         {value
                             ? <TokenInput token={value} mode={mode} />

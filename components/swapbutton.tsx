@@ -16,7 +16,7 @@ export const SwapButton = React.forwardRef<HTMLButtonElement, {
     const { tempAccount } = useRouteStore();
 
     return (
-        <Button {...props} ref={forwardedRef} className="w-full h-full max-h-14 mt-4 rounded flex justify-center items-center" disabled={!tempAccount}>
+        <Button {...props} ref={forwardedRef} className="w-full h-full max-h-14 mt-4 rounded flex justify-center items-center swapbutton" disabled={!tempAccount}>
             {status === Status.approvals && needsApproval && "Approve"}
             {(status === Status.review || (status === Status.approvals && !needsApproval)) && "Review"}
             {status === Status.send && "Swap"}
