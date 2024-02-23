@@ -46,7 +46,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                         {((data.isInput && !data.hasMultipleOutputs) || (data.isOutput && data.hasMultipleOutputs)) && <Select value={chosenIndex[data.address]?.toString()} onValueChange={value => {
                             choseIndex(data.address, Number(value))
                         }}>
-                            <SelectTrigger className='border-none p-0 bg-transparent -translate-y-1/3 !focus:shadow-none' showChevron={false}>
+                            <SelectTrigger className='border-none p-0 bg-transparent -translate-y-1/3 !focus:shadow-none'>
                                 <div className="text-center w-full">
                                     Show all routes
                                 </div>
