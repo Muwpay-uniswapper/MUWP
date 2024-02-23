@@ -20,7 +20,7 @@ jobs:
     - name: Run Playwright tests
       env:
         WALLET_PK: ${{ secrets.WALLET_PK }}
-      run: npm run dev & npx playwright test
+      run: npx playwright test
     - uses: actions/upload-artifact@v3
       if: always()
       with:
