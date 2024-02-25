@@ -30,18 +30,18 @@ BASESCAN_API_KEY="9TX9BJ6N65R5RNGGX8GQ5NSDZGSHWPWB2U"
 
 # Avalanche
 # echo "Deploying to Avalanche network"
-# forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://avalanche.drpc.org" --verify -e $AVAXSCAN_API_KEY
+# forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://avalanche.drpc.org" --verify -e $AVAXSCAN_API_KEY
 
 # Arbitrum
 # echo "Deploying to Arbitrum network"
-# forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://arbitrum.llamarpc.com" --verify -e $ARBISCAN_API_KEY
+# forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://arbitrum.drpc.org" --verify -e $ARBISCAN_API_KEY
 
 # Optimism
 # echo "Deploying to Optimism network"
 # forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://mainnet.optimism.io" --verify
 
 # Base
-echo "Deploying to Base network"
-forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://base.llamarpc.com" --verify -e $BASESCAN_API_KEY
+# echo "Deploying to Base network"
+# forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://base.llamarpc.com" --verify -e $BASESCAN_API_KEY
 
 

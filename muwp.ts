@@ -28,14 +28,14 @@ export interface MUWPChain extends Chain {
 
 export const muwpChains: MUWPChain[] = [
     { ...mainnet, muwpContract: "0x" },
-    { ...arbitrum, muwpContract: "0x" },
+    { ...arbitrum, muwpContract: "0x5367E923548194E663A2CF431bA2C0224a753499" },
     { ...optimism, muwpContract: "0x" },
     { ...polygon, muwpContract: "0x98601B2f9f484FEfDB7f032D35cE09E075CE083f" },
     { ...bsc, muwpContract: "0x" },
     { ...zkSync, muwpContract: "0x" },
     { ...polygonZkEvm, muwpContract: "0x" },
-    { ...base, muwpContract: "0x" },
-    { ...avalanche, muwpContract: "0x" },
+    { ...base, muwpContract: "0x52249522A8b9D97E1DEcB257319EB94151e91618" },
+    { ...avalanche, muwpContract: "0x795995c3Df5f6Ba7Adab37F34B09B4178b19FF60" },
     { ...linea, muwpContract: "0x" },
     { ...gnosis, muwpContract: "0x" },
     { ...fantom, muwpContract: "0x" },
