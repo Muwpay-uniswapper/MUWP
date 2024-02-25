@@ -10,9 +10,7 @@ import { Address, EthereumAddress } from "../core/model/Address";
 import { AptosBridgeTxData } from "../layerzero/aptos/txData";
 
 
-const Hash = z.string().refine(value => value.startsWith('0x'), {
-    message: "Hash/Hex must start with '0x'",
-});
+const Hash = z.string().regex(/^0x[0-9a-fA-F]+$/, "Hash must be a valid hex string");
 
 export const transactionRequestSchema = z.object({
     from: EthereumAddress, // Ethereum address format
@@ -145,6 +143,7 @@ export const consumeStep = inngest.createFunction(
                 throw e;
             }
         })
+
         await step.waitForEvent(`transaction-${hash}`, {
             event: "app/transaction.executed",
             match: "data.hash",

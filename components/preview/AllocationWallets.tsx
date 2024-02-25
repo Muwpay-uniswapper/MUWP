@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Slider } from '../ui/slider';
 import {
     Dialog,
@@ -23,22 +23,6 @@ const AllocationWallet: React.FC = () => {
 
     const routes = getRoutes();
     const inputTokens = routes.map(route => ({ token: route.fromToken, fromAmount: route.fromAmount }));
-
-    useEffect(() => {
-        const _distribution = { ...multiWalletDistribution };
-        for (const { token, fromAmount } of inputTokens) {
-            // Distribute the tokens evenly. The bigint represents the token amount, not the percentage
-            const amount = BigInt(fromAmount);
-            const wallets = multiWallets ?? [];
-            if (!_distribution[token.address] || Object.keys(_distribution[token.address]).length !== wallets.length || !wallets.every(wallet => Object.keys(_distribution[token.address]).includes(wallet))) {
-                _distribution[token.address] = {};
-                for (const wallet of wallets) {
-                    _distribution[token.address][wallet] = amount / BigInt(wallets.length);
-                }
-            }
-        }
-        useRouteStore.setState({ multiWalletDistribution: _distribution });
-    }, [inputTokens.map((token) => token.token.address).join(","), multiWallets?.join(",")]);
 
     const maps = (wallet: string, i: number, validate: (newAmount: number, i: number) => void, inputValue: string, setInputValue: (str: string) => void) => <>
         <FormatTokenAddress address={wallet} chainId={chain?.id ?? 1} />

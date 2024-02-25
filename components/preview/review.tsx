@@ -9,14 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Funnel } from "./funnel";
 import { useAccount, useEstimateFeesPerGas, useWalletClient } from "wagmi";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const InitiateResponse = z.object({
-    status: z.literal("success"),
-    address: z.string(),
-    txn: z.any(),
-    id: z.string(),
-});
+import { InitiateResponse } from "@/app/api/initiate/types";
 
 export function Review({
     nextStep,
@@ -27,7 +20,7 @@ export function Review({
     isSending: boolean,
     setIsSending: (sending: boolean) => void
 }) {
-    const { getRoutes, routes: _route, tempAccount, setTransaction } = useRouteStore();
+    const { getRoutes, routes: _route, tempAccount, setTransaction, multiWalletDistribution } = useRouteStore();
 
     const routes = getRoutes();
 
@@ -55,7 +48,8 @@ export function Review({
         setIsSending(true);
 
         const body: any = {
-            from: account.address,
+            from: multiWalletDistribution,
+            gasPayer: account.address,
             account: tempAccount,
             chainId: account.chain?.id,
             routes,
@@ -78,7 +72,7 @@ export function Review({
         }).then(async (res) => {
             const body = await res.json();
             if (!res.ok) {
-                throw new Error(body?.error ?? "Unknown error");
+                throw new Error(JSON.stringify(body?.error ?? "Unknown error"));
             }
             return body
         })

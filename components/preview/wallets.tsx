@@ -25,10 +25,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { zeroAddress } from "viem";
 
 
 export function Wallets() {
-    const { multiWallets, gasPayer } = useRouteStore();
+    const { multiWallets, gasPayer, multiWalletDistribution, getRoutes } = useRouteStore();
     const { connect } = useConnect();
     const connectors = useConnectors();
     const connections = useConnections();
@@ -50,6 +51,30 @@ export function Wallets() {
         setAccounts(_accounts);
         console.log("Mutated accounts")
     }, [connections.map((connected) => connected.connector.id).join(",")]);
+
+    const _distribution = { ...multiWalletDistribution };
+
+    useEffect(() => {
+        const routes = getRoutes();
+        const inputTokens = routes.map(route => ({ token: route.fromToken, fromAmount: route.fromAmount }));
+
+        for (const { token, fromAmount } of inputTokens) {
+            // Distribute the tokens evenly. The bigint represents the token amount, not the percentage
+            const amount = BigInt(fromAmount);
+            const wallets = multiWallets ?? [];
+            if (!_distribution[token.address] || Object.keys(_distribution[token.address]).length !== wallets.length || !wallets.every(wallet => Object.keys(_distribution[token.address]).includes(wallet))) {
+                _distribution[token.address] = {};
+                if (token.address === zeroAddress) {
+                    _distribution[token.address][gasPayer ?? address!] = amount;
+                } else {
+                    for (const wallet of wallets) {
+                        _distribution[token.address][wallet] = amount / BigInt(wallets.length);
+                    }
+                }
+            }
+        }
+        useRouteStore.setState({ multiWalletDistribution: _distribution });
+    }, [multiWallets?.join(",")]);
 
     return <>
         <h2 className="text-2xl font-medium mb-4">Multi Wallet</h2>
