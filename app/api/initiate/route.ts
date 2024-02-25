@@ -1,29 +1,17 @@
 import { inngest } from "@/lib/inngest/client";
-import { Route } from "@/lib/li.fi-ts";
 import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress } from 'viem'
 import { z } from "zod";
 import MUWPTransfer from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
-import { EthereumAddress } from "@/lib/core/model/Address";
+import { InitiateResponse, InputInitiate } from "./types";
 
-BigInt.prototype.toJSON = function () {
-    return this.toString();
-};
 
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const input = await z.object({
-            from: z.record(EthereumAddress, z.record(EthereumAddress, z.coerce.bigint())),
-            gasPayer: EthereumAddress,
-            account: EthereumAddress,
-            chainId: z.number(),
-            routes: z.array(Route.zod),
-            maxFeePerGas: z.coerce.bigint().optional(),
-            maxPriorityFeePerGas: z.coerce.bigint().optional(),
-        }).parseAsync(body);
+        const input = await InputInitiate.parseAsync(body);
 
         const client = createPublicClient({
             chain: extractChain({
@@ -79,6 +67,7 @@ export async function POST(request: Request) {
         /*
         // For Gas Payer
         function transfer(
+        address[] memory sender,
         address[] memory tokens,
         uint256[] memory amounts,
         uint256 totalGas,
@@ -86,8 +75,9 @@ export async function POST(request: Request) {
         ) public payable
             */
         const args = [
+            input.routes.map(route => Object.keys(input.from[route.fromToken.address])).flat(),
             input.routes.map(route => route.fromToken.address),
-            input.routes.map(route => input.from[route.fromToken.address][input.gasPayer]),
+            input.routes.map(route => Object.values(input.from[route.fromToken.address])).flat(),
             totalGas,
             input.account,
         ]
@@ -105,7 +95,7 @@ export async function POST(request: Request) {
             maxPriorityFeePerGas
         } = await client.estimateFeesPerGas()
 
-        const txns = [await client.prepareTransactionRequest({
+        const txn = await client.prepareTransactionRequest({
             account: input.gasPayer as `0x${string}`,
             to: chain?.muwpContract,
             value: totalGas + input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n),
@@ -113,10 +103,7 @@ export async function POST(request: Request) {
             chain: client.chain,
             maxFeePerGas,
             maxPriorityFeePerGas,
-        })]
-
-        // 2. Populate the rest of the transactions
-
+        })
 
         const _id = await inngest.send({
             name: "app/transfer.initiate",
@@ -127,13 +114,12 @@ export async function POST(request: Request) {
             },
         })
 
-
         return new Response(JSON.stringify({
             status: "success",
             address: input.account,
-            txns,
+            txn,
             id: _id.ids[0]
-        }), {
+        } as z.infer<typeof InitiateResponse>), {
             headers: {
                 'Content-Type': 'application/json',
             }

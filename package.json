@@ -90,6 +90,8 @@
     "zustand": "^4.4.6"
   },
   "devDependencies": {
+    "@anatine/zod-mock": "^3.13.3",
+    "@faker-js/faker": "^8.4.1",
     "@playwright/test": "^1.41.2",
     "@synthetixio/synpress": "alpha",
     "@types/chai": "^4.3.11",
@@ -104,6 +106,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-unused-imports": "^3.1.0",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "zocker": "^1.4.1"
   }
 }

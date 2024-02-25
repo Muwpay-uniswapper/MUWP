@@ -7,10 +7,7 @@ BigInt.prototype.toJSON = function () {
 };
 
 
-const Hash = z.string().refine(value => value.startsWith('0x'), {
-    message: "Hash/Hex must start with '0x'",
-});
-
+const Hash = z.string().regex(/^0x[0-9a-fA-F]+$/, "Hash must be a valid hex string");
 
 export async function POST(request: Request) {
     try {
