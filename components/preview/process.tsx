@@ -25,7 +25,7 @@ export type NextStep = (opt?: any) => void;
 
 export default function PreviewProcess() {
     const [status, setStatus] = useState<Status>(Status.approvals)
-    const { getRoutes, routes: _route, clear, multiWallets } = useRouteStore();
+    const { getRoutes, routes: _route, clear, multiWallets, multiWalletDistribution, gasPayer } = useRouteStore();
     const { clearSwaps } = useSwapStore();
     const [needsApproval, setNeedApprovals] = useState(true);
     const { data: walletClient } = useWalletClient()
@@ -36,6 +36,30 @@ export default function PreviewProcess() {
             useRouteStore.setState({ multiWallets: [address], gasPayer: address });
         }
     }, [address]);
+
+    const _distribution = { ...multiWalletDistribution };
+
+    React.useEffect(() => {
+        const routes = getRoutes();
+        const inputTokens = routes.map(route => ({ token: route.fromToken, fromAmount: route.fromAmount }));
+
+        for (const { token, fromAmount } of inputTokens) {
+            // Distribute the tokens evenly. The bigint represents the token amount, not the percentage
+            const amount = BigInt(fromAmount);
+            const wallets = multiWallets ?? [];
+            if (!_distribution[token.address] || Object.keys(_distribution[token.address]).length !== wallets.length || !wallets.every(wallet => Object.keys(_distribution[token.address]).includes(wallet))) {
+                _distribution[token.address] = {};
+                if (token.address === zeroAddress) {
+                    _distribution[token.address][gasPayer ?? address!] = amount;
+                } else {
+                    for (const wallet of wallets) {
+                        _distribution[token.address][wallet] = amount / BigInt(wallets.length);
+                    }
+                }
+            }
+        }
+        useRouteStore.setState({ multiWalletDistribution: _distribution });
+    }, [multiWallets?.join(",")]);
 
     React.useEffect(() => {
         (async () => {
