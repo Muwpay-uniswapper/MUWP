@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
     RainbowKitProvider,
     midnightTheme,
@@ -34,6 +34,7 @@ const muwpAppInfo = {
 export function State({ children }: { children: React.ReactNode }) {
     const [hydrated, setHydrated] = React.useState(false);
     const searchParams = useSearchParams();
+    const path = usePathname();
     const chainId = searchParams.get('chain');
     const toChainId = searchParams.get('toChain');
     const { switchChain } = useSwitchChain();
@@ -62,7 +63,7 @@ export function State({ children }: { children: React.ReactNode }) {
         if (outputChain) newParams.set('toChain', outputChain.toString());
 
         // Just append the new params to the path.
-        router.replace(`/?${newParams.toString()}`, {
+        router.replace(`${path}?${newParams.toString()}`, {
             scroll: false
         });
 

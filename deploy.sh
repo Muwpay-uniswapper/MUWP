@@ -10,6 +10,7 @@ POLYGONSCAN_API_KEY="BSZ82VGXVVRS4MNRR8XQUR4UGVXYG73WY7"
 BSCSCAN_API_KEY="IXNZ595JQDQNB1RMSQVR9YAVMWQBPK9VK3"
 AVAXSCAN_API_KEY="TPR7RCZX9A1Y8JUP4HUKN4BK8EQJ68ANT6"
 ARBISCAN_API_KEY="1JS9796B33BXMMGI5RNZAERZ4IJDZ5JGJ2"
+BASESCAN_API_KEY="9TX9BJ6N65R5RNGGX8GQ5NSDZGSHWPWB2U"
 
 # # Goerli
 # echo "Deploying to Goerli network"
@@ -28,8 +29,8 @@ ARBISCAN_API_KEY="1JS9796B33BXMMGI5RNZAERZ4IJDZ5JGJ2"
 # forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://binance.llamarpc.com" --verify -e $BSCSCAN_API_KEY
 
 # Avalanche
-echo "Deploying to Avalanche network"
-forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://avalanche.drpc.org" --verify -e $AVAXSCAN_API_KEY
+# echo "Deploying to Avalanche network"
+# forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://avalanche.drpc.org" --verify -e $AVAXSCAN_API_KEY
 
 # Arbitrum
 # echo "Deploying to Arbitrum network"
@@ -40,6 +41,7 @@ forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH -
 # forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://mainnet.optimism.io" --verify
 
 # Base
-# echo "Deploying to Base network"
-# forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://base.llamarpc.com" --verify
+echo "Deploying to Base network"
+forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://base.llamarpc.com" --verify -e $BASESCAN_API_KEY
+
 
