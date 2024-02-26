@@ -9,7 +9,7 @@ test.beforeEach(async ({ page, injectWeb3Provider, accounts }) => {
 
     await page.addInitScript(() => (window.ethereum.isMetaMask = true))
 
-    await page.goto('http://localhost:3000/?chain=1&toChain=10');
+    await page.goto('http://localhost:3000/?chain=137&toChain=42161');
 
     // Until the wallet is connected, the accounts should be empty
     let ethAccounts = await page.evaluate(() =>
@@ -46,14 +46,14 @@ test.beforeEach(async ({ page, injectWeb3Provider, accounts }) => {
 
 test('Multiple to One', async ({ page }) => {
     await page.click('text=Select Token');
-    await page.click('text="ETH"');
+    await page.click('text="MATIC"');
     await page.locator("#input-token-combo-0").getByRole("textbox").fill("0.1");
     await page.click('text=Select Token');
     await page.click('text="USDT"');
     await page.locator("#input-token-combo-1").getByRole("textbox").fill("150");
 
     await page.click('#output-token-combo-0');
-    await page.click('text="USDT"');
+    await page.click('text="ETH"');
 
     await page.click('text=Find Routes');
     await page.waitForEvent("console", (msg) => msg.text() === "Routes fetched");
@@ -65,13 +65,13 @@ test('Multiple to One', async ({ page }) => {
 
 test('One to Multiple', async ({ page }) => {
     await page.click('text=Select Token');
-    await page.click('text="ETH"');
+    await page.click('text="MATIC"');
     await page.locator("#input-token-combo-0").getByRole("textbox").fill("1");
 
     await page.click('#output-token-combo-0');
     await page.click('text="USDT"');
     await page.click('#output-token-combo-1');
-    await page.click('text="Wrapped ETH"');
+    await page.click('text="ETH"');
 
     await page.click('text=Find Routes');
     await page.waitForEvent("console", (msg) => msg.text() === "Routes fetched");
