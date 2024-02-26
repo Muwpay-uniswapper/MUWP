@@ -144,11 +144,17 @@ export const consumeStep = inngest.createFunction(
             }
         })
 
-        await step.waitForEvent(`transaction-${hash}`, {
-            event: "app/transaction.executed",
-            match: "data.hash",
-            timeout: `${(_step.estimate?.executionDuration ?? 60) * 1.3}s`, // wait at most 30% longer than estimated
+        await step.run(`transaction-${hash}`, async () => {
+            const client = await getWallet(address, transactionRequest.chainId);
+
+            await client.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
         })
+
+        // await step.waitForEvent(`transaction-${hash}`, {
+        //     event: "app/transaction.executed",
+        //     match: "data.hash",
+        //     timeout: `${(_step.estimate?.executionDuration ?? 60) * 1.3}s`, // wait at most 30% longer than estimated
+        // })
 
         await step.run(`step-${_step.id}-executed`, async () => {
             // Check if the step was executed

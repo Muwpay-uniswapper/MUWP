@@ -80,6 +80,7 @@ export const initiateTransfer = inngest.createFunction(
         })
 
         await step.sendEvent("app/consume.steps", data.routes.map(route => ({
+            id: `app/consume.steps/${route.id}`,
             name: "app/consume.steps",
             data: {
                 address: data.address,
