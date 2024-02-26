@@ -47,7 +47,7 @@ test.beforeEach(async ({ page, injectWeb3Provider, accounts }) => {
 test('Multiple to One', async ({ page }) => {
     await page.click('#input-token-combo-0');
     await page.click('text="MATIC"');
-    await page.locator("#input-token-combo-0").getByRole("textbox").fill("0.1");
+    await page.locator("#input-token-combo-0").getByRole("textbox").fill("100");
     await page.click('#input-token-combo-1');
     await page.click('text="USDT"');
     await page.locator("#input-token-combo-1").getByRole("textbox").fill("150");
@@ -66,7 +66,7 @@ test('Multiple to One', async ({ page }) => {
 test('One to Multiple', async ({ page }) => {
     await page.click('#input-token-combo-0');
     await page.click('text="MATIC"');
-    await page.locator("#input-token-combo-0").getByRole("textbox").fill("1");
+    await page.locator("#input-token-combo-0").getByRole("textbox").fill("120");
 
     await page.click('#output-token-combo-0');
     await page.click('text="USDT"');
