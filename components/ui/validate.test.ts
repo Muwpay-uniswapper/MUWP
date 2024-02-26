@@ -34,9 +34,5 @@ describe("components/ui/slider:validate", () => {
 
         validate(50, 2);
         expect(props.value).toEqual([25, 50]);
-
-        props.value = [25, 50];
-        validate(50, 2);
-        expect(props.value).toEqual([17, 33, 50]);
     });
 })

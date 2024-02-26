@@ -4,14 +4,14 @@ import { z } from "zod";
 import MUWPTransfer from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
-import { InitiateResponse, InputInitiate } from "./types";
+import { InitiateResponse, StrictInputInitiate } from "./types";
 
 
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const input = await InputInitiate.parseAsync(body);
+        const input = await StrictInputInitiate.parseAsync(body);
 
         const client = createPublicClient({
             chain: extractChain({

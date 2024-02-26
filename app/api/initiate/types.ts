@@ -32,10 +32,13 @@ export const InputInitiate = z.object({
     routes: z.array(Route.zod),
     maxFeePerGas: z.coerce.bigint().optional(),
     maxPriorityFeePerGas: z.coerce.bigint().optional(),
-}).refine(data => onlyOneEthSender(data.gasPayer).parse(data.from), {
+})
+
+export const StrictInputInitiate = InputInitiate.refine(data => onlyOneEthSender(data.gasPayer).parse(data.from), {
     message: 'Only the gasPayer can send from the zero address (ETH) and it must be the only sender.',
     path: ['from'],
 });
+
 
 export const InitiateResponse = z.object({
     status: z.literal("success"),
