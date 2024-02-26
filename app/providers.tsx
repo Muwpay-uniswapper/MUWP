@@ -23,6 +23,7 @@ const config = getDefaultConfig({
     projectId: projectId,
     chains: muwpChains as any,
     multiInjectedProviderDiscovery: true,
+    ssr: true
 })
 
 const queryClient = new QueryClient()

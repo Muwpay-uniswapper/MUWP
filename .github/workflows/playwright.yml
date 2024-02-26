@@ -21,7 +21,7 @@ jobs:
       env:
         WALLET_PK: ${{ secrets.WALLET_PK }}
         NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
-      run: npx playwright test --project=webkit
+      run: npx playwright test --project=chromium
     - uses: actions/upload-artifact@v3
       if: always()
       with:
