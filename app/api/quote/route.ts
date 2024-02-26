@@ -89,8 +89,10 @@ export async function POST(request: Request) {
                     const bodyContent = JSON.parse(matches[1].replace(/\\/g, ''));
                     return JSON.stringify({ message: bodyContent.message });
                 }
+
+                return JSON.stringify({ message: e.message });
             }
-            return JSON.stringify({ message: "Unexpected error" });
+            return JSON.stringify({ message: "Unexpected error", error: e });
         }
     }));
 
