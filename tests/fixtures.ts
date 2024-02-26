@@ -26,13 +26,13 @@ export const test = base.extend<{
 	// eslint-disable-next-line no-empty-pattern
 	rpcURL: async ({ }, use) => {
 		// Get Ethereum RPC URL
-		const rpc = "https://eth.pr1mer.tech"
+		const rpc = "https://polygon-rpc.com"
 		await use(rpc)
 	},
 
 	injectWeb3Provider: async ({ page, signers, rpcURL }, use) => {
 		await use((privateKeys = signers) =>
-			injectHeadlessWeb3Provider(page, privateKeys, 1, rpcURL)
+			injectHeadlessWeb3Provider(page, privateKeys, 137, rpcURL)
 		)
 	},
 })
