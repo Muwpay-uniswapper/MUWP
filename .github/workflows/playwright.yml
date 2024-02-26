@@ -21,6 +21,7 @@ jobs:
       env:
         WALLET_PK: ${{ secrets.WALLET_PK }}
         NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
+        LIFI_API_KEY: ${{ secrets.LIFI_API_KEY }}
       run: npx inngest-cli@latest dev & npx playwright test --project=chromium
     - uses: actions/upload-artifact@v3
       if: always()
@@ -34,9 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install bun
-      run: curl -fsSL https://bun.sh/install | bash
+    - uses: oven-sh/setup-bun@v1
     - name: Install dependencies
-      run: source /home/runner/.bashrc && bun install
+      run: bun install
     - name: Run unit tests
       run: bun test
