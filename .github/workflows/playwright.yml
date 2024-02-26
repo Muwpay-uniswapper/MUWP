@@ -23,6 +23,8 @@ jobs:
         NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
         LIFI_API_KEY: ${{ secrets.LIFI_API_KEY }}
         MASTER_HD: ${{ secrets.MASTER_HD }}
+        KV_REST_API_URL: ${{ secrets.KV_REST_API_URL }}
+        KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
       run: npx inngest-cli@latest dev & npx playwright test --project=chromium
     - uses: actions/upload-artifact@v3
       if: always()
