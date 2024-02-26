@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ main, master ]
 jobs:
-  test:
+  playwright-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -21,7 +21,7 @@ jobs:
       env:
         WALLET_PK: ${{ secrets.WALLET_PK }}
         NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
-      run: npx playwright test --project=chromium
+      run: npx inngest-cli@latest dev & npx playwright test --project=chromium
     - uses: actions/upload-artifact@v3
       if: always()
       with:
@@ -30,3 +30,11 @@ jobs:
           playwright-report/
           test-results/
         retention-days: 30
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install bun
+      run: curl -fsSL https://bun.sh/install | bash
+    - name: Run unit tests
+      run: bun test

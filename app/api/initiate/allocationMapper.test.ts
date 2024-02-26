@@ -1,6 +1,6 @@
 import { test, expect, describe } from "bun:test"
 import { zocker } from "zocker";
-import { InputInitiate } from "./route";
+import { InputInitiate } from "./types";
 
 describe("Allocation Mapper", () => {
     test("should handle single sender", async () => {
