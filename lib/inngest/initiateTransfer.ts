@@ -17,27 +17,27 @@ export const initiateTransfer = inngest.createFunction(
         id: "initiate-transfer",
         retries: 10
     },
-    { event: "app/account.created" },
+    { event: "app/transfer.initiate" },
     async ({ event, step }) => {
-        const accountData = await z.object({
-            address: EthereumAddress,
-        }).parseAsync(event.data);
+        // const accountData = await z.object({
+        //     address: EthereumAddress,
+        // }).parseAsync(event.data);
 
-        const transfer = await step.waitForEvent("wait-for-user-to-select-route", {
-            event: "app/transfer.initiate",
-            match: "data.address", // the field "data.address" must match
-            timeout: "72h", // wait at most 24h
-        });
-        if (!transfer) {
-            return await step.sendEvent("app/terminate.account", {
-                name: "app/terminate.account",
-                data: {
-                    address: accountData.address,
-                }
-            })
-        }
+        // const transfer = await step.waitForEvent("wait-for-user-to-select-route", {
+        //     event: "app/transfer.initiate",
+        //     match: "data.address", // the field "data.address" must match
+        //     timeout: "72h", // wait at most 24h
+        // });
+        // if (!transfer) {
+        //     return await step.sendEvent("app/terminate.account", {
+        //         name: "app/terminate.account",
+        //         data: {
+        //             address: accountData.address,
+        //         }
+        //     })
+        // }
 
-        const data = await Data.parseAsync(transfer.data);
+        const data = await Data.parseAsync(event.data);
 
         const funds_transferred = await step.waitForEvent("wait-for-user-to-transfer-funds", {
             event: "app/funds.transferred",
