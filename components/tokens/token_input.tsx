@@ -113,12 +113,13 @@ export function TokenInput({
     mode: "input" | "output"
 }) {
     const { address, chain } = useAccount()
+    const { inputAmount, setAmount, priceOutput, outputChain } = useSwapStore()
     const { data } = useBalance({
         address,
         token: (token.address !== zeroAddress && EthereumAddress.safeParse(token.address).success) ? token.address as `0x${string}` : undefined,
-        chainId: chain?.id
+        chainId: mode == "input" ? chain?.id : (outputChain ?? undefined)
     })
-    const { inputAmount, setAmount, priceOutput } = useSwapStore()
+
     const [inputValue, setInputValue] = React.useState('');
     const _value = mode == "input" ? inputAmount[token.value] ?? 0n : priceOutput(token).amount;
     const value = formatUnits(_value, token.decimals);
