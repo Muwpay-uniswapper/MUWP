@@ -45,6 +45,7 @@
     "@types/react": "18.2.37",
     "@types/react-dom": "18.2.15",
     "@uniswap/token-lists": "^1.0.0-beta.33",
+    "@vercel/analytics": "^1.2.2",
     "@vercel/kv": "^1.0.0",
     "@vercel/toolbar": "^0.1.5",
     "@welldone-studio/aptos-wallet-adapter": "^0.1.5",
