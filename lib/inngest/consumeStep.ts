@@ -224,6 +224,8 @@ export const consumeStep = inngest.createFunction(
                 })
 
                 console.log("Sending native funds back to user", hash)
+
+                return { hash }
             }
         })
     },
