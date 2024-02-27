@@ -35,7 +35,7 @@ export default function PreviewProcess() {
         if (address) {
             useRouteStore.setState({ multiWallets: [address], gasPayer: address });
         }
-    }, [address]);
+    }, [address, typeof multiWallets == "undefined"]);
 
     const _distribution = { ...multiWalletDistribution };
 
@@ -46,7 +46,7 @@ export default function PreviewProcess() {
         for (const { token, fromAmount } of inputTokens) {
             // Distribute the tokens evenly. The bigint represents the token amount, not the percentage
             const amount = BigInt(fromAmount);
-            const wallets = multiWallets ?? [];
+            const wallets = multiWallets ?? [address!];
             if (!_distribution[token.address] || Object.keys(_distribution[token.address]).length !== wallets.length || !wallets.every(wallet => Object.keys(_distribution[token.address]).includes(wallet))) {
                 _distribution[token.address] = {};
                 if (token.address === zeroAddress) {
@@ -59,7 +59,7 @@ export default function PreviewProcess() {
             }
         }
         useRouteStore.setState({ multiWalletDistribution: _distribution });
-    }, [multiWallets?.join(",")]);
+    }, [address, multiWallets?.join(","), getRoutes()[0]?.id]);
 
     React.useEffect(() => {
         (async () => {
