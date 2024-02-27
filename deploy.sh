@@ -11,6 +11,7 @@ BSCSCAN_API_KEY="IXNZ595JQDQNB1RMSQVR9YAVMWQBPK9VK3"
 AVAXSCAN_API_KEY="TPR7RCZX9A1Y8JUP4HUKN4BK8EQJ68ANT6"
 ARBISCAN_API_KEY="1JS9796B33BXMMGI5RNZAERZ4IJDZ5JGJ2"
 BASESCAN_API_KEY="9TX9BJ6N65R5RNGGX8GQ5NSDZGSHWPWB2U"
+FANTOMSCAN_API_KEY="KT8ECCIJWP258T84GKRRY84AAWWKGKHM2B"
 
 # # Goerli
 # echo "Deploying to Goerli network"
@@ -25,8 +26,8 @@ BASESCAN_API_KEY="9TX9BJ6N65R5RNGGX8GQ5NSDZGSHWPWB2U"
 # forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://polygon.llamarpc.com" --verify -e $POLYGONSCAN_API_KEY
 
 # Binance
-echo "Deploying to Binance network"
-forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://binance.llamarpc.com" --verify -e $BSCSCAN_API_KEY
+# echo "Deploying to Binance network"
+# forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://binance.llamarpc.com" --verify -e $BSCSCAN_API_KEY
 
 # Avalanche
 # echo "Deploying to Avalanche network"
@@ -44,4 +45,6 @@ forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH -
 # echo "Deploying to Base network"
 # forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://base.llamarpc.com" --verify -e $BASESCAN_API_KEY
 
-
+# Fantom
+echo "Deploying to Fantom network"
+forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://fantom.drpc.org" --verify -e $FANTOMSCAN_API_KEY
