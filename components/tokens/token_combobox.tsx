@@ -152,7 +152,7 @@ function TokenListContent({
             </CommandEmpty>
             <CommandGroup>
                 {tokenList
-                    .filter((token) => {
+                    ?.filter((token) => {
                         if (mode == "input" && chain && token.chainId !== chain.id) return false
                         if (mode == "output" && outputChain && token.chainId !== outputChain) return false
                         if (token.value.toLowerCase() == value?.value.toLowerCase()) return true
@@ -160,7 +160,7 @@ function TokenListContent({
                         if (outputTokens.find((_token) => _token?.value.toLowerCase() == token.value.toLowerCase())) return false
                         return true
                     })
-                    .map((token) => (
+                    ?.map((token) => (
                         <CommandItem
                             key={token.value}
                             value={token.value}
@@ -182,7 +182,7 @@ function TokenListContent({
                                     value?.value.toLowerCase?.() === token.value.toLowerCase() ? "opacity-100" : "opacity-0"
                                 )} />
                             <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
-                            {token.label.length > 20 ? `${token.label.substring(0, 20)}...` : token.label}
+                            {(token.label?.length ?? 0) > 20 ? `${token.label?.substring(0, 20)}...` : (token.label ?? token.value)}
                             {(token.verified || token.address == zeroAddress) && <BadgeCheck className="inline scale-75 opacity-50 ml-1" />}
                             {value?.value.toLowerCase?.() === token.value.toLowerCase() && <span className="text-red-500 absolute right-2 cursor-pointer">Remove token</span>}
                         </CommandItem>

@@ -1,6 +1,6 @@
 export interface CellLike {
     value: string,
-    label: string,
+    label?: string,
     logoURI?: string
 }
 

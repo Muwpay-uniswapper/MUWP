@@ -137,7 +137,7 @@ function ChainListContent({
             <CommandEmpty>No chain found.</CommandEmpty>
             <CommandGroup>
                 {chainList
-                    ?.filter((chain) => chain.label.toLowerCase().includes(search.toLowerCase()) || chain === value)
+                    ?.filter((chain) => chain.label?.toLowerCase().includes(search.toLowerCase()) || chain === value)
                     ?.map((chain) => (
                         <CommandItem
                             key={chain.value}
@@ -163,7 +163,7 @@ function ChainListContent({
                                     value?.value.toLowerCase?.() === chain.value.toLowerCase() ? "opacity-100" : "opacity-0"
                                 )} />
                             <img src={chain.logoURI} alt="logo" className="mr-2 h-4 w-4" />
-                            {chain.label.length > 20 ? `${chain.label.substring(0, 20)}...` : chain.label}
+                            {(chain.label?.length ?? 0) > 20 ? `${chain.label?.substring(0, 20)}...` : (chain.label ?? chain.value)}
                         </CommandItem>
                     ))}
             </CommandGroup>
