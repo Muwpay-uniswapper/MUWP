@@ -38,7 +38,7 @@ export const muwpChains: MUWPChain[] = [
     { ...avalanche, muwpContract: "0x795995c3Df5f6Ba7Adab37F34B09B4178b19FF60" },
     { ...linea, muwpContract: "0x" },
     { ...gnosis, muwpContract: "0x" },
-    { ...fantom, muwpContract: "0x" },
+    { ...fantom, muwpContract: "0x7031700988931E274B92a084066CbF8f4c62b23b" },
     { ...moonriver, muwpContract: "0x" },
     { ...moonbeam, muwpContract: "0x" },
     { ...fuse, muwpContract: "0x" },
