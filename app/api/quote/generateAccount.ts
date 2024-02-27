@@ -1,6 +1,5 @@
 import { fromHex } from "viem";
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
-import { inngest } from "@/lib/inngest/client";
 import * as store from "@/lib/kv/store";
 import { InputType } from "./route";
 
