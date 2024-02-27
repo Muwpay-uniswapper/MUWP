@@ -25,8 +25,8 @@ BASESCAN_API_KEY="9TX9BJ6N65R5RNGGX8GQ5NSDZGSHWPWB2U"
 # forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://polygon.llamarpc.com" --verify -e $POLYGONSCAN_API_KEY
 
 # Binance
-# echo "Deploying to Binance network"
-# forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://binance.llamarpc.com" --verify -e $BSCSCAN_API_KEY
+echo "Deploying to Binance network"
+forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://binance.llamarpc.com" --verify -e $BSCSCAN_API_KEY
 
 # Avalanche
 # echo "Deploying to Avalanche network"
@@ -37,8 +37,8 @@ BASESCAN_API_KEY="9TX9BJ6N65R5RNGGX8GQ5NSDZGSHWPWB2U"
 # forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://arbitrum.drpc.org" --verify -e $ARBISCAN_API_KEY
 
 # Optimism
-echo "Deploying to Optimism network"
-forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://mainnet.optimism.io" --verify -e $ETHERSCAN_API_KEY
+# echo "Deploying to Optimism network"
+# forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://mainnet.optimism.io" --verify -e $ETHERSCAN_API_KEY
 
 # Base
 # echo "Deploying to Base network"

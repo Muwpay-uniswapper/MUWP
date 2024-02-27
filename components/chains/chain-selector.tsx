@@ -137,8 +137,8 @@ function ChainListContent({
             <CommandEmpty>No chain found.</CommandEmpty>
             <CommandGroup>
                 {chainList
-                    .filter((chain) => chain.label.toLowerCase().includes(search.toLowerCase()) || chain === value)
-                    .map((chain) => (
+                    ?.filter((chain) => chain.label.toLowerCase().includes(search.toLowerCase()) || chain === value)
+                    ?.map((chain) => (
                         <CommandItem
                             key={chain.value}
                             value={chain.value}

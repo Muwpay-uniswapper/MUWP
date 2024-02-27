@@ -8,6 +8,7 @@ import { Providers } from './providers';
 // import { VercelToolbar } from '@vercel/toolbar/next';
 import Footer from '@/components/layout/footer'
 import NextNProgressClient from './progress'
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -39,6 +40,7 @@ export default function RootLayout({
 						<Footer />
 					</div>
 				</Providers>
+				<Analytics />
 			</body>
 		</html>
 	)
