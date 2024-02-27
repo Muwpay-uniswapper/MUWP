@@ -126,6 +126,24 @@ export const consumeStep = inngest.createFunction(
                     gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
                 })
 
+                console.log("Transaction sent", hash)
+
+                const tx = await client.waitForTransactionReceipt({ hash })
+
+                if (tx.status !== "success") {
+                    const _stored = await store.get(address) as string | object | undefined;
+                    const stored = typeof _stored === "string" ? JSON.parse(_stored) : _stored;
+                    await store.set(address, JSON.stringify({
+                        ...stored,
+                        failed: true,
+                        errors: {
+                            ...stored?.errors,
+                            [_step.id]: `Transaction reverted: ${hash}`,
+                        }
+                    }))
+                    throw new Error("Transaction reverted")
+                }
+
                 return { hash, chainId: transactionRequest.chainId }
             } catch (e) {
                 if (e instanceof TransactionExecutionError) {
@@ -141,43 +159,6 @@ export const consumeStep = inngest.createFunction(
                     }))
                 }
                 throw e;
-            }
-        })
-
-        await step.run(`transaction-${hash}`, async () => {
-            const client = await getWallet(address, transactionRequest.chainId);
-
-            await client.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
-        })
-
-        // await step.waitForEvent(`transaction-${hash}`, {
-        //     event: "app/transaction.executed",
-        //     match: "data.hash",
-        //     timeout: `${(_step.estimate?.executionDuration ?? 60) * 1.3}s`, // wait at most 30% longer than estimated
-        // })
-
-        await step.run(`step-${_step.id}-executed`, async () => {
-            // Check if the step was executed
-            const client = createPublicClient({
-                chain: extractChain({
-                    chains: Object.values(chains),
-                    id: chainId as any,
-                }),
-                transport: http()
-            })
-            const tx = await client.getTransactionReceipt({ hash })
-            if (tx.status !== "success") {
-                const _stored = await store.get(address) as string | object | undefined;
-                const stored = typeof _stored === "string" ? JSON.parse(_stored) : _stored;
-                await store.set(address, JSON.stringify({
-                    ...stored,
-                    failed: true,
-                    errors: {
-                        ...stored?.errors,
-                        [_step.id]: `Transaction reverted: ${hash}`,
-                    }
-                }))
-                throw new Error("Transaction failed")
             }
         })
 

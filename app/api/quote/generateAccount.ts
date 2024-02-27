@@ -39,12 +39,12 @@ export async function generateAccount(input: InputType) {
 
         console.log("Account stored successfully");
 
-        await inngest.send({
-            name: "app/account.created",
-            data: {
-                address: account.address,
-            },
-        })
+        // await inngest.send({
+        //     name: "app/account.created",
+        //     data: {
+        //         address: account.address,
+        //     },
+        // })
 
         console.log("Account created event sent successfully");
 
