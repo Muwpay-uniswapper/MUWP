@@ -27,7 +27,7 @@ export default function PreviewProcess() {
     const [status, setStatus] = useState<Status>(Status.approvals)
     const { getRoutes, routes: _route, clear, multiWallets, multiWalletDistribution, gasPayer } = useRouteStore();
     const { clearSwaps } = useSwapStore();
-    const [needsApproval, setNeedApprovals] = useState(true);
+    const [needsApproval, setNeedApprovals] = useState<string[]>([]);
     const { data: walletClient } = useWalletClient()
     const { address, chain } = useAccount();
 
@@ -88,12 +88,12 @@ export default function PreviewProcess() {
                     const amount = BigInt(route.steps[0].action.fromAmount)
 
                     if (allowance < amount) {
-                        setNeedApprovals(true);
-                        return;
+                        setNeedApprovals((prev) => [...prev, route.fromToken.address])
+                        continue;
                     }
                 }
             }
-            setNeedApprovals(false);
+            setNeedApprovals([]);
         })()
     }, [getRoutes()[0]?.id, multiWallets?.join(",")]);
 
@@ -109,15 +109,15 @@ export default function PreviewProcess() {
     }, [status, hash])
 
     return <Dialog open={(status == Status.send || isSending) ? true : undefined}>
-        <DialogTrigger className="w-full" asChild><SwapButton status={status} needsApproval={needsApproval} /></DialogTrigger>
+        <DialogTrigger className="w-full" asChild><SwapButton status={status} needsApproval={needsApproval.length > 0} /></DialogTrigger>
         <DialogContent canClose={status != Status.send && isSending != true}>
             <WalletAccessor />
             <DialogHeader>
                 <DialogTitle>Trade Review</DialogTitle>
             </DialogHeader>
             <PreviewStatus status={status} needsApproval={needsApproval} />
-            {status == Status.approvals && needsApproval && <Approvals nextStep={() => setStatus(Status.review)} />}
-            {(status == Status.review || (status == Status.approvals && !needsApproval)) && <Review nextStep={(send: string) => {
+            {status == Status.approvals && needsApproval.length > 0 && <Approvals nextStep={() => setStatus(Status.review)} needsApproval={needsApproval} />}
+            {(status == Status.review || (status == Status.approvals && needsApproval.length == 0)) && <Review nextStep={(send: string) => {
                 setHash(send)
                 setStatus(Status.send)
                 setIsSending(false)

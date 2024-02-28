@@ -156,8 +156,8 @@ function TokenListContent({
                         if (mode == "input" && chain && token.chainId !== chain.id) return false
                         if (mode == "output" && outputChain && token.chainId !== outputChain) return false
                         if (token.value.toLowerCase() == value?.value.toLowerCase()) return true
-                        if (inputTokens.find((_token) => _token?.value.toLowerCase() == token.value.toLowerCase())) return false
-                        if (outputTokens.find((_token) => _token?.value.toLowerCase() == token.value.toLowerCase())) return false
+                        if (inputTokens.find((_token) => (_token?.value.toLowerCase() == token.value.toLowerCase() && _token.chainId == token.chainId))) return false
+                        if (outputTokens.find((_token) => (_token?.value.toLowerCase() == token.value.toLowerCase() && _token.chainId == token.chainId))) return false
                         return true
                     })
                     ?.map((token) => (

@@ -12,9 +12,11 @@ import { NextStep } from "./process";
 import { Token } from "@/lib/li.fi-ts";
 
 export function Approvals({
-    nextStep
+    nextStep,
+    needsApproval,
 }: {
-    nextStep: NextStep
+    nextStep: NextStep,
+    needsApproval: string[]
 }) {
     const { getRoutes, routes: _route, multiWallets } = useRouteStore();
     const { data: walletClient } = useWalletClient()
@@ -33,6 +35,7 @@ export function Approvals({
         } = {}
 
         for (const route of routes) {
+            if (!needsApproval.includes(route.fromToken.address)) continue;
             pending[route.fromToken.address] = {
                 amount: BigInt(route.fromAmount) + (pending[route.fromToken.address]?.amount ?? 0n),
                 token: route.fromToken
@@ -40,7 +43,7 @@ export function Approvals({
         }
 
         return Object.entries(pending).map(([address, obj]) => ({ address: address as `0x${string}`, amount: obj.amount, token: obj.token }))
-    }, [routes])
+    }, [needsApproval, routes])
 
 
     const approve = async (unlimited: boolean) => {
