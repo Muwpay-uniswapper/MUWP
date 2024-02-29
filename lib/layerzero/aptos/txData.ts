@@ -66,8 +66,8 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
             chainId: step.action.fromChainId,
             data: encodedData,
             from: step.action.fromAddress as `0x${string}`,
-            gasLimit: toHex(BigInt(step.estimate?.gasCosts?.[0].amount ?? simulation.request.gas?.toString() ?? "0")),
-            gasPrice: toHex(BigInt(step.estimate?.gasCosts?.[0].price ?? simulation.request.gasPrice?.toString() ?? "0")),
+            gasLimit: toHex(simulation.request.gas?.toString() ?? "0"),
+            gasPrice: toHex(simulation.request.gasPrice?.toString() ?? "0"),
             to: contract.address,
             value: toHex(BigInt(step.action.fromAmount) + nativeFee),
         }
