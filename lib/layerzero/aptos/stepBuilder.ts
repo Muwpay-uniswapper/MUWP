@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { OmnichainAptosBridge, RequiredBlockConfirmationAptos, getTokensAptosBridge } from "./omnichains";
-import { createPublicClient, encodePacked, extractChain, formatUnits, getContract, http, parseEther, parseUnits, zeroAddress } from "viem";
+import { createPublicClient, encodePacked, extractChain, formatUnits, getContract, http, parseUnits, zeroAddress } from "viem";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { muwpChains } from "@/muwp";
 import { Step, StepTypeEnum } from "@/lib/li.fi-ts";
