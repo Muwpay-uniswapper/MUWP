@@ -6,6 +6,7 @@ import { cn } from "@/lib/core/utils";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { useSwapStore } from "@/lib/core/data/swapStore";
+import { Home } from "lucide-react";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -49,6 +50,11 @@ export default function Navbar() {
                 ${isMenuOpen ? "translate-y-0 backdrop-blur-sm bg-black/50 opacity-100" : "-translate-y-[calc(100%+70px)] md:translate-y-0 opacity-0 md:opacity-100"}`
                 }>
                     <div className="flex flex-col md:flex-row gap-6 items-center">
+                        <Link className="" href={homeURL}>
+                            <button className="uppercase cursor-pointer py-2 px-4 rounded-sm text-white hover:bg-gradient-to-r hover:from-[#DC7896] hover:to-[#9E59FE] hover:text-transparent bg-clip-text transition-all duration-300 ease-in-out false false">
+                                <Home />
+                            </button>
+                        </Link>
                         <Link className="" href="/transactions">
                             <button className="uppercase cursor-pointer py-2 px-4 rounded-sm text-white hover:bg-gradient-to-r hover:from-[#DC7896] hover:to-[#9E59FE] hover:text-transparent bg-clip-text transition-all duration-300 ease-in-out false false">
                                 transactions

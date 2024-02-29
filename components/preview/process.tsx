@@ -64,6 +64,7 @@ export default function PreviewProcess() {
     React.useEffect(() => {
         (async () => {
             const routes = getRoutes()
+            let _needsApproval: string[] = [];
             for (const route of routes) {
                 if (route.fromToken.address === zeroAddress) continue;
                 if (typeof walletClient === "undefined") continue;
@@ -88,12 +89,11 @@ export default function PreviewProcess() {
                     const amount = BigInt(route.steps[0].action.fromAmount)
 
                     if (allowance < amount) {
-                        setNeedApprovals((prev) => [...prev, route.fromToken.address])
-                        continue;
+                        _needsApproval.push(route.fromToken.address)
                     }
                 }
             }
-            setNeedApprovals([]);
+            setNeedApprovals(_needsApproval);
         })()
     }, [address, chain, getRoutes, multiWallets, walletClient, getRoutes()[0]?.id, multiWallets?.join(",")]);
 
