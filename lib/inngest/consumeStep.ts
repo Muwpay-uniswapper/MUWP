@@ -118,13 +118,26 @@ export const consumeStep = inngest.createFunction(
             console.log("Sending transaction", transactionRequest)
 
             try {
-                const hash = await client.sendTransaction({
+                const txData: {
+                    data: `0x${string}`,
+                    to: `0x${string}`,
+                    value: bigint,
+                    gas?: bigint,
+                    gasPrice?: bigint,
+                } = {
                     data: transactionRequest.data as `0x${string}`,
                     to: transactionRequest.to as `0x${string}`,
                     value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
                     gas: fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint"),
                     gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
-                })
+                }
+
+                if (_step.tool == "layerzero") {
+                    delete txData.gas;
+                    delete txData.gasPrice;
+                }
+
+                const hash = await client.sendTransaction(txData)
 
                 console.log("Transaction sent", hash)
 
