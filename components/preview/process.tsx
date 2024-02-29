@@ -64,7 +64,7 @@ export default function PreviewProcess() {
     React.useEffect(() => {
         (async () => {
             const routes = getRoutes()
-            let _needsApproval: string[] = [];
+            const _needsApproval: string[] = [];
             for (const route of routes) {
                 if (route.fromToken.address === zeroAddress) continue;
                 if (typeof walletClient === "undefined") continue;
