@@ -66,16 +66,14 @@ export async function FinalAptosStepBuilder({
     const [nativeFee, _zroFee] = await contract.read.quoteForSend([{
         refundAddress: fromAddress as `0x${string}`,
         zroPaymentAddress: zeroAddress,
-    }, adapterParams])
-
-    let gasEstimate = nativeFee;
+    }, adapterParams]);
 
     // if (fromTokenAddress == zeroAddress) {
     const weth = await contract.read.weth();
 
-    const rawGasEstimate = await contract.estimateGas.sendETHToAptos([
+    const { request } = await contract.simulate.sendETHToAptos([
         toAddress as `0x${string}`,
-        parseEther("1"),
+        BigInt(fromAmount),
         {
             refundAddress: fromAddress as `0x${string}`,
             zroPaymentAddress: zeroAddress,
@@ -83,15 +81,15 @@ export async function FinalAptosStepBuilder({
         adapterParams
     ], {
         account: weth,
-        value: parseEther("1") + nativeFee
+        value: BigInt(fromAmount) + nativeFee
     });
 
     const gasPrice = await client.getGasPrice();
 
-    gasEstimate += rawGasEstimate * gasPrice;
-
-    console.log(`Gas estimate: ${gasEstimate - nativeFee}`);
+    console.log(`Gas estimate: ${request.gas}`);
     console.log(`Native fee: ${nativeFee}`);
+
+    request.gas = request.gas ?? 0n + nativeFee;
 
     const toToken = aptosToken.tokens?.find(t => t.address == target);
     if (!toToken) throw new Error(`Token not found: ${target}`);
@@ -133,11 +131,11 @@ export async function FinalAptosStepBuilder({
             }],
             executionDuration,
             gasCosts: [{
-                amount: gasEstimate.toString(),
+                amount: request.gas?.toString() ?? "0",
                 type: "SEND",
                 token: nativeToken,
-                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * gasEstimate, nativeToken.decimals * 2),
-                estimate: gasEstimate.toString(),
+                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * (request.gas ?? 1n), nativeToken.decimals * 2),
+                estimate: request.gas?.toString() ?? "0",
                 price: gasPrice.toString(),
             }]
         },
