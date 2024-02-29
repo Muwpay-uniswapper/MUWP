@@ -75,10 +75,10 @@ export default function PreviewProcess() {
                     client
                 })
 
-                for (const address of multiWallets ?? []) {
+                for (const _address of multiWallets ?? [address!]) {
                     let allowance = 0n
                     try {
-                        allowance = await contract.read.allowance([address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
+                        allowance = await contract.read.allowance([_address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
                     } catch (e) {
                         console.error(e);
                     }
@@ -95,7 +95,7 @@ export default function PreviewProcess() {
             }
             setNeedApprovals([]);
         })()
-    }, [getRoutes()[0]?.id, multiWallets?.join(",")]);
+    }, [address, chain, getRoutes, multiWallets, walletClient, getRoutes()[0]?.id, multiWallets?.join(",")]);
 
     const [isSending, setIsSending] = useState(false);
     const [hash, setHash] = useState<string | undefined>();

@@ -52,7 +52,9 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
             adapterParams
         ] as const
 
-        const simulation = await contract.simulate.sendETHToAptos(args)
+        const simulation = await contract.simulate.sendETHToAptos(args, {
+            value: BigInt(step.action.fromAmount) + nativeFee
+        })
 
         const encodedData = encodeFunctionData({
             abi: contract.abi,
