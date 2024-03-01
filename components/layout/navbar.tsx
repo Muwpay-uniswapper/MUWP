@@ -6,7 +6,6 @@ import { cn } from "@/lib/core/utils";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { useSwapStore } from "@/lib/core/data/swapStore";
-import { ArrowLeft, Home } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 export default function Navbar() {
