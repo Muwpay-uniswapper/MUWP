@@ -134,6 +134,8 @@ export const columns: ColumnDef<Transaction>[] = [
         accessorKey: "routes",
         header: "",
         cell: ({ row }) => {
+            const completed = row.original.status.completed === row.original.routes.length
+            if (!completed) return null
             const output = row.getValue("routes") as Route[]
             if (output.some((route) => route.toToken.chainId === AptosChainId as any)) {
                 return <ClaimAptos tokensAddress={output.filter((route) => route.toToken.chainId === AptosChainId as any).map((route) => route.toToken.address as `0x${string}`)} />
