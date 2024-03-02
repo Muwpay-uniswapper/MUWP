@@ -43,6 +43,14 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
 
             const lifiInput: InputType = {
                 ...input,
+                inputAmount: {
+                    [`${req.fromChainId}:${req.fromTokenAddress}`]: BigInt(req.fromAmount)
+                },
+                inputTokens: [{
+                    address: req.fromTokenAddress,
+                    value: `${req.fromChainId}:${req.fromTokenAddress}`
+                }],
+                distribution: [100],
                 outputTokens: [{
                     address: outputTokenAddress,
                     value: `${req.fromChainId}:${outputTokenAddress}`
