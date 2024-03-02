@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { AptosChainId } from "@/lib/layerzero/aptos/omnichains";
 import { ClaimAptos } from "@/lib/layerzero/aptos/claim";
+import { muwpChains } from "@/muwp";
 
 
 export const columns: ColumnDef<Transaction>[] = [
@@ -42,11 +43,15 @@ export const columns: ColumnDef<Transaction>[] = [
         header: "ID",
         cell: ({ row }) => {
             const id = row.getValue("id") as string
+            const chainId = row.original.routes[0].fromChainId
+
+            const chain = muwpChains.find((chain) => chain.id === chainId)
+
             const shorthash = `${id.slice(0, 6)}...${id.slice(-4)}`
             return <Tooltip>
                 <TooltipTrigger>{shorthash}</TooltipTrigger>
                 <TooltipContent>
-                    {id}
+                    <a href={`${chain?.blockExplorers?.default.url}/address/${id}`} target="_blank" rel="noreferrer" className="hover:underline font-mono">{id}</a>
                 </TooltipContent>
             </Tooltip>
         },
