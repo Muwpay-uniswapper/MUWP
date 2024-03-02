@@ -18,8 +18,8 @@ FANTOMSCAN_API_KEY="KT8ECCIJWP258T84GKRRY84AAWWKGKHM2B"
 # forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://ethereum-goerli-rpc.publicnode.com" --verify -e $ETHERSCAN_API_KEY
 
 # Ethereum
-# echo "Deploying to Ethereum network"
-# forge create MUWPTransfer --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url $HTTPS_ENDPOINT --verify -e $ETHERSCAN_API_KEY
+echo "Deploying to Ethereum network"
+forge create MUWPTransfer --legacy --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url $HTTPS_ENDPOINT --verify -e $ETHERSCAN_API_KEY
 
 # Polygon
 # echo "Deploying to Polygon network"
@@ -46,5 +46,5 @@ FANTOMSCAN_API_KEY="KT8ECCIJWP258T84GKRRY84AAWWKGKHM2B"
 # forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://base.llamarpc.com" --verify -e $BASESCAN_API_KEY
 
 # Fantom
-echo "Deploying to Fantom network"
-forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://fantom.drpc.org" --verify -e $FANTOMSCAN_API_KEY
+# echo "Deploying to Fantom network"
+# forge create MUWPTransfer --legacy --use "0.8.22" --optimize --contracts $CONTRACT_PATH --private-key $PRIVATE_KEY --rpc-url "https://fantom.drpc.org" --verify -e $FANTOMSCAN_API_KEY

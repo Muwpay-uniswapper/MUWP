@@ -27,7 +27,7 @@ export interface MUWPChain extends Chain {
 }
 
 export const muwpChains: MUWPChain[] = [
-    { ...mainnet, muwpContract: "0x" },
+    { ...mainnet, muwpContract: "0x447cEeC7e6bBa8f357C145d64854D7708ec92cBd" },
     { ...arbitrum, muwpContract: "0x5367E923548194E663A2CF431bA2C0224a753499" },
     { ...optimism, muwpContract: "0xA298f3265CeDFFf333f0fa939C64a292dd948993" },
     { ...polygon, muwpContract: "0x98601B2f9f484FEfDB7f032D35cE09E075CE083f" },
