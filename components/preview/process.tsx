@@ -42,19 +42,31 @@ export default function PreviewProcess() {
     React.useEffect(() => {
         const routes = getRoutes();
         const inputTokens = routes.map(route => ({ token: route.fromToken, fromAmount: route.fromAmount }));
+        const total = inputTokens.reduce((acc, { fromAmount }) => acc + BigInt(fromAmount), 0n);
 
         for (const { token, fromAmount } of inputTokens) {
             // Distribute the tokens evenly. The bigint represents the token amount, not the percentage
             const amount = BigInt(fromAmount);
             const wallets = multiWallets ?? [address!];
-            if (!_distribution[token.address] || Object.keys(_distribution[token.address]).length !== wallets.length || !wallets.every(wallet => Object.keys(_distribution[token.address]).includes(wallet))) {
+            if (!_distribution[token.address]
+                || Object.keys(_distribution[token.address]).length !== wallets.length
+                || !wallets.every(wallet => Object.keys(_distribution[token.address]).includes(wallet))
+                || total !== Object.values(_distribution[token.address]).reduce((acc, val) => acc + val, 0n)
+            ) {
                 _distribution[token.address] = {};
                 if (token.address === zeroAddress) {
                     _distribution[token.address][gasPayer ?? address!] = amount;
                 } else {
-                    for (const wallet of wallets) {
-                        _distribution[token.address][wallet] = amount / BigInt(wallets.length);
-                    }
+                    let leftToSpend = amount;
+                    wallets.forEach((wallet, index) => {
+                        if (index === wallets.length - 1) {
+                            _distribution[token.address][wallet] = leftToSpend;
+                        } else {
+                            const share = amount / BigInt(wallets.length);
+                            _distribution[token.address][wallet] = share;
+                            leftToSpend -= share;
+                        }
+                    });
                 }
             }
         }
