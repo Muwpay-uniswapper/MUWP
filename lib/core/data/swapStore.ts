@@ -4,7 +4,7 @@ import { parseUnits } from "viem";
 import { AllowDenyPrefer } from '@/lib/li.fi-ts';
 
 type SwapStore = {
-    targetAddress?: string;
+    targetAddress?: `0x${string}`;
     setTargetAddress: (address: string | undefined) => void;
     allowDenyBridges: AllowDenyPrefer;
     toggleAllowDenyBridge: (bridge: string) => void;
@@ -29,7 +29,7 @@ type SwapStore = {
 
 export const useSwapStore = create<SwapStore>((set: StoreApi<SwapStore>['setState'], get: StoreApi<SwapStore>['getState']) => ({
     targetAddress: undefined,
-    setTargetAddress: (address: string | undefined) => set({ targetAddress: address }),
+    setTargetAddress: (address: string | undefined) => set({ targetAddress: address as `0x${string}` | undefined }),
     allowDenyBridges: { allow: undefined, deny: [], prefer: undefined },
     toggleAllowDenyBridge: (bridge: string) => {
         set((state: SwapStore) => {

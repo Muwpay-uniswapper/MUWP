@@ -113,9 +113,9 @@ export function TokenInput({
     mode: "input" | "output"
 }) {
     const { address, chain } = useAccount()
-    const { inputAmount, setAmount, priceOutput, outputChain } = useSwapStore()
+    const { inputAmount, setAmount, priceOutput, outputChain, targetAddress } = useSwapStore()
     const { data } = useBalance({
-        address,
+        address: mode === "input" ? address : targetAddress,
         token: (token.address !== zeroAddress && EthereumAddress.safeParse(token.address).success) ? token.address as `0x${string}` : undefined,
         chainId: mode == "input" ? chain?.id : (outputChain ?? undefined)
     })
@@ -143,7 +143,7 @@ export function TokenInput({
         setInputValue(value)
     }
 
-    return <div className="w-full bg-zinc-800 relative">
+    return <div className="w-full bg-zinc-800 relative rounded-sm border">
         <div className="flex flex-wrap items-center justify-between p-4 rounded">
             <div className="flex flex-col  items-start w-full">
                 <div className="flex items-center space-x-2">

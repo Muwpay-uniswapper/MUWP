@@ -99,7 +99,7 @@ export function ChainCombobox({
                 }} isAboveMd={isAboveMd} />
             </ContainerContent>
         </Container>
-        {value && mode == "output" && value?.type != "EVM" && <AddressSelector
+        {value && mode == "output" && <AddressSelector
             targetAddress={targetAddress ?? ""}
             setTargetAddress={setTargetAddress}
             chain={value!}
