@@ -68,22 +68,36 @@ export async function FinalAptosStepBuilder({
         zroPaymentAddress: zeroAddress,
     }, adapterParams]);
 
-    // if (fromTokenAddress == zeroAddress) {
-    const weth = await contract.read.weth();
+    let _rawGasEstimate: bigint;
+    if (fromTokenAddress == zeroAddress) {
+        const weth = await contract.read.weth();
 
-    const _rawGasEstimate = await contract.estimateGas.sendETHToAptos([
-        toAddress as `0x${string}`,
-        parseEther("1"),
-        {
-            refundAddress: fromAddress as `0x${string}`,
-            zroPaymentAddress: zeroAddress,
-        },
-        adapterParams
-    ], {
-        account: weth,
-        value: parseEther("1") + nativeFee
-    });
-
+        _rawGasEstimate = await contract.estimateGas.sendETHToAptos([
+            toAddress as `0x${string}`,
+            parseEther("1"),
+            {
+                refundAddress: fromAddress as `0x${string}`,
+                zroPaymentAddress: zeroAddress,
+            },
+            adapterParams
+        ], {
+            account: weth,
+            value: parseEther("1") + nativeFee
+        });
+    } else {
+        _rawGasEstimate = await contract.estimateGas.sendToAptos([
+            fromTokenAddress as `0x${string}`,
+            toAddress as `0x${string}`,
+            BigInt(fromAmount),
+            {
+                refundAddress: fromAddress as `0x${string}`,
+                zroPaymentAddress: zeroAddress,
+            },
+            adapterParams
+        ], {
+            account: fromAddress as `0x${string}`
+        });
+    }
     const gasPrice = await client.getGasPrice();
 
     console.log(`Gas estimate: ${_rawGasEstimate}`);
