@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { OmnichainAptosBridge, RequiredBlockConfirmationAptos, getTokensAptosBridge } from "./omnichains";
-import { createPublicClient, encodePacked, extractChain, formatUnits, getContract, http, parseUnits, zeroAddress } from "viem";
+import { createPublicClient, encodePacked, extractChain, formatUnits, getContract, http, parseEther, parseUnits, zeroAddress } from "viem";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { muwpChains } from "@/muwp";
 import { Step, StepTypeEnum } from "@/lib/li.fi-ts";
@@ -71,9 +71,9 @@ export async function FinalAptosStepBuilder({
     // if (fromTokenAddress == zeroAddress) {
     const weth = await contract.read.weth();
 
-    const { request } = await contract.simulate.sendETHToAptos([
+    const _rawGasEstimate = await contract.estimateGas.sendETHToAptos([
         toAddress as `0x${string}`,
-        BigInt(fromAmount),
+        parseEther("1"),
         {
             refundAddress: fromAddress as `0x${string}`,
             zroPaymentAddress: zeroAddress,
@@ -81,15 +81,15 @@ export async function FinalAptosStepBuilder({
         adapterParams
     ], {
         account: weth,
-        value: BigInt(fromAmount) + nativeFee
+        value: parseEther("1") + nativeFee
     });
 
     const gasPrice = await client.getGasPrice();
 
-    console.log(`Gas estimate: ${request.gas}`);
+    console.log(`Gas estimate: ${_rawGasEstimate}`);
     console.log(`Native fee: ${nativeFee}`);
 
-    request.gas = request.gas ?? 0n + nativeFee;
+    const rawGasEstimate = (_rawGasEstimate ?? 0n) * gasPrice + nativeFee;
 
     const toToken = aptosToken.tokens?.find(t => t.address == target);
     if (!toToken) throw new Error(`Token not found: ${target}`);
@@ -131,11 +131,11 @@ export async function FinalAptosStepBuilder({
             }],
             executionDuration,
             gasCosts: [{
-                amount: request.gas?.toString() ?? "0",
+                amount: rawGasEstimate.toString() ?? "0",
                 type: "SEND",
                 token: nativeToken,
-                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * (request.gas ?? 1n), nativeToken.decimals * 2),
-                estimate: request.gas?.toString() ?? "0",
+                amountUSD: formatUnits(parseUnits(nativeToken.priceUSD ?? "0", nativeToken.decimals) * (rawGasEstimate ?? 1n), nativeToken.decimals * 2),
+                estimate: rawGasEstimate.toString() ?? "0",
                 price: gasPrice.toString(),
             }]
         },
