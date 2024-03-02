@@ -1,4 +1,4 @@
-import { WalletCombobox } from "@/components/chains/AddressSelector";
+import { AptosWalletCombobox } from "@/components/chains/AddressSelector";
 import { Button } from "@/components/ui/button";
 import { Aptos, AptosConfig } from "@aptos-labs/ts-sdk";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
@@ -51,7 +51,7 @@ export function ClaimAptos({
     }
 
     if (!connected) {
-        return <WalletCombobox message="Connect to claim" />
+        return <AptosWalletCombobox message="Connect to claim" />
     }
 
     return <Button onClick={claim}>

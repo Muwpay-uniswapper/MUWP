@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "../ui/command";
 import { cn } from "@/lib/core/utils";
+import { AptosChainId } from "@/lib/layerzero/aptos/omnichains";
+import { useAccount } from "wagmi";
 
 
 export function AddressSelector({
@@ -20,19 +22,24 @@ export function AddressSelector({
     chain: Chain
 }) {
     const { connected, account } = useWallet();
+    const { address } = useAccount();
     useEffect(() => {
-        setTargetAddress(connected ? account?.address || "" : "")
-    }, [connected])
+        if (chain.chainId == AptosChainId) {
+            setTargetAddress(connected ? account?.address || "" : "")
+        } else {
+            setTargetAddress(address || "")
+        }
+    }, [connected, address, chain.chainId, setTargetAddress, account?.address])
 
     return <div className="relative">
         <Input placeholder={`Your ${chain?.label} address`}
             value={targetAddress}
             onChange={(e) => setTargetAddress(e.target.value)} />
-        <WalletCombobox className="absolute right-0 top-0" />
+        {chain.chainId == AptosChainId && <AptosWalletCombobox className="absolute right-0 top-0" />}
     </div>
 }
 
-export function WalletCombobox({
+export function AptosWalletCombobox({
     className,
     message
 }: {
