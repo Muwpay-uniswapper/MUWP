@@ -18,7 +18,6 @@ import {
     boba,
     aurora,
     goerli,
-    polygonMumbai,
     Chain
 } from 'viem/chains';
 
