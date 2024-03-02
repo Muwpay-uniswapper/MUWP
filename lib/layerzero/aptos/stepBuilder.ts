@@ -85,18 +85,22 @@ export async function FinalAptosStepBuilder({
             value: parseEther("1") + nativeFee
         });
     } else {
-        _rawGasEstimate = await contract.estimateGas.sendToAptos([
-            fromTokenAddress as `0x${string}`,
-            toAddress as `0x${string}`,
-            BigInt(fromAmount),
-            {
-                refundAddress: fromAddress as `0x${string}`,
-                zroPaymentAddress: zeroAddress,
-            },
-            adapterParams
-        ], {
-            account: fromAddress as `0x${string}`
-        });
+        try {
+            _rawGasEstimate = await contract.estimateGas.sendToAptos([
+                fromTokenAddress as `0x${string}`,
+                toAddress as `0x${string}`,
+                BigInt(fromAmount),
+                {
+                    refundAddress: fromAddress as `0x${string}`,
+                    zroPaymentAddress: zeroAddress,
+                },
+                adapterParams
+            ], {
+                account: fromAddress as `0x${string}`
+            });
+        } catch (e) {
+            _rawGasEstimate = 2841674n; // Will fail later
+        }
     }
     const gasPrice = await client.getGasPrice();
 
