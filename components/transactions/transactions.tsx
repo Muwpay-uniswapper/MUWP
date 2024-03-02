@@ -45,7 +45,8 @@ export default function Transactions() {
                 desc: true,
             }]}
         />
-        <div className="text-2xl py-4">Past Transactions</div>
+        <div className="text-2xl pt-4">Past Transactions</div>
+        <p className="text-gray-500 pb-4 text-sm">Some cross-chain transactions may take a few minutes to complete. Please wait for the transaction to be confirmed on the destination chain.</p>
         <DataTable
             columns={columns}
             data={txn.filter((tx) => tx.status.completed >= tx.routes.length)}
