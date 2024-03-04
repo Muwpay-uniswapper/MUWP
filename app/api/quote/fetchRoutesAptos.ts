@@ -56,7 +56,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
                     value: `${req.fromChainId}:${outputTokenAddress}`
                 }],
                 outputChain: req.fromChainId,
-                toAddress: input.fromAddress, // We want to send the funds back to the managed wallet
+                toAddress: tempAccount, // We want to send the funds back to the managed wallet
             }
 
             const { routes } = await handleLiFiRoutes(lifiInput, tempAccount);
@@ -84,7 +84,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
                 fromChainId: steps[steps.length - 1]?.action.toChainId ?? req.fromChainId,
                 fromTokenAddress: steps[steps.length - 1]?.action.toToken.address ?? req.fromTokenAddress,
                 fromAmount: steps[steps.length - 1]?.estimate?.toAmount ?? req.fromAmount,
-                fromAddress: steps[steps.length - 1]?.action.toAddress ?? req.fromAddress,
+                fromAddress: steps[steps.length - 1]?.action.toAddress ?? tempAccount,
                 toAddress: req.toAddress as `0x${string}`
             })
 

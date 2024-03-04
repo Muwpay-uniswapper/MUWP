@@ -31,7 +31,7 @@ export const consumeStep = inngest.createFunction(
     { event: "app/consume.steps" },
     async ({ event, step }) => {
         const { remainingSteps, address, id, originalChainId, totalRoutes } = await z.object({
-            address: EthereumAddress,
+            address: EthereumAddress, // temp account
             remainingSteps: z.array(Step.zod),
             totalRoutes: z.number().int(),
             id: z.string().optional(),
