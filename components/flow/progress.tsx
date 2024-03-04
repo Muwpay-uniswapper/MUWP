@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 export function Progress({ validUntil }: { validUntil: Date; }) {
     const [progress, setProgress] = useState<number>(0);
     const [timeLeft, setTimeLeft] = useState<string>('');
 
-    const totalDuration = validUntil.getTime() - new Date().getTime();
+    const totalDuration = useMemo(() => validUntil.getTime() - new Date().getTime(), [validUntil]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -46,7 +46,7 @@ export function Progress({ validUntil }: { validUntil: Date; }) {
                 />
             </svg>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side='left' className='max-w-sm'>
             You have {timeLeft} to complete the swap, otherwise a new rate will be calculated.
         </TooltipContent>
     </Tooltip>
