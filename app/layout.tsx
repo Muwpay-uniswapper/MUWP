@@ -9,7 +9,6 @@ import { Providers } from './providers';
 import Footer from '@/components/layout/footer'
 import NextNProgressClient from './progress'
 import { Analytics } from '@vercel/analytics/react';
-import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
