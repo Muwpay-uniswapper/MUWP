@@ -79,7 +79,7 @@ export const initiateTransfer = inngest.createFunction(
             }
         })
 
-        await step.sendEvent("app/consume.steps", data.routes.map(route => ({
+        await step.sendEvent("app/consume.steps", data.routes.map((route, index) => ({
             id: `app/consume.steps/${route.id}`,
             name: "app/consume.steps",
             data: {
@@ -87,6 +87,7 @@ export const initiateTransfer = inngest.createFunction(
                 remainingSteps: route.steps,
                 totalRoutes: data.routes.length,
                 id: route.id,
+                index,
                 originalChainId: route.steps[0].action.fromChainId,
             }
         })))
