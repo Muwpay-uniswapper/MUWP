@@ -1,11 +1,11 @@
-const million = require('million/compiler');
+// const million = require('million/compiler');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
-    return config;
-  },
+  // webpack: (config) => {
+  //   config.resolve.fallback = { fs: false, net: false, tls: false };
+  //   return config;
+  // },
   redirects: async () => {
     return [
       {
@@ -16,8 +16,8 @@ const nextConfig = {
     ];
   }
 }
-module.exports = million.next(nextConfig, {
-  auto: { rsc: true },
-});
+// module.exports = million.next(nextConfig, {
+//   auto: { rsc: true },
+// });
 
-// module.exports = nextConfig;
+module.exports = nextConfig;
