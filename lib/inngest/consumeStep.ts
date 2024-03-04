@@ -30,11 +30,12 @@ export const consumeStep = inngest.createFunction(
     },
     { event: "app/consume.steps" },
     async ({ event, step }) => {
-        const { remainingSteps, address, id, originalChainId, totalRoutes } = await z.object({
+        const { remainingSteps, address, id, originalChainId, totalRoutes, index } = await z.object({
             address: EthereumAddress, // temp account
             remainingSteps: z.array(Step.zod),
             totalRoutes: z.number().int(),
             id: z.string().optional(),
+            index: z.number().int(),
             originalChainId: z.number().int(),
         }).parseAsync(event.data);
 
@@ -42,9 +43,11 @@ export const consumeStep = inngest.createFunction(
 
         const _step = remainingSteps[0];
 
-        const { transactionRequest, approvalAddress, amount } = await step.run(`approvals-${_step.id}`, async () => {
-
+        const { transactionRequest, approvalAddress, amount, nonce } = await step.run(`approvals-${_step.id}`, async () => {
+            let _index = index;
             const client = await getWallet(address, _step.action.fromChainId);
+
+            _index = Math.max(_index, await client.getTransactionCount({ address: client.account.address }));
 
             const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, BigInt(_step.action.fromAmount), _step.action.fromChainId);
             _step.action.fromAmount = amount.toString();
@@ -72,7 +75,11 @@ export const consumeStep = inngest.createFunction(
                 const allowance = BigInt(_allowance)
 
                 if (allowance < amount) {
-                    const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
+                    const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount], {
+                        nonce: _index,
+                    });
+
+                    _index += 1;
 
                     await client.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
                 }
@@ -87,7 +94,7 @@ export const consumeStep = inngest.createFunction(
             const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
             if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
 
-            return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`, amount: amount.toString() }
+            return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`, amount: amount.toString(), nonce: _index }
         })
 
         const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
@@ -118,24 +125,28 @@ export const consumeStep = inngest.createFunction(
             console.log("Sending transaction", transactionRequest)
 
             try {
+                const _nonce = Math.max(nonce, await client.getTransactionCount({ address: client.account.address }));
                 const txData: {
                     data: `0x${string}`,
                     to: `0x${string}`,
                     value: bigint,
                     gas?: bigint,
                     gasPrice?: bigint,
+                    nonce?: number,
                 } = {
                     data: transactionRequest.data as `0x${string}`,
                     to: transactionRequest.to as `0x${string}`,
                     value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
                     gas: fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint"),
                     gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
+                    nonce: _nonce
                 }
 
                 if (_step.tool == "layerzero") {
                     delete txData.gas;
                     delete txData.gasPrice;
                 }
+
 
                 const hash = await client.sendTransaction(txData)
 
