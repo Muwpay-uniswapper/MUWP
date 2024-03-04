@@ -30,12 +30,13 @@ export const consumeStep = inngest.createFunction(
     },
     { event: "app/consume.steps" },
     async ({ event, step }) => {
-        const { remainingSteps, address, id, originalChainId, totalRoutes, index } = await z.object({
+        const { remainingSteps, address, id, originalChainId, totalRoutes, index, refundAddress } = await z.object({
             address: EthereumAddress, // temp account
             remainingSteps: z.array(Step.zod),
             totalRoutes: z.number().int(),
             id: z.string().optional(),
             index: z.number().int().optional(),
+            refundAddress: EthereumAddress,
             originalChainId: z.number().int(),
         }).parseAsync(event.data);
 
@@ -201,6 +202,7 @@ export const consumeStep = inngest.createFunction(
                     id,
                     index: (index ?? 0) + 1,
                     originalChainId,
+                    refundAddress
                 }
             })
         }
@@ -228,7 +230,7 @@ export const consumeStep = inngest.createFunction(
                 const balance = await client.getBalance({ address: client.account.address })
                 const gas = await client.getGasPrice()
                 const hash = await client.sendTransaction({
-                    to: _step.action.toAddress as `0x${string}`,
+                    to: refundAddress as `0x${string}`,
                     value: balance - gas * BigInt(21000),
                 })
 
