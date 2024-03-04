@@ -4,7 +4,7 @@ import { Edge, FitView, Node, SetCenter } from 'reactflow';
 import { z } from 'zod';
 import { create, StoreApi } from 'zustand';
 import { useSwapStore } from './swapStore';
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 
 export type Transaction = {
     routes: Route[];
@@ -19,6 +19,9 @@ export type Transaction = {
 };
 
 type RouteStore = {
+    multiWallets?: `0x${string}`[];
+    gasPayer?: `0x${string}`;
+    multiWalletDistribution: { [key: string]: { [key: string]: bigint } }; // token -> wallet -> amount
     tempAccount: `0x${string}` | undefined;
     transactions: Transaction[];
     setTransaction: (transaction: Transaction) => void;
@@ -57,6 +60,9 @@ BigInt.prototype.toJSON = function () {
 };
 
 export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteStore>['setState'], get: StoreApi<RouteStore>['getState']) => ({
+    multiWallets: undefined,
+    gasPayer: undefined,
+    multiWalletDistribution: {},
     tempAccount: undefined,
     transactions: [],
     setTransaction: (transaction: Transaction) => {
@@ -119,6 +125,7 @@ export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteSt
             }, {} as { [key: string]: number });
 
             useSwapStore.setState({});
+            const multiWalletDistribution = Object.fromEntries(input.inputTokens.map((token) => [token.address, {}]))
 
             set({
                 routes: routes.routes as any,
@@ -126,6 +133,7 @@ export const useRouteStore = create<RouteStore>()(persist((set: StoreApi<RouteSt
                 chosenIndex,
                 isFetching: false,
                 validUntil: routes.validUntil,
+                multiWalletDistribution
             });
         } catch (e) {
             set({ isFetching: false });

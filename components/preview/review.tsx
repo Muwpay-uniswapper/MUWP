@@ -1,4 +1,4 @@
-import { useRouteStore } from "@/lib/front/data/routeStore";
+import { useRouteStore } from "@/lib/core/data/routeStore";
 import { ArrowLeftRight, DollarSign, Fuel, Info, Layers2, Loader2, PercentCircle, Receipt } from "lucide-react";
 import React from "react";
 import { PrepareTransactionRequestReturnType, formatUnits } from "viem";
@@ -7,17 +7,9 @@ import { NextStep } from "./process";
 import { format } from "../flow/DetailNode";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Funnel } from "./funnel";
-import { useAccount, useFeeData, useNetwork, usePublicClient, useWalletClient } from "wagmi";
+import { useAccount, useEstimateFeesPerGas, useWalletClient } from "wagmi";
 import { toast } from "sonner";
-import { z } from "zod";
-import { useRouter } from "next/navigation";
-
-const InitiateResponse = z.object({
-    status: z.literal("success"),
-    address: z.string(),
-    txn: z.any(),
-    id: z.string(),
-});
+import { InitiateResponse } from "@/app/api/initiate/types";
 
 export function Review({
     nextStep,
@@ -28,34 +20,38 @@ export function Review({
     isSending: boolean,
     setIsSending: (sending: boolean) => void
 }) {
-    const { getRoutes, routes: _route, tempAccount, setTransaction } = useRouteStore();
+    const { getRoutes, routes: _route, tempAccount, setTransaction, multiWalletDistribution } = useRouteStore();
 
-    const routes = getRoutes()
+    const routes = getRoutes();
 
-    const gasFees = routes.map((route) => Number(route.gasCostUSD)).reduce((a, b) => a + b, 0);
+    const outputTokens = routes.map((route) => route.steps[route.steps.length - 1].action.toToken);
+    const outputTokenSet = new Set(outputTokens.map((token) => token.address));
+    const hasMultipleOutputs = outputTokenSet.size > 1;
+
+    const gasFees = routes.map((route) => Number(route.gasCostUSD ?? "0")).reduce((a, b) => a + b, 0);
     const feeCosts = routes.map((route) => route.steps.map((step) => step.estimate?.feeCosts?.map((fee) => Number(fee.amountUSD))?.reduce((a, b) => a + b, 0) ?? 0).reduce((a, b) => a + b, 0)).reduce((a, b) => a + b, 0);
     let duration = routes.map((route) => route.steps.map((step) => step.estimate?.executionDuration ?? 0).reduce((a, b) => a + b, 0)).reduce((a, b) => Math.max(a, b), 0); // Steps are executed in parallel, so we take the max
     if (duration > 0) {
         duration += 3 * 60; // Add 3 min for the transaction to be mined
     }
     const steps = routes.map((route) => route.steps.length).reduce((a, b) => a + b, 0);
-    const sum = routes.reduce((acc, route) => acc + BigInt(route.toAmount), BigInt(0));
+    const sum = routes.reduce((acc, route) => acc + BigInt(hasMultipleOutputs ? route.fromAmount : route.toAmount), 0n);
     const slippage = routes.map((route) => route.steps.map((step) => step.action.slippage ?? 0).reduce((a, b) => Math.max(a, b), 0)).reduce((a, b) => Math.max(a, b), 0);
-    const amountMin = routes.map((route) => BigInt(route.toAmountMin)).reduce((a, b) => a + b, 0n);
+    const _amountMin = routes.map((route) => BigInt(route.toAmountMin));
+    const amountMin = !hasMultipleOutputs ? _amountMin.reduce((a, b) => a + b, 0n) : _amountMin;
 
     const { data: walletClient } = useWalletClient()
-    const { data } = useFeeData();
+    const { data } = useEstimateFeesPerGas();
     const account = useAccount();
-    const { chain } = useNetwork();
-    const router = useRouter();
 
     const sendTxn = async () => {
         setIsSending(true);
 
         const body: any = {
-            from: account.address,
+            from: multiWalletDistribution,
+            gasPayer: account.address,
             account: tempAccount,
-            chainId: chain?.id,
+            chainId: account.chain?.id,
             routes,
         };
 
@@ -76,7 +72,7 @@ export function Review({
         }).then(async (res) => {
             const body = await res.json();
             if (!res.ok) {
-                throw new Error(body?.error ?? "Unknown error");
+                throw new Error(JSON.stringify(body?.error ?? "Unknown error"));
             }
             return body
         })
@@ -100,7 +96,8 @@ export function Review({
             });
         })
 
-        const { address, txn } = await InitiateResponse.parseAsync(res);
+        const { address, txn: _txn } = await InitiateResponse.parseAsync(res);
+        const txn = _txn as PrepareTransactionRequestReturnType;
 
         // Sending tx
         let _hash: `0x${string}` | undefined;
@@ -108,7 +105,12 @@ export function Review({
         do {
             counter++;
 
-            const __hash = walletClient?.sendTransaction(txn as PrepareTransactionRequestReturnType);
+            const __hash = walletClient?.sendTransaction({
+                chain: txn.chain,
+                data: txn.data,
+                to: txn.to,
+                value: txn.value
+            });
 
             if (!__hash) continue;
 
@@ -145,7 +147,7 @@ export function Review({
             const notifyBackend = await fetch("/api/receive-funds", {
                 method: "POST",
                 body: JSON.stringify({
-                    chainId: chain?.id,
+                    chainId: account.chain?.id,
                     transactionHash: _hash,
                     accountAddress: tempAccount
                 }),
@@ -176,29 +178,54 @@ export function Review({
         </div>
         <div className="flex flex-row justify-evenly items-center max-w-xs mx-auto">
             <div className="flex flex-col gap-2">
-                {routes.map((route) => <Tooltip>
+                {!hasMultipleOutputs ? routes.map((route) => <Tooltip key={route.id}>
                     <TooltipTrigger>
                         <img src={route.fromToken.logoURI} alt={route.fromToken.symbol} className="w-6 h-6 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
                         {formatUnits(BigInt(route.fromAmount), route.fromToken.decimals)} {route.fromToken.symbol}
                     </TooltipContent>
-                </Tooltip>)}
+                </Tooltip>)
+                    : <Tooltip>
+                        <TooltipTrigger>
+                            <img src={routes[0]?.fromToken.logoURI} alt={routes[0]?.fromToken.symbol} className="w-6 h-6 rounded-full" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {formatUnits(sum, routes[0]?.fromToken.decimals)} {routes[0]?.fromToken.symbol}
+                        </TooltipContent>
+                    </Tooltip>
+                }
             </div>
-            <Funnel height={routes.length * 3} />
-            <Tooltip>
-                <TooltipTrigger>
-                    <img src={routes[0]?.toToken.logoURI} alt={routes[0]?.toToken.symbol} className="w-6 h-6 rounded-full" />
-                </TooltipTrigger>
-                <TooltipContent>
-                    {formatUnits(sum, routes[0]?.toToken.decimals)} {routes[0]?.toToken.symbol}
-                </TooltipContent>
-            </Tooltip>
+            <Funnel height={routes.length * 3} reverse={hasMultipleOutputs} />
+            <div className="flex flex-col gap-2">
+                {hasMultipleOutputs ? routes.map((route) => <Tooltip key={route.id}>
+                    <TooltipTrigger>
+                        <img src={route.toToken.logoURI} alt={route.toToken.symbol} className="w-6 h-6 rounded-full" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        {formatUnits(BigInt(route.toAmount), route.toToken.decimals)} {route.toToken.symbol}
+                    </TooltipContent>
+                </Tooltip>)
+                    : <Tooltip>
+                        <TooltipTrigger>
+                            <img src={routes[0]?.toToken.logoURI} alt={routes[0]?.toToken.symbol} className="w-6 h-6 rounded-full" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {formatUnits(sum, routes[0]?.toToken.decimals)} {routes[0]?.toToken.symbol}
+                        </TooltipContent>
+                    </Tooltip>
+                }
+            </div>
         </div>
         <div className="grid grid-cols-2 gap-2 my-4">
             <p><Receipt className="inline w-4 h-4 mr-1" />Minimum Output</p>
             <p className="text-right">
-                {format(formatUnits(amountMin, routes[0].toToken.decimals))} {routes[0].toToken.symbol}
+                {typeof amountMin == "bigint"
+                    ? `${format(formatUnits(amountMin, routes[0].toToken.decimals))} ${routes[0].toToken.symbol}`
+                    : (<ul>
+                        {amountMin.map((min, i) => <li key={i}>{format(formatUnits(min, routes[i].toToken.decimals))} {routes[i].toToken.symbol}</li>)}
+                    </ul>)
+                }
             </p>
             <p><PercentCircle className="inline w-4 h-4 mr-1" />Slippage</p>
             <p className="text-right">

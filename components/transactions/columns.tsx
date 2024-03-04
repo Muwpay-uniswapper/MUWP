@@ -1,6 +1,6 @@
 "use client";
 
-import { Transaction } from "@/lib/front/data/routeStore";
+import { Transaction } from "@/lib/core/data/routeStore";
 import { ColumnDef, Row } from "@tanstack/react-table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Route } from "@lifi/sdk";
@@ -9,12 +9,15 @@ import TxActions from "./txActions";
 import Status from "./status";
 import { Button } from "../ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { AptosChainId } from "@/lib/layerzero/aptos/omnichains";
+import { ClaimAptos } from "@/lib/layerzero/aptos/claim";
+import { muwpChains } from "@/muwp";
 
 
 export const columns: ColumnDef<Transaction>[] = [
     {
         accessorKey: "timestamp",
-        sortingFn: (rowA: Row<Transaction>, rowB: Row<Transaction>, columnId: string): number => {
+        sortingFn: (rowA: Row<Transaction>, rowB: Row<Transaction>, _columnId: string): number => {
             const a = new Date(rowA.original.timestamp)
             const b = new Date(rowB.original.timestamp)
             return a > b ? 1 : a < b ? -1 : 0
@@ -40,11 +43,15 @@ export const columns: ColumnDef<Transaction>[] = [
         header: "ID",
         cell: ({ row }) => {
             const id = row.getValue("id") as string
+            const chainId = row.original.routes[0].fromChainId
+
+            const chain = muwpChains.find((chain) => chain.id === chainId)
+
             const shorthash = `${id.slice(0, 6)}...${id.slice(-4)}`
             return <Tooltip>
                 <TooltipTrigger>{shorthash}</TooltipTrigger>
                 <TooltipContent>
-                    {id}
+                    <a href={`${chain?.blockExplorers?.default.url}/address/${id}`} target="_blank" rel="noreferrer" className="hover:underline font-mono">{id}</a>
                 </TooltipContent>
             </Tooltip>
         },
@@ -91,13 +98,17 @@ export const columns: ColumnDef<Transaction>[] = [
         header: "Input",
         cell: ({ row }) => {
             const routes = row.getValue("routes") as Route[]
+            const _inputs = new Set(routes.map((route) => route.fromToken.address))
+            const inputs = Array.from(_inputs).map((address) => routes.find((route) => route.fromToken.address === address)!.fromToken)
             return <div className="flex flex-row gap-1">
-                {routes.map((route) => <Tooltip>
+                {Array.from(inputs).map((route) => <Tooltip key={route.address}>
                     <TooltipTrigger>
-                        <img src={route.fromToken.logoURI} alt={route.fromToken.symbol} className="w-4 h-4 rounded-full" />
+                        <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
-                        {formatUnits(BigInt(route.fromAmount), route.fromToken.decimals)} {route.fromToken.symbol}
+                        {formatUnits(BigInt(
+                            routes.filter((r) => r.fromToken === route).reduce((acc, r) => acc + BigInt(r.fromAmount), 0n)
+                        ), route.decimals)} {route.symbol}
                     </TooltipContent>
                 </Tooltip>)}
             </div>
@@ -108,17 +119,33 @@ export const columns: ColumnDef<Transaction>[] = [
         header: "Output",
         cell: ({ row }) => {
             const routes = row.getValue("routes") as Route[]
-            const sum = routes.reduce((acc, route) => acc + BigInt(route.toAmount), BigInt(0))
+            const _outputs = new Set(routes.map((route) => route.toToken.address))
+            const outputs = Array.from(_outputs).map((address) => routes.find((route) => route.toToken.address === address)!.toToken)
             return <div className="flex flex-row gap-1">
-                <Tooltip>
+                {Array.from(outputs).map((route) => <Tooltip key={route.address}>
                     <TooltipTrigger>
-                        <img src={routes[0].toToken.logoURI} alt={routes[0].toToken.symbol} className="w-4 h-4 rounded-full" />
+                        <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
-                        {formatUnits(sum, routes[0].toToken.decimals)} {routes[0].toToken.symbol}
+                        {formatUnits(BigInt(
+                            routes.filter((r) => r.toToken === route).reduce((acc, r) => acc + BigInt(r.toAmount), 0n)
+                        ), route.decimals)} {route.symbol}
                     </TooltipContent>
-                </Tooltip>
+                </Tooltip>)}
             </div>
+        }
+    },
+    {
+        accessorKey: "routes",
+        header: "",
+        cell: ({ row }) => {
+            const completed = row.original.status.completed === row.original.routes.length
+            if (!completed) return null
+            const output = row.getValue("routes") as Route[]
+            if (output.some((route) => route.toToken.chainId === AptosChainId as any)) {
+                return <ClaimAptos tokensAddress={output.filter((route) => route.toToken.chainId === AptosChainId as any).map((route) => route.toToken.address as `0x${string}`)} />
+            }
+            return null
         }
     },
     {

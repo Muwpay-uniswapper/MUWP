@@ -1,3 +1,4 @@
+import { EthereumAddress } from "@/lib/core/model/Address";
 import { inngest } from "@/lib/inngest/client";
 import { z } from "zod";
 
@@ -6,10 +7,7 @@ BigInt.prototype.toJSON = function () {
 };
 
 
-const Hash = z.string().refine(value => value.startsWith('0x'), {
-    message: "Hash/Hex must start with '0x'",
-});
-
+const Hash = z.string().regex(/^0x[0-9a-fA-F]+$/, "Hash must be a valid hex string");
 
 export async function POST(request: Request) {
     try {
@@ -17,7 +15,7 @@ export async function POST(request: Request) {
         const input = z.object({
             transactionHash: Hash,
             chainId: z.number(),
-            accountAddress: Hash,
+            accountAddress: EthereumAddress,
         }).parse(body);
 
         await inngest.send({

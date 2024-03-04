@@ -1,17 +1,16 @@
 "use client";
 
-import ReactFlow, { Connection, DefaultEdgeOptions, Edge, Panel, ReactFlowProvider, addEdge, useEdgesState, useNodesState, useReactFlow, useViewport } from "reactflow";
+import ReactFlow, { Connection, DefaultEdgeOptions, Edge, Panel, ReactFlowProvider, addEdge, useEdgesState, useNodesState, useReactFlow } from "reactflow";
 import { Card } from "../ui/card";
 
 import "reactflow/dist/style.css"
-import { useRouteStore } from "@/lib/front/data/routeStore";
-import { hash, renderNodes } from "./render";
+import { useRouteStore } from "@/lib/core/data/routeStore";
+import { renderNodes } from "./render";
 import EdgeExchange from "./EdgeExchange";
 import TokenNode from "./TokenNode";
 import React, { useCallback, useMemo } from "react";
 import { GradientIdContext } from "./provider";
 import DetailNode from "./DetailNode";
-import { Route, Step } from "@/lib/li.fi-ts";
 import { Progress } from "./progress";
 
 const edgeTypes = {

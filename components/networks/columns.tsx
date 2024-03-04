@@ -5,7 +5,7 @@ import { Checkbox } from "../ui/checkbox"
 import { Exchange } from "@/lib/li.fi-ts"
 import { ChainIcon } from "connectkit"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useSwapStore } from "@/lib/front/data/swapStore";
+import { useSwapStore } from "@/lib/core/data/swapStore";
 
 export const columns: ColumnDef<Exchange>[] = [
     {
@@ -54,7 +54,7 @@ export const columns: ColumnDef<Exchange>[] = [
         header: "Supported Chains",
         cell: ({ row }) => (
             <div className="flex flex-row gap-1">
-                {row.original.supportedChains?.map((chain) => <Tooltip>
+                {row.original.supportedChains?.map((chain) => <Tooltip key={chain} >
                     <TooltipTrigger>
                         <ChainIcon id={chain} key={chain} />
                     </TooltipTrigger>

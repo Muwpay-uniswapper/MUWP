@@ -1,5 +1,5 @@
 "use client";
-import { useRouteStore } from "@/lib/front/data/routeStore";
+import { useRouteStore } from "@/lib/core/data/routeStore";
 import { DataTable } from "../networks/data-table";
 import { columns } from "./columns";
 import useSWR from "swr"
@@ -13,9 +13,9 @@ const fetcher = (args: string[]) => {
 }
 
 export default function Transactions() {
-    const { transactions, setTransaction } = useRouteStore();
+    const { transactions } = useRouteStore();
     const { data } = useSWR(["/api/status", transactions.map((tx) => tx.id)], fetcher, {
-        refreshInterval: 5000,
+        refreshInterval: 15000,
     })
 
     const txn = useMemo(() => {
@@ -35,7 +35,7 @@ export default function Transactions() {
         return _txn
     }, [data, Object.values(data ?? {})])
 
-    return <div className="w-full px-4 max-w-4xl">
+    return <div className="w-full px-4 max-w-6xl">
         <div className="text-2xl py-4">Pending Transactions</div>
         <DataTable
             columns={columns}
@@ -45,7 +45,8 @@ export default function Transactions() {
                 desc: true,
             }]}
         />
-        <div className="text-2xl py-4">Past Transactions</div>
+        <div className="text-2xl pt-4">Past Transactions</div>
+        <p className="text-gray-500 pb-4 text-sm">Some cross-chain transactions may take a few minutes to complete. Please wait for the transaction to be confirmed on the destination chain.</p>
         <DataTable
             columns={columns}
             data={txn.filter((tx) => tx.status.completed >= tx.routes.length)}

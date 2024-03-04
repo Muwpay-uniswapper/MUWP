@@ -1,7 +1,7 @@
-import { expect } from "chai";
 import { HDKey, hdKeyToAccount, generatePrivateKey } from 'viem/accounts'
 import { secp256k1 } from '@noble/curves/secp256k1'
 import { fromHex } from "viem";
+import { describe, it, expect } from "bun:test";
 
 describe("HD Wallet", function () {
     it("Should generate a consistent wallet", async function () {
@@ -12,7 +12,7 @@ describe("HD Wallet", function () {
             accountIndex: 0,
         })
 
-        expect(account.address).to.equal("0xE05f5dE81F34C461B3fe7e135B8314eACfCA3F3a")
+        expect(account.address).toEqual("0xE05f5dE81F34C461B3fe7e135B8314eACfCA3F3a")
     });
 
     it("Should generate a consistent wallet from env", async function () {
@@ -23,6 +23,6 @@ describe("HD Wallet", function () {
             accountIndex: 0,
         })
 
-        expect(account.address).to.equal("0xB4460e9c543a62e9C8EBb13BF6805BEC11A739A3")
+        expect(account.address).toEqual("0xB4460e9c543a62e9C8EBb13BF6805BEC11A739A3")
     })
 });

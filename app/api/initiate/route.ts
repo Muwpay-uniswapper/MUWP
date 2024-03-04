@@ -1,37 +1,17 @@
 import { inngest } from "@/lib/inngest/client";
-import { Route } from "@/lib/li.fi-ts";
 import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress } from 'viem'
 import { z } from "zod";
-import { abi } from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
+import MUWPTransfer from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
+import { InitiateResponse, StrictInputInitiate } from "./types";
 
-BigInt.prototype.toJSON = function () {
-    return this.toString();
-};
-
-const Address = z
-    .string()
-    .refine(value =>
-        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
-        {
-            message: 'Invalid Ethereum address.',
-            path: [], // path is kept empty to indicate whole string should be validated
-        }
-    );
 
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const input = await z.object({
-            from: Address,
-            account: Address,
-            chainId: z.number(),
-            routes: z.array(Route.zod),
-            maxFeePerGas: z.coerce.bigint().optional(),
-            maxPriorityFeePerGas: z.coerce.bigint().optional(),
-        }).parseAsync(body);
+        const input = await StrictInputInitiate.parseAsync(body);
 
         const client = createPublicClient({
             chain: extractChain({
@@ -85,23 +65,28 @@ export async function POST(request: Request) {
         }))).reduce((acc1, cost) => acc1 + cost, 0n);
 
         /*
+        // For Gas Payer
         function transfer(
+        address[] memory sender,
         address[] memory tokens,
         uint256[] memory amounts,
         uint256 totalGas,
         address recipient
         ) public payable
             */
+        const args = [
+            input.routes.map(route => Object.keys(input.from[route.fromToken.address])).flat(),
+            input.routes.map(route => route.fromToken.address),
+            input.routes.map(route => Object.values(input.from[route.fromToken.address])).flat(),
+            totalGas,
+            input.account,
+        ]
         const data = encodeFunctionData({
-            abi,
+            abi: MUWPTransfer.abi,
             functionName: "transfer",
-            args: [
-                input.routes.map(route => route.steps[0].action.fromToken.address),
-                input.routes.map(route => BigInt(route.steps[0].action.fromAmount)),
-                totalGas,
-                input.account,
-            ]
+            args
         })
+
 
         const chain = muwpChains.find(chain => chain.id === input.chainId)
 
@@ -111,7 +96,7 @@ export async function POST(request: Request) {
         } = await client.estimateFeesPerGas()
 
         const txn = await client.prepareTransactionRequest({
-            account: input.from as `0x${string}`,
+            account: input.gasPayer as `0x${string}`,
             to: chain?.muwpContract,
             value: totalGas + input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n),
             data,
@@ -126,16 +111,16 @@ export async function POST(request: Request) {
                 address: input.account,
                 routes: input.routes,
                 totalGas,
+                refundAddress: input.gasPayer,
             },
         })
-
 
         return new Response(JSON.stringify({
             status: "success",
             address: input.account,
             txn,
             id: _id.ids[0]
-        }), {
+        } as z.infer<typeof InitiateResponse>), {
             headers: {
                 'Content-Type': 'application/json',
             }
@@ -163,7 +148,7 @@ export async function POST(request: Request) {
             })
         } else if (e instanceof Error) {
             console.log(e.message)
-            const bodyPattern = /Body: \"(\{.*\})\"/;
+            const bodyPattern = /Body: "(\{.*\})"/;
             const matches = e.message.match(bodyPattern);
 
             if (matches && matches.length > 1) {

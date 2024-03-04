@@ -2,29 +2,18 @@ import { inngest } from "./client";
 import { z } from "zod";
 import * as store from "@/lib/kv/store";
 import { Step } from "../li.fi-ts";
-import { publicClient } from "@/app/providers";
-import { advancedAPI } from "../front/data/api";
-import { HDAccount, HttpTransport, PublicClient, TransactionExecutionError, createPublicClient, createWalletClient, extractChain, fromHex, getContract, http, zeroAddress } from 'viem'
+import { advancedAPI } from "../core/data/api";
+import { TransactionExecutionError, createPublicClient, createWalletClient, erc20Abi, extractChain, fromHex, getContract, http, publicActions, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
-import { WalletClient } from "wagmi";
-import { abi as erc20ABI } from '@/out/ERC20.sol/ERC20.json'
+import { Address, EthereumAddress } from "../core/model/Address";
+import { AptosBridgeTxData } from "../layerzero/aptos/txData";
 
-const Address = z
-    .string()
-    .refine(value =>
-        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
-        {
-            message: 'Invalid Ethereum address.',
-            path: [], // path is kept empty to indicate whole string should be validated
-        }
-    );
-const Hash = z.string().refine(value => value.startsWith('0x'), {
-    message: "Hash/Hex must start with '0x'",
-});
 
-const transactionRequestSchema = z.object({
-    from: Address, // Ethereum address format
+const Hash = z.string().regex(/^0x[0-9a-fA-F]+$/, "Hash must be a valid hex string");
+
+export const transactionRequestSchema = z.object({
+    from: EthereumAddress, // Ethereum address format
     to: Address, // Ethereum address format
     chainId: z.number().int(), // Chain ID should be an integer
     data: Hash, // Data field should start with 0x followed by hex characters
@@ -41,11 +30,13 @@ export const consumeStep = inngest.createFunction(
     },
     { event: "app/consume.steps" },
     async ({ event, step }) => {
-        const { remainingSteps, address, id, originalChainId, totalRoutes } = await z.object({
-            address: Address,
+        const { remainingSteps, address, id, originalChainId, totalRoutes, index, refundAddress } = await z.object({
+            address: EthereumAddress, // temp account
             remainingSteps: z.array(Step.zod),
             totalRoutes: z.number().int(),
             id: z.string().optional(),
+            index: z.number().int().optional(),
+            refundAddress: EthereumAddress,
             originalChainId: z.number().int(),
         }).parseAsync(event.data);
 
@@ -53,74 +44,81 @@ export const consumeStep = inngest.createFunction(
 
         const _step = remainingSteps[0];
 
-        const { transactionRequest, approvalAddress } = await step.run(`approvals-${_step.id}`, async () => {
-            // if (process.env.NODE_ENV !== "production") {
+        const { transactionRequest, approvalAddress, amount, nonce } = await step.run(`approvals-${_step.id}`, async () => {
+            let _index = index;
+            const client = await getWallet(address, _step.action.fromChainId);
 
-            // }
+            _index = Math.max(_index ?? 0, await client.getTransactionCount({ address: client.account.address }));
+
+            const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, BigInt(_step.action.fromAmount), _step.action.fromChainId);
+            _step.action.fromAmount = amount.toString();
+
             _step.action.slippage = 1.0; // 100% slippage
             if (_step.estimate) {
                 _step.estimate.toAmountMin = "1"; // 1 output token, which is like 0.00...1 ETH
             }
 
-            const fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
-            const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
-            if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
-
-            const { walletClient, publicClient } = await getWallet(address, fullStep.transactionRequest.chainId);
-
-            if (fullStep.action.fromToken.address !== zeroAddress) {
+            if (_step.action.fromToken.address !== zeroAddress) {
                 // Approvals
                 const contract = getContract({
-                    address: fullStep.action.fromToken.address as `0x${string}`,
-                    abi: erc20ABI,
-                    publicClient: publicClient!,
-                    walletClient: walletClient!,
+                    address: _step.action.fromToken.address as `0x${string}`,
+                    abi: erc20Abi,
+                    client,
                 })
 
-                const approvalAddress = fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`
+                const approvalAddress = _step.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`
 
                 const _allowance = await contract.read.allowance([
-                    walletClient.account.address as `0x${string}`,
-                    approvalAddress
-                ]) as string
+                    client.account.address as `0x${string}`,
+                    approvalAddress as `0x${string}`
+                ])
 
                 const allowance = BigInt(_allowance)
 
-                const amount = BigInt(fullStep.action.fromAmount)
-
                 if (allowance < amount) {
-                    const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount])
+                    const hash = await contract.write.approve([approvalAddress as `0x${string}`, amount], {
+                        nonce: _index,
+                    });
 
-                    await publicClient.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
+                    _index += 1;
 
-                    return { transactionRequest, hash, approvalAddress }
+                    await client.waitForTransactionReceipt({ hash }) // This may take a while and make the workflow timeout. In that case, it will just be retried
                 }
             }
-            return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}` }
+
+            let fullStep: Step;
+            if (_step.tool == "layerzero") {
+                fullStep = await AptosBridgeTxData(_step as Step);
+            } else {
+                fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
+            }
+            const transactionRequest = await transactionRequestSchema.parseAsync(fullStep.transactionRequest)
+            if (fullStep.action.fromAddress !== address) throw new Error("Address mismatch")
+
+            return { transactionRequest, approvalAddress: fullStep.estimate?.approvalAddress ?? _step.estimate?.approvalAddress as `0x${string}`, amount: amount.toString(), nonce: _index }
         })
 
         const { hash, chainId } = await step.run(`step-${_step.id}`, async () => {
-            const { walletClient, publicClient } = await getWallet(address, transactionRequest.chainId);
+            const client = await getWallet(address, transactionRequest.chainId);
 
             // Check if allowance is sufficient
             if (_step.action.fromToken.address !== zeroAddress) {
                 const contract = getContract({
                     address: _step.action.fromToken.address as `0x${string}`,
-                    abi: erc20ABI,
-                    publicClient: publicClient!,
-                    walletClient: walletClient!,
+                    abi: erc20Abi,
+                    client
                 })
 
                 const _allowance = await contract.read.allowance([
-                    walletClient.account.address as `0x${string}`,
-                    approvalAddress
-                ]) as string
+                    client.account.address as `0x${string}`,
+                    approvalAddress as `0x${string}`
+                ])
 
                 const allowance = BigInt(_allowance)
 
-                const amount = BigInt(_step.action.fromAmount)
+                const _amount = BigInt(amount)
 
-                if (allowance < amount) {
+                if (allowance < _amount) {
                     throw new Error("Allowance insufficient")
                 }
             }
@@ -128,13 +126,51 @@ export const consumeStep = inngest.createFunction(
             console.log("Sending transaction", transactionRequest)
 
             try {
-                const hash = await walletClient.sendTransaction({
+                let _nonce: number | undefined = Math.max(nonce, await client.getTransactionCount({ address: client.account.address }));
+                if (isNaN(_nonce)) {
+                    _nonce = undefined;
+                }
+                const txData: {
+                    data: `0x${string}`,
+                    to: `0x${string}`,
+                    value: bigint,
+                    gas?: bigint,
+                    gasPrice?: bigint,
+                    nonce?: number,
+                } = {
                     data: transactionRequest.data as `0x${string}`,
                     to: transactionRequest.to as `0x${string}`,
                     value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
                     gas: fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint"),
                     gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
-                })
+                    nonce: _nonce
+                }
+
+                if (_step.tool == "layerzero") {
+                    delete txData.gas;
+                    delete txData.gasPrice;
+                }
+
+
+                const hash = await client.sendTransaction(txData)
+
+                console.log("Transaction sent", hash)
+
+                const tx = await client.waitForTransactionReceipt({ hash })
+
+                if (tx.status !== "success") {
+                    const _stored = await store.get(address) as string | object | undefined;
+                    const stored = typeof _stored === "string" ? JSON.parse(_stored) : _stored;
+                    await store.set(address, JSON.stringify({
+                        ...stored,
+                        failed: true,
+                        errors: {
+                            ...stored?.errors,
+                            [_step.id]: `Transaction reverted: ${hash}`,
+                        }
+                    }))
+                    throw new Error("Transaction reverted")
+                }
 
                 return { hash, chainId: transactionRequest.chainId }
             } catch (e) {
@@ -153,36 +189,6 @@ export const consumeStep = inngest.createFunction(
                 throw e;
             }
         })
-        await step.waitForEvent(`transaction-${hash}`, {
-            event: "app/transaction.executed",
-            match: "data.hash",
-            timeout: `${(_step.estimate?.executionDuration ?? 60) * 1.3}s`, // wait at most 30% longer than estimated
-        })
-
-        await step.run(`step-${_step.id}-executed`, async () => {
-            // Check if the step was executed
-            const client = createPublicClient({
-                chain: extractChain({
-                    chains: Object.values(chains),
-                    id: chainId as any,
-                }),
-                transport: http()
-            })
-            const tx = await client.getTransactionReceipt({ hash })
-            if (tx.status !== "success") {
-                const _stored = await store.get(address) as string | object | undefined;
-                const stored = typeof _stored === "string" ? JSON.parse(_stored) : _stored;
-                await store.set(address, JSON.stringify({
-                    ...stored,
-                    failed: true,
-                    errors: {
-                        ...stored?.errors,
-                        [_step.id]: `Transaction reverted: ${hash}`,
-                    }
-                }))
-                throw new Error("Transaction failed")
-            }
-        })
 
         const _remainingSteps = remainingSteps.slice(1);
 
@@ -194,7 +200,9 @@ export const consumeStep = inngest.createFunction(
                     remainingSteps: _remainingSteps,
                     totalRoutes,
                     id,
+                    index: (index ?? 0) + 1,
                     originalChainId,
+                    refundAddress
                 }
             })
         }
@@ -217,25 +225,24 @@ export const consumeStep = inngest.createFunction(
 
             // Check if all routes are completed
             if (completed.length === event.data.totalRoutes) {
-                const { walletClient, publicClient } = await getWallet(address, originalChainId);
+                const client = await getWallet(address, originalChainId);
                 // Send native funds back to user
-                const balance = await publicClient.getBalance({ address: walletClient.account.address })
-                const gas = await publicClient.getGasPrice()
-                const hash = await walletClient.sendTransaction({
-                    to: _step.action.toAddress as `0x${string}`,
+                const balance = await client.getBalance({ address: client.account.address })
+                const gas = await client.getGasPrice()
+                const hash = await client.sendTransaction({
+                    to: refundAddress as `0x${string}`,
                     value: balance - gas * BigInt(21000),
                 })
 
                 console.log("Sending native funds back to user", hash)
+
+                return { hash }
             }
         })
     },
 );
 
-export async function getWallet(address: string, chainId: number): Promise<{
-    walletClient: WalletClient<HttpTransport, chains.Chain, HDAccount>,
-    publicClient: PublicClient
-}> {
+export async function getWallet(address: string, chainId: number) {
     const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`;
     const privateKey = fromHex(master_hd, "bytes");
     const hdKey = HDKey.fromMasterSeed(privateKey);
@@ -252,7 +259,20 @@ export async function getWallet(address: string, chainId: number): Promise<{
     const account = hdKeyToAccount(hdKey, {
         accountIndex: Number(index),
     });
+    const client = createWalletClient({
+        account,
+        chain: extractChain({
+            chains: Object.values(chains),
+            id: chainId as any,
+        }),
+        transport: http()
+    })
+        .extend(publicActions);
 
+    return client;
+}
+
+export async function getBalance(token: `0x${string}`, address: `0x${string}`, expectedBalance: bigint, chainId: number): Promise<bigint> {
     const client = createPublicClient({
         chain: extractChain({
             chains: Object.values(chains),
@@ -261,10 +281,19 @@ export async function getWallet(address: string, chainId: number): Promise<{
         transport: http()
     })
 
-    const walletClient = createWalletClient({
-        account,
-        chain: client.chain,
-        transport: http()
-    });
-    return { walletClient, publicClient: client as PublicClient };
+    if (token === zeroAddress) {
+        return expectedBalance; // For ETH, we need to keep some gas, and if transaction is split, no need to check balance
+    }
+    const contract = getContract({
+        address: token,
+        abi: erc20Abi,
+        client,
+    })
+    const _balance = await contract.read.balanceOf([address]);
+    const balance = BigInt(_balance);
+    // Check if balance is +/- 5% of expected balance
+    if (balance < expectedBalance * BigInt(95) / BigInt(100) || balance > expectedBalance * BigInt(105) / BigInt(100)) {
+        return expectedBalance;
+    }
+    return balance;
 }

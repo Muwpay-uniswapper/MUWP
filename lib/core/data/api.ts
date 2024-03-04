@@ -5,14 +5,14 @@ class LiFiAuth implements SecurityAuthentication {
         return "LiFiAuth"
     }
     applySecurityAuthentication(context: RequestContext): void | Promise<void> {
-        if (process.env.NODE_ENV === "production") {
+        if (process.env.NODE_ENV === "production" || process.env.LIFI_API_KEY) {
             context.setHeaderParam("x-lifi-api-key", process.env.LIFI_API_KEY ?? "");
         }
     }
 }
 
 const config = createConfiguration({
-    baseServer: process.env.NODE_ENV === "production" ? server1 : server2,
+    baseServer: (process.env.NODE_ENV === "production" || process.env.LIFI_API_KEY) ? server1 : server2,
     authMethods: {
         default: new LiFiAuth()
     }

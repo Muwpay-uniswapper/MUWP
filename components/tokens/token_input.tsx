@@ -1,23 +1,24 @@
 import React from "react";
-import { Token } from "@/lib/front/model/CellLike"
-import { useSwapStore } from "@/lib/front/data/swapStore";
-import { Chain, formatUnits, parseUnits, zeroAddress } from "viem";
+import { Token } from "@/lib/core/model/CellLike"
+import { useSwapStore } from "@/lib/core/data/swapStore";
+import { formatUnits, parseUnits, zeroAddress } from "viem";
 import { Badge } from "../ui/badge";
-import { useAccount, useBalance, useNetwork } from "wagmi";
+import { useAccount, useBalance, useChains } from "wagmi";
 import { BadgeCheck, FileDigit, Wallet2Icon } from "lucide-react";
-import { publicClient } from "@/app/providers";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { cn } from "@/lib/front/utils";
+import { cn } from "@/lib/core/utils";
+import { EthereumAddress } from "@/lib/core/model/Address";
 
-export function FormatTokenAddress({ token }: { token: Token }) {
-    const { chain } = publicClient({ chainId: token.chainId })
+export function FormatTokenAddress({ address, chainId }: { address: string, chainId: number }) {
+    const chains = useChains()
+    const chain = chains.find(chain => chain.id === chainId)
 
-    if (token.address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
+    if (address === zeroAddress) return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1"><BadgeCheck className="inline w-4 h-4" /> Native Token</div>
 
-    const shortAddress = `${token.address.slice(0, 6)}...${token.address.slice(-4)}`
+    const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`
     return <div className="text-sm text-zinc-400 flex flex-row items-center gap-1">
         <FileDigit className="inline w-4 h-4" />
-        <a href={`${chain?.blockExplorers?.default.url}/address/${token.address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono">{shortAddress}</a>
+        <a href={`${chain?.blockExplorers?.default.url}/address/${address}`} target="_blank" rel="noreferrer" className="hover:underline font-mono" onClick={(e) => e.stopPropagation()}>{shortAddress}</a>
     </div>
 }
 
@@ -31,7 +32,7 @@ export function PercentageSelector({
     const [inputValue, setInputValue] = React.useState('');
     const inputRef = React.useRef<HTMLInputElement>(null);
 
-    const { inputAmount, setAmount, priceOutput } = useSwapStore()
+    const { inputAmount, setAmount } = useSwapStore()
 
     return <Tooltip onOpenChange={() => {
         setInputValue('');
@@ -111,16 +112,16 @@ export function TokenInput({
     token: Token,
     mode: "input" | "output"
 }) {
-    const { address } = useAccount()
-    const { chain } = useNetwork()
+    const { address, chain } = useAccount()
+    const { inputAmount, setAmount, priceOutput, outputChain, targetAddress } = useSwapStore()
     const { data } = useBalance({
-        address,
-        token: token.address !== zeroAddress ? token.address as `0x${string}` : undefined,
-        chainId: chain?.id
+        address: mode === "input" ? address : targetAddress,
+        token: (token.address !== zeroAddress && EthereumAddress.safeParse(token.address).success) ? token.address as `0x${string}` : undefined,
+        chainId: mode == "input" ? chain?.id : (outputChain ?? undefined)
     })
-    const { inputAmount, setAmount, priceOutput } = useSwapStore()
+
     const [inputValue, setInputValue] = React.useState('');
-    const _value = mode == "input" ? inputAmount[token.value] ?? 0n : priceOutput().amount;
+    const _value = mode == "input" ? inputAmount[token.value] ?? 0n : priceOutput(token).amount;
     const value = formatUnits(_value, token.decimals);
 
     React.useEffect(() => {
@@ -138,11 +139,11 @@ export function TokenInput({
     }
 
     // format the number when unfocusing
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const handleBlur = (_e: React.FocusEvent<HTMLInputElement>) => {
         setInputValue(value)
     }
 
-    return <div className="w-full bg-zinc-800">
+    return <div className="w-full bg-zinc-800 relative rounded-sm border">
         <div className="flex flex-wrap items-center justify-between p-4 rounded">
             <div className="flex flex-col  items-start w-full">
                 <div className="flex items-center space-x-2">
@@ -155,6 +156,7 @@ export function TokenInput({
                                 style={{
                                     aspectRatio: "32/32",
                                     objectFit: "cover",
+                                    borderRadius: "100%"
                                 }}
                                 width="32"
                             />
@@ -162,7 +164,7 @@ export function TokenInput({
                         <TooltipContent>
                             <div className="text-left p-4">
                                 <div className="text-base font-semibold">{token.label} Token</div>
-                                <FormatTokenAddress token={token} />
+                                <FormatTokenAddress address={token.address} chainId={chain?.id ?? 1} />
                             </div>
                         </TooltipContent>
                     </Tooltip>
@@ -181,7 +183,7 @@ export function TokenInput({
             </div>
             <div className="flex flex-row justify-between w-full">
                 {/* <div className="text-xl font-semibold text-blue-500 text-right">{token.label}</div> */}
-                <div className="text-sm font-normal text-gray-500 text-left">≈{formatUnits((parseUnits(token.priceUSD?.toString() ?? "", 9) * _value), 9 + token.decimals)} $</div>
+                <div className="text-sm font-normal text-gray-500 text-left">≈{parseFloat(formatUnits((parseUnits(token.priceUSD?.toString() ?? "", 9) * _value), 9 + token.decimals)).toFixed(2)} $</div>
                 {data && <div className="text-sm font-normal text-gray-500 text-right"><Wallet2Icon className="w-3 h-3 inline mr-1" />{formatUnits(data.value, token.decimals).slice(0, 10)} {token.ticker}</div>}
             </div>
         </div>

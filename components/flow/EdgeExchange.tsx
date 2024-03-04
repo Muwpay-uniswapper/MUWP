@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
-import { EdgeProps, getSmoothStepPath, EdgeLabelRenderer, useReactFlow, getBezierPath } from 'reactflow';
-import { GradientIdContext } from './provider';
+import { EdgeProps, EdgeLabelRenderer, useReactFlow, getBezierPath } from 'reactflow';
 import { UnfoldHorizontal } from 'lucide-react';
 import { ToolDetails } from '@/lib/li.fi-ts/models/ToolDetails';
 

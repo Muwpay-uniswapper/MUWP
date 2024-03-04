@@ -12,14 +12,14 @@ export function PreviewStatus({
     needsApproval
 }: {
     status: Status,
-    needsApproval: boolean
+    needsApproval: string[]
 }) {
     const loading = <Loader2 className="h-12 w-12 animate-spin absolute -left-3
                 -top-3 text-blue-500/50" />
 
     return (
         <div className="flex flex-row items-center justify-between py-4">
-            {needsApproval && <>
+            {needsApproval.length > 0 && <>
                 <div className="flex gap-1 relative">
                     {status == Status.approvals && loading}
                     <UnlockIcon />

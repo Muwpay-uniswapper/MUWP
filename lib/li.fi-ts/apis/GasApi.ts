@@ -23,7 +23,7 @@ export class GasApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async gasPricesChainIdGet(chainId: string, refresh?: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
         // verify required parameter 'chainId' is not null or undefined
         if (chainId === null || chainId === undefined) {
@@ -68,7 +68,7 @@ export class GasApiRequestFactory extends BaseAPIRequestFactory {
      * @param xLifiApiKey Authentication header, contact support if you want to get registered.
      */
     public async gasPricesGet(refresh?: string, xLifiApiKey?: string, _options?: Configuration): Promise<RequestContext> {
-        let _config = _options || this.configuration;
+        const _config = _options || this.configuration;
 
 
 

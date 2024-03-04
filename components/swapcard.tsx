@@ -3,12 +3,10 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Label } from '@/components/ui/label'
-import { cn } from '@/lib/front/utils'
+import { cn } from '@/lib/core/utils'
 import { ConnectButton } from '@/components/connectbutton'
 import { ArrowDown } from "lucide-react"
 import { TokenSelector, ChainSelector } from '@/components/dataFetch'

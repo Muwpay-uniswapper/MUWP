@@ -1,18 +1,17 @@
-import React, { memo, ReactNode } from 'react';
-import { Handle, NodeProps, Position, useEdgesState, useNodesState, useReactFlow, useUpdateNodeInternals } from 'reactflow';
-import { FiCloud } from 'react-icons/fi';
-import { FeeCost, GasCost, Step, Token } from '@/lib/li.fi-ts';
+import React, { memo } from 'react';
+import { NodeProps, useReactFlow, useUpdateNodeInternals } from 'reactflow';
+import { FeeCost, GasCost, Step } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDownToLine, Diff, DollarSign, Fuel, X } from 'lucide-react';
-import { useRouteStore } from '@/lib/front/data/routeStore';
+import { useRouteStore } from '@/lib/core/data/routeStore';
 
 export type DetailNodeData = Step & {
     edgeId: string;
 }
 
 export const format = (n?: number | string) => {
-    if (!n || typeof n == undefined) return "?";
+    if (!n || typeof n == "undefined") return "?";
     if (typeof n === "number") {
         return Math.round(n * 1000) / 1000;
     }
@@ -40,7 +39,7 @@ export default memo(({ data }: NodeProps<DetailNodeData>) => {
                     updateNodes(nodes.map((node) => node.id));
                 }} />
                 <CardTitle>Details</CardTitle>
-                <CardDescription>{data.action.fromToken.symbol} to {data.action.toToken.symbol} on {data.tool}</CardDescription>
+                <CardDescription>{data.action.fromToken.symbol} to {data.action.toToken.symbol} on {data.toolDetails.name ?? data.tool}</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-2">
                 <p><Diff className="inline w-4 h-4 mr-1" /> Slippage</p>

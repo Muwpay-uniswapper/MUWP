@@ -3,7 +3,6 @@
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -12,59 +11,103 @@ import { PreviewStatus, Status } from "./status";
 import React, { useState } from "react";
 import { SwapButton } from "../swapbutton";
 import { Approvals } from "./approvals";
-import { useRouteStore } from "@/lib/front/data/routeStore";
-import { getContract, zeroAddress } from "viem";
+import { useRouteStore } from "@/lib/core/data/routeStore";
+import { getContract, zeroAddress, erc20Abi, publicActions } from "viem";
 import { Review } from "./review";
 import { PreviewSend } from "./send";
-import { useSwapStore } from "@/lib/front/data/swapStore";
-import Link from "next/link";
-import { erc20ABI, useAccount, useNetwork, usePublicClient, useWalletClient } from "wagmi";
+import { useSwapStore } from "@/lib/core/data/swapStore";
+import { useAccount, useWalletClient } from "wagmi";
 import { MUWPChain } from "@/muwp";
 import { useRouter } from "next/navigation";
+import { WalletAccessor } from "./wallets";
 
 export type NextStep = (opt?: any) => void;
 
 export default function PreviewProcess() {
     const [status, setStatus] = useState<Status>(Status.approvals)
-    const { getRoutes, routes: _route, clear, chosenIndex } = useRouteStore();
+    const { getRoutes, routes: _route, clear, multiWallets, multiWalletDistribution, gasPayer } = useRouteStore();
     const { clearSwaps } = useSwapStore();
-    const [needsApproval, setNeedApprovals] = useState(true);
+    const [needsApproval, setNeedApprovals] = useState<string[]>([]);
     const { data: walletClient } = useWalletClient()
-    const publicClient = usePublicClient()
-    const account = useAccount()
-    const { chain } = useNetwork()
+    const { address, chain } = useAccount();
+
+    React.useEffect(() => {
+        if (address) {
+            useRouteStore.setState({ multiWallets: [address], gasPayer: address });
+        }
+    }, [address, typeof multiWallets == "undefined"]);
+
+    const _distribution = { ...multiWalletDistribution };
+
+    React.useEffect(() => {
+        const routes = getRoutes();
+        const inputTokens = routes.map(route => ({ token: route.fromToken, fromAmount: route.fromAmount }));
+        const total = inputTokens.reduce((acc, { fromAmount }) => acc + BigInt(fromAmount), 0n);
+
+        for (const { token, fromAmount } of inputTokens) {
+            // Distribute the tokens evenly. The bigint represents the token amount, not the percentage
+            const amount = BigInt(fromAmount);
+            const wallets = multiWallets ?? [address!];
+            if (!_distribution[token.address]
+                || Object.keys(_distribution[token.address]).length !== wallets.length
+                || !wallets.every(wallet => Object.keys(_distribution[token.address]).includes(wallet))
+                || total !== Object.values(_distribution[token.address]).reduce((acc, val) => acc + val, 0n)
+            ) {
+                _distribution[token.address] = {};
+                if (token.address === zeroAddress) {
+                    _distribution[token.address][gasPayer ?? address!] = amount;
+                } else {
+                    let leftToSpend = amount;
+                    wallets.forEach((wallet, index) => {
+                        if (index === wallets.length - 1) {
+                            _distribution[token.address][wallet] = leftToSpend;
+                        } else {
+                            const share = amount / BigInt(wallets.length);
+                            _distribution[token.address][wallet] = share;
+                            leftToSpend -= share;
+                        }
+                    });
+                }
+            }
+        }
+        useRouteStore.setState({ multiWalletDistribution: _distribution });
+    }, [address, multiWallets?.join(","), getRoutes()[0]?.id]);
+
     React.useEffect(() => {
         (async () => {
             const routes = getRoutes()
+            const _needsApproval: string[] = [];
             for (const route of routes) {
                 if (route.fromToken.address === zeroAddress) continue;
+                if (typeof walletClient === "undefined") continue;
+                const client = walletClient.extend(publicActions);
                 // Check allowance
                 const contract = getContract({
                     address: route.fromToken.address as `0x${string}`,
-                    abi: erc20ABI,
-                    publicClient: publicClient!,
-                    walletClient: walletClient!,
+                    abi: erc20Abi,
+                    client
                 })
 
-                let allowance = 0n
-                try {
-                    allowance = await contract.read.allowance([account.address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
-                } catch (e) {
-                    console.error(e);
-                }
+                for (const _address of multiWallets ?? [address!]) {
+                    let allowance = 0n
+                    try {
+                        allowance = await contract.read.allowance([_address!, (chain as MUWPChain).muwpContract]) // TODO: Replace with router address
+                    } catch (e) {
+                        console.error(e);
+                    }
 
-                console.log(allowance)
+                    console.log(allowance)
 
-                const amount = BigInt(route.steps[0].action.fromAmount)
+                    const amount = BigInt(route.steps[0].action.fromAmount)
 
-                if (allowance < amount) {
-                    setNeedApprovals(true);
-                    return;
+                    if (allowance < amount) {
+                        _needsApproval.push(route.fromToken.address)
+                    }
                 }
             }
-            setNeedApprovals(false);
+            setNeedApprovals(_needsApproval);
         })()
-    }, [getRoutes()[0]?.id]);
+    }, [address, chain, getRoutes, multiWallets, walletClient, getRoutes()[0]?.id, multiWallets?.join(",")]);
 
     const [isSending, setIsSending] = useState(false);
     const [hash, setHash] = useState<string | undefined>();
@@ -78,22 +121,23 @@ export default function PreviewProcess() {
     }, [status, hash])
 
     return <Dialog open={(status == Status.send || isSending) ? true : undefined}>
-        <DialogTrigger className="w-full"><SwapButton status={status} needsApproval={needsApproval} /></DialogTrigger>
+        <DialogTrigger className="w-full" asChild><SwapButton status={status} needsApproval={needsApproval.length > 0} /></DialogTrigger>
         <DialogContent canClose={status != Status.send && isSending != true}>
+            <WalletAccessor />
             <DialogHeader>
                 <DialogTitle>Trade Review</DialogTitle>
-                <PreviewStatus status={status} needsApproval={needsApproval} />
-                {status == Status.approvals && needsApproval && <Approvals nextStep={() => setStatus(Status.review)} />}
-                {(status == Status.review || (status == Status.approvals && !needsApproval)) && <Review nextStep={(send: string) => {
-                    setHash(send)
-                    setStatus(Status.send)
-                    setIsSending(false)
-                }} isSending={isSending} setIsSending={setIsSending} />}
-                {status == Status.send && hash && <PreviewSend hash={hash as `0x${string}`} setHash={setHash} nextStep={() => {
-                    clear();
-                    clearSwaps();
-                }} />}
             </DialogHeader>
+            <PreviewStatus status={status} needsApproval={needsApproval} />
+            {status == Status.approvals && needsApproval.length > 0 && <Approvals nextStep={() => setStatus(Status.review)} needsApproval={needsApproval} />}
+            {(status == Status.review || (status == Status.approvals && needsApproval.length == 0)) && <Review nextStep={(send: string) => {
+                setHash(send)
+                setStatus(Status.send)
+                setIsSending(false)
+            }} isSending={isSending} setIsSending={setIsSending} />}
+            {status == Status.send && hash && <PreviewSend hash={hash as `0x${string}`} setHash={setHash} nextStep={() => {
+                clear();
+                clearSwaps();
+            }} />}
         </DialogContent>
     </Dialog>
 }

@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import { Check, ChevronDown, Loader2 } from "lucide-react"
-import { useNetwork, useSwitchNetwork } from "wagmi"
+import { useAccount, useSwitchChain } from "wagmi"
 import { Drawer } from 'vaul';
-import { cn } from "@/lib/front/utils"
+import { cn } from "@/lib/core/utils"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -15,9 +15,10 @@ import {
     CommandList,
 } from "@/components/ui/command"
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { Chain } from "@/lib/front/model/CellLike";
-import { useSwapStore } from "@/lib/front/data/swapStore"
-import { useBreakpoint } from "@/lib/front/media-query";
+import { Chain } from "@/lib/core/model/CellLike";
+import { useSwapStore } from "@/lib/core/data/swapStore"
+import { useBreakpoint } from "@/lib/core/media-query";
+import { AddressSelector } from "./AddressSelector";
 
 export function ChainCombobox({
     index,
@@ -36,18 +37,20 @@ export function ChainCombobox({
 
     const { isAboveMd } = useBreakpoint("md")
 
-    const { chain } = useNetwork()
-    const { outputChain } = useSwapStore()
-    const { pendingChainId, isLoading, reset, switchNetwork } = useSwitchNetwork({
-        onSettled: () => {
-            reset(); // reset mutation variables (eg. pendingChainId, error
-        },
+    const { chain } = useAccount()
+    const { outputChain, targetAddress, setTargetAddress } = useSwapStore()
+    const { isPending, reset, switchChain, variables } = useSwitchChain({
+        mutation: {
+            onSettled: () => {
+                reset(); // reset mutation variables (eg. pendingChainId, error
+            },
+        }
     })
 
     const value = chainList.find(_chain =>
         mode == "input" ?
-            (isLoading
-                ? (pendingChainId == _chain.chainId)
+            (isPending
+                ? (variables?.chainId == _chain.chainId)
                 : (chain?.id == _chain.chainId))
             : outputChain == _chain.chainId
     )
@@ -64,9 +67,9 @@ export function ChainCombobox({
         )
     }
 
-    return (
+    return <>
         <Container open={open} onOpenChange={setOpen}>
-            <ContainerTrigger asChild id={`token-combo-${index}`}>
+            <ContainerTrigger asChild id={`${mode}-chain-combo-${index}`}>
                 <Button
                     variant="outline"
                     role="combobox"
@@ -78,7 +81,7 @@ export function ChainCombobox({
                 >
                     {value
                         ? <div className="flex flex-row items-center p-2 relative">
-                            {isLoading && <Loader2 className="h-10 w-10 animate-spin absolute left-1 text-blue-500" />}
+                            {isPending && <Loader2 className="h-10 w-10 animate-spin absolute left-1 text-blue-500" />}
                             <img src={value.logoURI} alt={value.label} className="mr-2 h-8 w-8 rounded-full" />
                             <div className="">{value.label}</div>
                             <ChevronDown />
@@ -90,10 +93,18 @@ export function ChainCombobox({
                 </Button>
             </ContainerTrigger>
             <ContainerContent side="right">
-                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={switchNetwork} isAboveMd={isAboveMd} />
+                <ChainListContent value={value} tokenList={chainList} setOpen={setOpen} mode={mode} switchNetwork={id => {
+                    if (typeof id === "undefined") return
+                    switchChain({ chainId: id })
+                }} isAboveMd={isAboveMd} />
             </ContainerContent>
         </Container>
-    )
+        {value && mode == "output" && <AddressSelector
+            targetAddress={targetAddress ?? ""}
+            setTargetAddress={setTargetAddress}
+            chain={value!}
+        />}
+    </>
 }
 function ChainListContent({
     value,
@@ -111,7 +122,7 @@ function ChainListContent({
     isAboveMd: boolean
 }) {
     const [search, setSearch] = React.useState("")
-    const { setOutputChain, inputTokens, removeInputToken, setOutputToken } = useSwapStore()
+    const { setOutputChain, inputTokens, removeInputToken } = useSwapStore()
 
 
     return <Command
@@ -126,8 +137,8 @@ function ChainListContent({
             <CommandEmpty>No chain found.</CommandEmpty>
             <CommandGroup>
                 {chainList
-                    .filter((chain) => chain.label.toLowerCase().includes(search.toLowerCase()) || chain === value)
-                    .map((chain) => (
+                    ?.filter((chain) => chain.label?.toLowerCase().includes(search.toLowerCase()) || chain === value)
+                    ?.map((chain) => (
                         <CommandItem
                             key={chain.value}
                             value={chain.value}
@@ -141,7 +152,6 @@ function ChainListContent({
                                     }
                                 } else {
                                     setOutputChain(chain?.chainId ?? null)
-                                    setOutputToken(null)
                                 }
 
                                 setOpen(false);
@@ -153,7 +163,7 @@ function ChainListContent({
                                     value?.value.toLowerCase?.() === chain.value.toLowerCase() ? "opacity-100" : "opacity-0"
                                 )} />
                             <img src={chain.logoURI} alt="logo" className="mr-2 h-4 w-4" />
-                            {chain.label.length > 20 ? `${chain.label.substring(0, 20)}...` : chain.label}
+                            {(chain.label?.length ?? 0) > 20 ? `${chain.label?.substring(0, 20)}...` : (chain.label ?? chain.value)}
                         </CommandItem>
                     ))}
             </CommandGroup>

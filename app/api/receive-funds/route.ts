@@ -1,14 +1,14 @@
+import { EthereumAddress } from "@/lib/core/model/Address";
 import { inngest } from "@/lib/inngest/client";
 import { z } from "zod";
+import { track } from '@vercel/analytics/server';
 
 BigInt.prototype.toJSON = function () {
     return this.toString();
 };
 
 
-const Hash = z.string().refine(value => value.startsWith('0x'), {
-    message: "Hash/Hex must start with '0x'",
-});
+const Hash = z.string().regex(/^0x[0-9a-fA-F]+$/, "Hash must be a valid hex string");
 
 
 export async function POST(request: Request) {
@@ -17,17 +17,22 @@ export async function POST(request: Request) {
         const input = z.object({
             transactionHash: Hash,
             chainId: z.number(),
-            accountAddress: Hash,
+            accountAddress: EthereumAddress,
         }).parse(body);
 
-        await inngest.send({
+        const inngestID = await inngest.send({
             name: "app/funds.transferred",
             data: {
                 transactionHash: input.transactionHash,
                 chainId: input.chainId,
                 address: input.accountAddress,
             },
-        })
+        });
+
+        await track('Swap started', {
+            ...input,
+            inngestID: inngestID.ids[0],
+        });
 
         return new Response(JSON.stringify({
             status: "success",

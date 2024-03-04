@@ -1,17 +1,7 @@
 import { inngest } from "./client";
 import { z } from "zod";
 import * as store from "@/lib/kv/store";
-import { Route } from "../li.fi-ts";
-
-const Address = z
-    .string()
-    .refine(value =>
-        /^(0x)?[0-9a-fA-F]{40}$/.test(value),
-        {
-            message: 'Invalid Ethereum address.',
-            path: [], // path is kept empty to indicate whole string should be validated
-        }
-    );
+import { EthereumAddress } from "../core/model/Address";
 
 const portfolioSchema = z.object({
     links: z.object({
@@ -33,7 +23,7 @@ export const terminateAccount = inngest.createFunction(
     { event: "app/terminate.account" },
     async ({ event, step }) => {
         const data = await z.object({
-            address: Address,
+            address: EthereumAddress,
         }).parseAsync(event.data);
 
         await step.run("verify-account-funds", async () => {

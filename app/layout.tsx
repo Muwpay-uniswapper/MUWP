@@ -1,14 +1,14 @@
 import Navbar from '@/components/layout/navbar'
 import './globals.scss'
 import { Inter } from 'next/font/google'
-import { cn } from '@/lib/front/utils'
+import { cn } from '@/lib/core/utils'
 import { Viewport, Metadata } from 'next'
 import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
 // import { VercelToolbar } from '@vercel/toolbar/next';
-import { Suspense } from "react";
 import Footer from '@/components/layout/footer'
 import NextNProgressClient from './progress'
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -40,6 +40,7 @@ export default function RootLayout({
 						<Footer />
 					</div>
 				</Providers>
+				<Analytics />
 			</body>
 		</html>
 	)

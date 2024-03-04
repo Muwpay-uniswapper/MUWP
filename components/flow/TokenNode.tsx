@@ -1,26 +1,28 @@
-import React, { memo, ReactNode, useContext, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
 } from "@/components/ui/select"
 import { Route, Token } from '@/lib/li.fi-ts';
 import { formatUnits } from "viem";
-import { ArrowDown, ChevronDown, Clock, DollarSign, Fuel } from 'lucide-react';
-import { useRouteStore } from '@/lib/front/data/routeStore';
+import { ArrowDown, Clock, DollarSign, Fuel } from 'lucide-react';
+import { useRouteStore } from '@/lib/core/data/routeStore';
 import { Badge } from '../ui/badge';
-import { cn } from '@/lib/front/utils';
+import { cn } from '@/lib/core/utils';
 import { format } from './DetailNode';
 import { ChainIcon } from 'connectkit';
 
 export type TokenNodeData = Token & {
     amounts: { [key: string]: string }
     isInput?: boolean;
+    hasMultipleOutputs: boolean;
+    isOutput?: boolean;
     isSource?: boolean;
     source?: string; // Means isTarget
+    isShifted?: boolean;
 }
 
 export default memo(({ data }: NodeProps<TokenNodeData>) => {
@@ -38,13 +40,13 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                     <ChainIcon id={data.chainId} />
                 </div>
             </div>
-            {data.isInput && <div className={cn("wrapper gradient -z-10 !absolute transform scale-90 w-full h-full opacity-75 transition-all", hover ? "-translate-y-10" : "-translate-y-4")}>
+            {((data.isInput && !data.hasMultipleOutputs) || (data.isOutput && data.hasMultipleOutputs)) && <div className={cn("wrapper gradient -z-10 !absolute transform scale-90 w-full h-full opacity-75 transition-all", hover ? "-translate-y-10" : "-translate-y-4")}>
                 <div className="inner">
                     <div className="body w-full">
-                        {data.isInput && <Select value={chosenIndex[data.address]?.toString()} onValueChange={value => {
+                        {((data.isInput && !data.hasMultipleOutputs) || (data.isOutput && data.hasMultipleOutputs)) && <Select value={chosenIndex[data.address]?.toString()} onValueChange={value => {
                             choseIndex(data.address, Number(value))
                         }}>
-                            <SelectTrigger className='border-none p-0 bg-transparent -translate-y-1/3 !focus:shadow-none' showChevron={false}>
+                            <SelectTrigger className='border-none p-0 bg-transparent -translate-y-1/3 !focus:shadow-none'>
                                 <div className="text-center w-full">
                                     Show all routes
                                 </div>
@@ -65,7 +67,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
                         <div className="icon"> <img src={data.logoURI} alt={data.symbol} className="w-4 h-4 rounded-full" /></div>
                         <div>
                             <div className="title">{data.name.length > 12 ? data.symbol : data.name}</div>
-                            <div className="subline">{(!data.isInput && !data.isSource) && "~"}{formattedAmount.slice(0, 10)}</div>
+                            <div className="subline">{((!data.isInput && !data.isSource && !data.hasMultipleOutputs) || data.isOutput) && "~"}{formattedAmount.slice(0, 10)}</div>
                         </div>
                     </div>
                     <Handle type="target" position={Position.Top} />
@@ -79,7 +81,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
 export function RouteInfo({ route, index }: { route: Route, index: number }) {
     return <div className={cn("w-full relative p-4")}>
         {
-            route.tags?.map((tag) => <Badge className="mr-1 mb-1">{tag}</Badge>)
+            route.tags?.map((tag, i) => <Badge className="mr-1 mb-1" key={i}>{tag}</Badge>)
         }
         <div className="flex flex-col items-center justify-center">
             {format(formatUnits(BigInt(route.fromAmount), route.fromToken.decimals))} {route.fromToken.symbol}

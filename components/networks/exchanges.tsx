@@ -3,7 +3,7 @@
 import { Exchange } from "@/lib/li.fi-ts";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { useSwapStore } from "@/lib/front/data/swapStore";
+import { useSwapStore } from "@/lib/core/data/swapStore";
 
 export function ExchangesList({
     data
