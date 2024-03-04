@@ -30,12 +30,20 @@ export async function FinalAptosStepBuilder({
         transport: http()
     });
 
+    const getBlock = async (): Promise<{ timestamp: bigint; number: bigint; }[]> => {
+        try {
+            return await client.getBlock().then(async block => [block, await client.getBlock({ blockHash: block.parentHash })])
+        } catch (e) {
+            return [{ timestamp: 10n, number: 1n }, { timestamp: 0n, number: 0n }]
+        }
+    }
+
     const [aptosToken, fromToken, nativeToken, aptosGas, blocks] = await Promise.all([
         getTokensAptosBridge(),
         tokenGet(fromChainId, fromTokenAddress),
         tokenGet(fromChainId, zeroAddress),
         fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json()),
-        client.getBlock().then(async block => [block, await client.getBlock({ blockHash: block.parentHash })])
+        getBlock()
     ]);
 
     const blockTime = Number(blocks[0].timestamp - blocks[1].timestamp) / Number(blocks[0].number - blocks[1].number);

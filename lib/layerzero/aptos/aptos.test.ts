@@ -2,12 +2,25 @@ import { describe, expect, it } from "bun:test";
 import { createPublicClient, encodePacked, getContract, http, zeroAddress } from 'viem'
 import { AptosChains, OmnichainAptosBridge } from "./omnichains";
 import { OmnichainAptosBridgeAbi } from "./abi";
-import { avalanche } from 'viem/chains'
+import { avalanche, polygon } from 'viem/chains'
 
 describe("Aptos", () => {
     const client = createPublicClient({
         chain: avalanche,
         transport: http()
+    })
+
+    const polygonClient = createPublicClient({
+        chain: polygon,
+        transport: http()
+    })
+
+    it("should be able to get block time", async () => {
+        const blocks = await polygonClient.getBlock().then(async block => [block, await polygonClient.getBlock({ blockHash: block.parentHash })])
+
+        const blockTime = Number(blocks[0].timestamp - blocks[1].timestamp) / Number(blocks[0].number - blocks[1].number);
+
+        expect(blockTime).toBeDefined()
     })
 
     it("should be able to get quotes", async () => {
