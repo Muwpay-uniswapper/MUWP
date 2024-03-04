@@ -111,6 +111,7 @@ export async function POST(request: Request) {
                 address: input.account,
                 routes: input.routes,
                 totalGas,
+                refundAddress: input.gasPayer,
             },
         })
 

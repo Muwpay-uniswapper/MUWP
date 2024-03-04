@@ -8,6 +8,7 @@ import { EthereumAddress } from "../core/model/Address";
 
 const Data = z.object({
     address: EthereumAddress,
+    refundAddress: EthereumAddress,
     routes: z.array(Route.zod),
     totalGas: z.coerce.bigint(),
 });
@@ -88,6 +89,7 @@ export const initiateTransfer = inngest.createFunction(
                 totalRoutes: data.routes.length,
                 id: route.id,
                 index,
+                refundAddress: data.refundAddress,
                 originalChainId: route.steps[0].action.fromChainId,
             }
         })))
