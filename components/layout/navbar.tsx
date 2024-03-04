@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useAccount } from "wagmi";
 import { useSwapStore } from "@/lib/core/data/swapStore";
 import { usePathname } from "next/navigation";
-
+// million-ignore
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isAboveMd } = useBreakpoint("md");
@@ -18,17 +18,20 @@ export default function Navbar() {
     const [homeURL, setHomeURL] = useState("/");
 
     useEffect(() => {
-        if (isAboveMd) {
+        if (isAboveMd && isMenuOpen) {
             setIsMenuOpen(false);
         }
-    }, [isAboveMd]);
+    }, [isAboveMd, isMenuOpen]);
 
     useEffect(() => {
-        const newParams = new URLSearchParams(window.location.search);
-        if (chain) newParams.set('chain', chain.id.toString());
-        if (outputChain) newParams.set('toChain', outputChain.toString());
-        setHomeURL(`/?${newParams.toString()}`);
-    }, [chain, outputChain]);
+        if (typeof window !== "undefined" && path !== "/") {
+            const newParams = new URLSearchParams(window.location.search);
+            if (chain) newParams.set('chain', chain.id.toString());
+            if (outputChain) newParams.set('toChain', outputChain.toString());
+
+            setHomeURL(`/?${newParams.toString()}`);
+        }
+    }, [chain, outputChain, path]);
 
     return (
         <div className={cn("text-white my-auto py-4 items-center relative w-full top-0 z-50 transition-all",
@@ -40,7 +43,7 @@ export default function Navbar() {
                         <p>BETA</p>
                     </Link>
                     <button className="flex flex-col justify-center items-center gap-1 w-8 h-8 md:hidden"
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        onClick={() => { setIsMenuOpen(!isMenuOpen) }}
                     >
                         <div className={`w-5 h-0.5 bg-white transition-all ${isMenuOpen ? "transform rotate-45 translate-y-[6px]" : ""}`}></div>
                         <div className={`w-5 h-0.5 bg-white transition-all ${isMenuOpen ? "opacity-0" : ""}`}></div>
