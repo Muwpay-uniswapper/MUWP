@@ -35,7 +35,7 @@ export const consumeStep = inngest.createFunction(
             remainingSteps: z.array(Step.zod),
             totalRoutes: z.number().int(),
             id: z.string().optional(),
-            index: z.number().int(),
+            index: z.number().int().optional(),
             originalChainId: z.number().int(),
         }).parseAsync(event.data);
 
@@ -47,7 +47,7 @@ export const consumeStep = inngest.createFunction(
             let _index = index;
             const client = await getWallet(address, _step.action.fromChainId);
 
-            _index = Math.max(_index, await client.getTransactionCount({ address: client.account.address }));
+            _index = Math.max(_index ?? 0, await client.getTransactionCount({ address: client.account.address }));
 
             const amount = await getBalance(_step.action.fromToken.address as `0x${string}`, address as `0x${string}`, BigInt(_step.action.fromAmount), _step.action.fromChainId);
             _step.action.fromAmount = amount.toString();
@@ -196,6 +196,7 @@ export const consumeStep = inngest.createFunction(
                     remainingSteps: _remainingSteps,
                     totalRoutes,
                     id,
+                    index: (index ?? 0) + 1,
                     originalChainId,
                 }
             })
