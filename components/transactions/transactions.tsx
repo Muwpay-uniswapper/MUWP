@@ -15,7 +15,7 @@ const fetcher = (args: string[]) => {
 export default function Transactions() {
     const { transactions } = useRouteStore();
     const { data } = useSWR(["/api/status", transactions.map((tx) => tx.id)], fetcher, {
-        refreshInterval: 5000,
+        refreshInterval: 15000,
     })
 
     const txn = useMemo(() => {

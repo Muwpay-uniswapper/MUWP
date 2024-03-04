@@ -125,7 +125,10 @@ export const consumeStep = inngest.createFunction(
             console.log("Sending transaction", transactionRequest)
 
             try {
-                const _nonce = Math.max(nonce, await client.getTransactionCount({ address: client.account.address }));
+                let _nonce: number | undefined = Math.max(nonce, await client.getTransactionCount({ address: client.account.address }));
+                if (isNaN(_nonce)) {
+                    _nonce = undefined;
+                }
                 const txData: {
                     data: `0x${string}`,
                     to: `0x${string}`,
