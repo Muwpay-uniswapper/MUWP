@@ -30,13 +30,15 @@ export async function FinalAptosStepBuilder({
         transport: http()
     });
 
-    const [aptosToken, fromToken, nativeToken, aptosGas, block10Time] = await Promise.all([
+    const [aptosToken, fromToken, nativeToken, aptosGas, blocks] = await Promise.all([
         getTokensAptosBridge(),
         tokenGet(fromChainId, fromTokenAddress),
         tokenGet(fromChainId, zeroAddress),
         fetch("https://mainnet.aptoslabs.com/v1/estimate_gas_price").then((res) => res.json()),
-        client.getBlock().then(async block => block.timestamp - await client.getBlock({ blockNumber: block.number - 10n }).then(block => block.timestamp))
+        client.getBlock().then(async block => [block, await client.getBlock({ blockHash: block.parentHash })])
     ]);
+
+    const blockTime = Number(blocks[0].timestamp - blocks[1].timestamp) / Number(blocks[0].number - blocks[1].number);
 
     console.log(`Fetching routes for ${fromToken.name} -> ${aptosToken.tokens?.find(t => t.address == target)!.name}`);
 
@@ -115,7 +117,7 @@ export async function FinalAptosStepBuilder({
 
     // Time to execute the transaction
     const confirmations = RequiredBlockConfirmationAptos[fromChainId];
-    const timePerBlock = Number(block10Time) / 10; // Unix timestamp in seconds
+    const timePerBlock = blockTime; // Unix timestamp in seconds
     const extraDelay = 10; // (mempool delay - depends on GAS)
     const executionDuration = (confirmations + 1) * timePerBlock + extraDelay;
 
