@@ -1,6 +1,7 @@
 import { advancedAPI } from "@/lib/core/data/api";
 import { InputType } from "./route";
 import { Route } from "@/lib/li.fi-ts";
+import { zeroAddress } from "viem";
 
 export async function handleLiFiRoutes(input: InputType, tempAccount: string) {
     const mode = input.outputTokens.length > 1 ? "split" : "single";
@@ -32,14 +33,21 @@ export async function handleLiFiRoutes(input: InputType, tempAccount: string) {
                 if (chainChanges.length > 1) {
                     return false;
                 }
+
                 const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
-                if (stepsAfterChainChange.length > 0) {
+
+                // Check if after changing the chain, the token is the native (gas) token on that chain
+                const isGasTokenSwap = stepsAfterChainChange.length === 1 &&
+                    stepsAfterChainChange[0].action.toToken.address == zeroAddress;
+
+                if (!isGasTokenSwap && stepsAfterChainChange.length > 0) {
                     return false;
                 }
                 return true;
             });
+
             return routes;
-        })
+        });
 
     console.log(`Fetching ${queries.length} routes`)
 
