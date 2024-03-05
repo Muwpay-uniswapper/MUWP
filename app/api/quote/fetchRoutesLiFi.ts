@@ -34,10 +34,10 @@ export async function handleLiFiRoutes(input: InputType, tempAccount: string) {
                     return false;
                 }
 
-                const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) + 1 : 0);
+                const stepsAfterChainChange = route.steps.slice(chainChanges[0] ? route.steps.indexOf(chainChanges[0]) : 0);
 
                 // Check if after changing the chain, the token is the native (gas) token on that chain
-                const isGasTokenSwap = stepsAfterChainChange.length === 1 &&
+                const isGasTokenSwap = stepsAfterChainChange.length === 2 &&
                     stepsAfterChainChange[0].action.toToken.address == zeroAddress;
 
                 if (!isGasTokenSwap && stepsAfterChainChange.length > 0) {
