@@ -36,7 +36,7 @@ export const columns: ColumnDef<Exchange>[] = [
         header: () => null,
         cell: ({ row }) => (
             <img
-                src={row.original.logoURI}
+                src={row.original?.logoURI}
                 alt={row.getValue("name")}
                 className="w-6 h-6 rounded-full"
             />

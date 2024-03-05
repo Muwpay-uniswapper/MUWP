@@ -17,7 +17,7 @@ import { Button } from '../ui/button';
 import { Token } from '@/lib/core/model/CellLike';
 
 const maps = (token: Token, i: number, validate: (newAmount: number, i: number) => void, inputValue: string, setInputValue: (str: string) => void) => <>
-    <img src={token.logoURI} alt={token.value} className="w-4 h-4 rounded-full" />
+    <img src={token?.logoURI} alt={token.value} className="w-4 h-4 rounded-full" />
     <input
         className="text-sm font-semibold bg-transparent border-none focus:ring-0 focus:outline-none text-white w-12 text-right"
         value={inputValue}
@@ -55,7 +55,7 @@ const Allocation: React.FC = () => {
             const cls = await getColors(outputTokens);
             setColors(cls);
         })();
-    }, [outputTokens.map((token) => token.logoURI).join()]);
+    }, [outputTokens.map((token) => token?.logoURI).join()]);
 
     useEffect(() => {
         const array = Array.from(Array(outputTokens.length - 1).keys()).map((_, i) => Math.round(100 / outputTokens.length * (i + 1)))

@@ -82,7 +82,7 @@ export function ChainCombobox({
                     {value
                         ? <div className="flex flex-row items-center p-2 relative">
                             {isPending && <Loader2 className="h-10 w-10 animate-spin absolute left-1 text-blue-500" />}
-                            <img src={value.logoURI} alt={value.label} className="mr-2 h-8 w-8 rounded-full" />
+                            <img src={value?.logoURI} alt={value.label} className="mr-2 h-8 w-8 rounded-full" />
                             <div className="">{value.label}</div>
                             <ChevronDown />
                         </div>
@@ -162,7 +162,7 @@ function ChainListContent({
                                     "mr-2 h-4 w-4",
                                     value?.value.toLowerCase?.() === chain.value.toLowerCase() ? "opacity-100" : "opacity-0"
                                 )} />
-                            <img src={chain.logoURI} alt="logo" className="mr-2 h-4 w-4" />
+                            <img src={chain?.logoURI} alt="logo" className="mr-2 h-4 w-4" />
                             {(chain.label?.length ?? 0) > 20 ? `${chain.label?.substring(0, 20)}...` : (chain.label ?? chain.value)}
                         </CommandItem>
                     ))}

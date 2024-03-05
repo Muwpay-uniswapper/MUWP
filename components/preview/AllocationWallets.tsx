@@ -57,7 +57,7 @@ const AllocationWallet: React.FC = () => {
     return <>
         {inputTokens.map(({ token, fromAmount }) => (<>
             <div className="flex flex-row items-center gap-3 my-4">
-                <img src={token.logoURI} className="h-6 w-6" />
+                <img src={token?.logoURI} className="h-6 w-6" />
                 {(Object.keys(distribution[token.address])?.length ?? 0) < 4 ?
                     <Slider
                         className="h-8"
@@ -90,7 +90,7 @@ const AllocationWallet: React.FC = () => {
                         </DialogTrigger>
                         <DialogContent className='max-w-3xl'>
                             <DialogHeader>
-                                <DialogTitle><img src={token.logoURI} className="h-6 w-6 inline" /> Allocation</DialogTitle>
+                                <DialogTitle><img src={token?.logoURI} className="h-6 w-6 inline" /> Allocation</DialogTitle>
                                 <DialogDescription>
                                     Adjust the allocation of {token.symbol} to different wallets
                                 </DialogDescription>

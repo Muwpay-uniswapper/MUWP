@@ -53,8 +53,8 @@ function closestColor(rgb: RGB, hexColors: string[]): string {
 export async function getColors(outputTokens: Token[]) {
     const _colors: { [key: string]: string } = {};
     for (const token of outputTokens) {
-        if (token.logoURI) {
-            const file = await fetch(token.logoURI).then((res) => res.arrayBuffer())
+        if (token?.logoURI) {
+            const file = await fetch(token?.logoURI).then((res) => res.arrayBuffer())
             const shrp = sharp(file)
             const dom = (await shrp.stats()).dominant
             const stats = (dom.r <= 8 && dom.b <= 8 && dom.g <= 8) ? await shrp

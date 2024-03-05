@@ -152,7 +152,7 @@ export function TokenInput({
                             <img
                                 alt="Token Symbol"
                                 height="32"
-                                src={token.logoURI}
+                                src={token?.logoURI}
                                 style={{
                                     aspectRatio: "32/32",
                                     objectFit: "cover",

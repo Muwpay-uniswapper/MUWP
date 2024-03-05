@@ -34,7 +34,7 @@ export function BridgesList({
                         {allowDenyBridges.deny?.includes(bridge.key ?? "")
                             ? <X className="absolute -top-2 -right-2 w-5 h-5 p-1 bg-red-400 rounded-full" />
                             : <Check className="absolute -top-2 -right-2 w-5 h-5 p-1 bg-green-400 rounded-full" />}
-                        <img src={bridge.logoURI} alt={bridge.name} className={cn(
+                        <img src={bridge?.logoURI} alt={bridge.name} className={cn(
                             "w-8 h-8 rounded-full",
                             allowDenyBridges.deny?.includes(bridge.key ?? "") ? "filter grayscale opacity-50" : ""
                         )} />

@@ -103,7 +103,7 @@ export const columns: ColumnDef<Transaction>[] = [
             return <div className="flex flex-row gap-1">
                 {Array.from(inputs).map((route) => <Tooltip key={route.address}>
                     <TooltipTrigger>
-                        <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
+                        <img src={route?.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
                         {formatUnits(BigInt(
@@ -124,7 +124,7 @@ export const columns: ColumnDef<Transaction>[] = [
             return <div className="flex flex-row gap-1">
                 {Array.from(outputs).map((route) => <Tooltip key={route.address}>
                     <TooltipTrigger>
-                        <img src={route.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
+                        <img src={route?.logoURI} alt={route.symbol} className="w-4 h-4 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
                         {formatUnits(BigInt(

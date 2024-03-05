@@ -180,7 +180,7 @@ export function Review({
             <div className="flex flex-col gap-2">
                 {!hasMultipleOutputs ? routes.map((route) => <Tooltip key={route.id}>
                     <TooltipTrigger>
-                        <img src={route.fromToken.logoURI} alt={route.fromToken.symbol} className="w-6 h-6 rounded-full" />
+                        <img src={route.fromToken?.logoURI} alt={route.fromToken.symbol} className="w-6 h-6 rounded-full" />
                     </TooltipTrigger>
                     <TooltipContent>
                         {formatUnits(BigInt(route.fromAmount), route.fromToken.decimals)} {route.fromToken.symbol}
@@ -188,7 +188,7 @@ export function Review({
                 </Tooltip>)
                     : <Tooltip>
                         <TooltipTrigger>
-                            <img src={routes[0]?.fromToken.logoURI} alt={routes[0]?.fromToken.symbol} className="w-6 h-6 rounded-full" />
+                            <img src={routes[0]?.fromToken?.logoURI} alt={routes[0]?.fromToken.symbol} className="w-6 h-6 rounded-full" />
                         </TooltipTrigger>
                         <TooltipContent>
                             {formatUnits(sum, routes[0]?.fromToken.decimals)} {routes[0]?.fromToken.symbol}

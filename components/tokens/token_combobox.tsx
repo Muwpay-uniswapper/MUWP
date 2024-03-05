@@ -181,7 +181,7 @@ function TokenListContent({
                                     "mr-2 h-4 w-4",
                                     value?.value.toLowerCase?.() === token.value.toLowerCase() ? "opacity-100" : "opacity-0"
                                 )} />
-                            <img src={token.logoURI} alt="logo" className="mr-2 h-4 w-4" />
+                            <img src={token?.logoURI} alt="logo" className="mr-2 h-4 w-4" />
                             {(token.label?.length ?? 0) > 20 ? `${token.label?.substring(0, 20)}...` : (token.label ?? token.value)}
                             {(token.verified || token.address == zeroAddress) && <BadgeCheck className="inline scale-75 opacity-50 ml-1" />}
                             {value?.value.toLowerCase?.() === token.value.toLowerCase() && <span className="text-red-500 absolute right-2 cursor-pointer">Remove token</span>}

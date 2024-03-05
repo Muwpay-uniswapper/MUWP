@@ -64,7 +64,7 @@ export default memo(({ data }: NodeProps<TokenNodeData>) => {
             <div className="wrapper gradient w-full">
                 <div className="inner">
                     <div className="body">
-                        <div className="icon"> <img src={data.logoURI} alt={data.symbol} className="w-4 h-4 rounded-full" /></div>
+                        <div className="icon"> <img src={data?.logoURI} alt={data.symbol} className="w-4 h-4 rounded-full" /></div>
                         <div>
                             <div className="title">{data.name.length > 12 ? data.symbol : data.name}</div>
                             <div className="subline">{((!data.isInput && !data.isSource && !data.hasMultipleOutputs) || data.isOutput) && "~"}{formattedAmount.slice(0, 10)}</div>

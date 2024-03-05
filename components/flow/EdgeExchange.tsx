@@ -57,7 +57,7 @@ const EdgeExchange: FC<EdgeProps> = ({
                     className="nodrag nopan react-flow__controls cursor-pointer"
                     onClick={focus}
                 >
-                    <img src={(data.toolDetails as ToolDetails).logoURI} className='inline w-4 h-4 mr-1' />
+                    <img src={(data.toolDetails as ToolDetails)?.logoURI} className='inline w-4 h-4 mr-1' />
                     {data.toolDetails.name}{getNode(source)?.data.chainId !== getNode(target)?.data.chainId && <UnfoldHorizontal className='inline ml-1' />}
                 </div>
             </EdgeLabelRenderer>
