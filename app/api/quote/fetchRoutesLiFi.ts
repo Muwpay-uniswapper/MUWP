@@ -40,7 +40,7 @@ export async function handleLiFiRoutes(input: InputType, tempAccount: string) {
                 const isGasTokenSwap = stepsAfterChainChange.length === 2 &&
                     stepsAfterChainChange[0].action.toToken.address == zeroAddress;
 
-                if (!isGasTokenSwap && stepsAfterChainChange.length > 0) {
+                if (!isGasTokenSwap && stepsAfterChainChange.length > 1) {
                     return false;
                 }
                 return true;
