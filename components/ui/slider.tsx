@@ -10,7 +10,7 @@ function _Slider<T>(
     thumbs?: number;
     colors?: string[];
     objects?: T[];
-    maps?: (arg0: T, i: number, validate: (newAmount: number, i: number) => void, inputValue: string, setInputValue: (str: string) => void) => React.ReactNode;
+    maps?: (arg0: T, i: number, validate?: (newAmount: number, i: number) => void, inputValue?: string, setInputValue?: (str: string) => void) => React.ReactNode;
   },
   ref: React.Ref<React.ElementRef<typeof SliderPrimitive.Root>>,
 ) {
@@ -18,7 +18,14 @@ function _Slider<T>(
   const [inputValue, setInputValue] = React.useState("0");
 
   if (thumbs < 1) {
-    return <div className="text-black text-center rounded w-full pt-1 bg-primary">100%</div>
+    return <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="text-black text-center rounded w-full pt-1 bg-primary">100%</div>
+      </TooltipTrigger>
+      <TooltipContent>
+        {props.objects && props.maps?.(props.objects[0], 0)}
+      </TooltipContent>
+    </Tooltip>
   }
 
   const validate = (newAmount: number, i: number) => {

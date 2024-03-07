@@ -39,7 +39,7 @@ export default function PreviewProcess() {
 
     const _distribution = { ...multiWalletDistribution };
 
-    React.useEffect(() => {
+    const fixDistribution = () => {
         const routes = getRoutes();
         const inputTokens = routes.map(route => ({ token: route.fromToken, fromAmount: route.fromAmount }));
         const total = inputTokens.reduce((acc, { fromAmount }) => acc + BigInt(fromAmount), 0n);
@@ -71,7 +71,11 @@ export default function PreviewProcess() {
             }
         }
         useRouteStore.setState({ multiWalletDistribution: _distribution });
-    }, [address, multiWallets?.join(","), getRoutes()[0]?.id]);
+
+        console.log(_distribution, multiWallets);
+    }
+
+    React.useEffect(fixDistribution, [address, multiWallets?.join(","), getRoutes()[0]?.id]);
 
     React.useEffect(() => {
         (async () => {
