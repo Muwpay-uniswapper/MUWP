@@ -34,6 +34,8 @@ export async function generateAccount(input: InputType) {
 
         await store.set(account.address, JSON.stringify({
             index,
+            from: input.fromAddress,
+            to: input.toAddress
         }));
 
         console.log("Account stored successfully");

@@ -1,5 +1,6 @@
 import { Transaction, useRouteStore } from "@/lib/core/data/routeStore"
 import { Row } from "@tanstack/react-table"
+import { signMessage } from "wagmi/actions"
 import { useState } from "react"
 import {
     AlertDialog,
@@ -13,11 +14,14 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CopyIcon, MoreHorizontal, TrashIcon } from "lucide-react";
+import { useAccount, useConfig } from "wagmi"
 
 
 export default function TxActions({ row }: { row: Row<Transaction> }) {
     const [pk, setPk] = useState<string | null>(null)
+    const config = useConfig();
     const { deleteTransaction } = useRouteStore();
+    const { address } = useAccount();
 
     return <>
         <DropdownMenu>
@@ -30,9 +34,17 @@ export default function TxActions({ row }: { row: Row<Transaction> }) {
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem onClick={async () => {
+                    const msg = await signMessage(config, {
+                        message: row.original.id,
+                    });
+
                     const pk = await fetch(`/api/recover-funds`, {
                         method: "POST",
-                        body: row.getValue("id")
+                        body: JSON.stringify({
+                            id: row.original.id,
+                            signature: msg,
+                            address,
+                        })
                     }).then((res) => res.text())
                     setPk(pk)
                 }}>
