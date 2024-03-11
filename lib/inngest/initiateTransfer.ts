@@ -4,6 +4,7 @@ import { Route } from "../li.fi-ts";
 import { createPublicClient, extractChain, http } from "viem";
 import * as chains from 'viem/chains'
 import { EthereumAddress } from "../core/model/Address";
+import { track } from "@vercel/analytics/server";
 
 
 const Data = z.object({
@@ -19,7 +20,7 @@ export const initiateTransfer = inngest.createFunction(
         retries: 10
     },
     { event: "app/transfer.initiate" },
-    async ({ event, step }) => {
+    async ({ event, step, runId }) => {
         // const accountData = await z.object({
         //     address: EthereumAddress,
         // }).parseAsync(event.data);
@@ -73,10 +74,24 @@ export const initiateTransfer = inngest.createFunction(
 
             const transaction = await client.getTransactionReceipt({
                 hash: input.transactionHash as `0x${string}`,
-            })
+            });
 
             if (!transaction || transaction.status !== "success") {
                 throw new Error("Transaction not found")
+            }
+            try {
+                // Calculate volume in USD
+                const volume = data.routes.reduce((acc, route) => {
+                    return acc + Number(route.fromAmountUSD);
+                }, 0);
+
+                await track('Swap started', {
+                    ...input,
+                    inngestID: runId,
+                    volume,
+                });
+            } catch (e) {
+                console.error(e);
             }
         })
 

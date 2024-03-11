@@ -1,7 +1,6 @@
 import { EthereumAddress } from "@/lib/core/model/Address";
 import { inngest } from "@/lib/inngest/client";
 import { z } from "zod";
-import { track } from '@vercel/analytics/server';
 
 BigInt.prototype.toJSON = function () {
     return this.toString();
@@ -20,18 +19,13 @@ export async function POST(request: Request) {
             accountAddress: EthereumAddress,
         }).parse(body);
 
-        const inngestID = await inngest.send({
+        await inngest.send({
             name: "app/funds.transferred",
             data: {
                 transactionHash: input.transactionHash,
                 chainId: input.chainId,
                 address: input.accountAddress,
             },
-        });
-
-        await track('Swap started', {
-            ...input,
-            inngestID: inngestID.ids[0],
         });
 
         return new Response(JSON.stringify({
