@@ -112,16 +112,16 @@ export async function getTokensAptosBridge(): Promise<TokensGet200Response> {
                 priceUSD: await api.tokenGet("1", "WETH").then(res => res.priceUSD).catch(() => undefined),
                 chainId: AptosChainId
             },
-            {
-                name: "USDC (LayerZero testnet)",
-                symbol: "zgUSDC",
-                coinKey: "zgusdc:aptos:layerzero",
-                logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/aptos/assets/0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa%3A%3Aasset%3A%3AUSDC/logo.png",
-                address: AptosTokensAddress.usdc_test,
-                decimals: 6,
-                priceUSD: "1",
-                chainId: AptosChainId
-            }
+            // {
+            //     name: "USDC (LayerZero testnet)",
+            //     symbol: "zgUSDC",
+            //     coinKey: "zgusdc:aptos:layerzero",
+            //     logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/aptos/assets/0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa%3A%3Aasset%3A%3AUSDC/logo.png",
+            //     address: AptosTokensAddress.usdc_test,
+            //     decimals: 6,
+            //     priceUSD: "1",
+            //     chainId: AptosChainId
+            // }
         ]
     }
 }

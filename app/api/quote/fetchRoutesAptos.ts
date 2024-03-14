@@ -61,7 +61,7 @@ export async function handleAptosRoutes(input: InputType, tempAccount: string) {
 
             const { routes } = await handleLiFiRoutes(lifiInput, tempAccount);
 
-            previousRoutes.push(...routes[req.fromTokenAddress]);
+            previousRoutes.push(routes[req.fromTokenAddress][0]);
 
             target = possibilities?.[outputTokenAddress];
         }
