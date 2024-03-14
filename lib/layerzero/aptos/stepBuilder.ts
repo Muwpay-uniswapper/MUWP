@@ -109,7 +109,20 @@ export async function FinalAptosStepBuilder({
                 account: fromAddress as `0x${string}`
             });
         } catch (e) {
-            _rawGasEstimate = 2841674n; // Will fail later
+            const weth = await contract.read.weth();
+
+            _rawGasEstimate = await contract.estimateGas.sendETHToAptos([
+                toAddress as `0x${string}`,
+                parseEther("1"),
+                {
+                    refundAddress: fromAddress as `0x${string}`,
+                    zroPaymentAddress: zeroAddress,
+                },
+                adapterParams
+            ], {
+                account: weth,
+                value: parseEther("1") + nativeFee
+            }) * 15n / 10n; // 1.5x gas estimate
         }
     }
     const gasPrice = await client.getGasPrice();
