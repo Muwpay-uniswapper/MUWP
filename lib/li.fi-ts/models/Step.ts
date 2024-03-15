@@ -163,6 +163,6 @@ export namespace StepTypeEnum {
             StepTypeEnum.Swap,
             StepTypeEnum.Cross,
             StepTypeEnum.Lifi
-        ]);
+        ]).or(z.string()) as z.ZodSchema<StepTypeEnum> // Just in case the server returns an unknown value
     }
 }
