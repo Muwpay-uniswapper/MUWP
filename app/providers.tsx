@@ -37,6 +37,8 @@ const config = createConfig(
         appDescription: "MUWPay is a decentralized finance (DeFi) platform that aims to provide a seamless and secure way to transfer assets across different blockchains.",
         appUrl: "https://muwp.xyz", // your app's url
         appIcon: "https://muwp.xyz/muwpayLogoIcon.svg",
+
+        ssr: true,
     }),
 );
 
