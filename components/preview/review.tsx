@@ -1,7 +1,7 @@
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { ArrowLeftRight, DollarSign, Fuel, Info, Layers2, Loader2, PercentCircle, Receipt } from "lucide-react";
 import React from "react";
-import { PrepareTransactionRequestReturnType, formatUnits } from "viem";
+import { BaseError, PrepareTransactionRequestReturnType, formatUnits } from "viem";
 import { Button } from "../ui/button";
 import { NextStep } from "./process";
 import { format } from "../flow/DetailNode";
@@ -85,13 +85,16 @@ export function Review({
                     resolve(data);
                     return `Transaction data loaded`;
                 },
-                error: (e) => {
-                    reject(e);
+                error: (error) => {
+                    reject(error);
                     setIsSending(false);
-                    return <>
-                        <b>Could not load transaction data</b>
-                        {e instanceof Error && e.message.split("\n")[0]}
-                    </>
+                    if (error instanceof BaseError) {
+                        return error.shortMessage;
+                    }
+                    if (error instanceof Error) {
+                        return `Error: ${error.message}`
+                    }
+                    return "Error"
                 }
             });
         })
@@ -121,13 +124,16 @@ export function Review({
                         resolve(data);
                         return `Transaction sent`;
                     },
-                    error: (e) => {
-                        reject(e);
+                    error: (error) => {
+                        reject(error);
                         setIsSending(false);
-                        return <>
-                            <b>Could not send transaction... trying again</b>
-                            {e instanceof Error && e.message}
-                        </>
+                        if (error instanceof BaseError) {
+                            return error.shortMessage;
+                        }
+                        if (error instanceof Error) {
+                            return `Error: ${error.message}`
+                        }
+                        return "Error"
                     }
                 });
             })

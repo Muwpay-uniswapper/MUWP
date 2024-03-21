@@ -4,7 +4,7 @@ import { useAccount, useConnections, useSwitchAccount, useWalletClient } from "w
 import { useRouteStore } from "@/lib/core/data/routeStore";
 import { Loader2, Unlock } from "lucide-react";
 import React, { useState } from "react";
-import { erc20Abi, formatUnits, getContract, publicActions, zeroAddress } from "viem";
+import { BaseError, erc20Abi, formatUnits, getContract, publicActions, zeroAddress } from "viem";
 import { toast } from "sonner";
 import { MUWPChain } from "@/muwp";
 import { Button } from "../ui/button";
@@ -91,13 +91,16 @@ export function Approvals({
                     }
                     return `Approvals successful`;
                 },
-                error: (e) => {
+                error: (error) => {
                     setWaiting(-1);
-                    reject(e);
-                    return <>
-                        <b>Could not approve tokens</b>
-                        {e instanceof Error && e.message}
-                    </>
+                    reject(error);
+                    if (error instanceof BaseError) {
+                        return error.shortMessage;
+                    }
+                    if (error instanceof Error) {
+                        return `Error: ${error.message}`
+                    }
+                    return "Error"
                 },
             });
         })
