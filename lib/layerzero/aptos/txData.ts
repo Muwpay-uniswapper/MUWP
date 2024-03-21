@@ -11,7 +11,7 @@ export async function AptosBridgeTxData(step: Step): Promise<Step> {
     const client = createPublicClient({
         chain: extractChain({
             chains: muwpChains,
-            id: step.action.fromChainId
+            id: step.action.fromChainId as any
         }),
         transport: http()
     })

@@ -39,6 +39,11 @@ export async function TokenSelector({
             chainId: chain!,
             verified: safeTokens.tokens.find((safeToken) => safeToken.address == token.address && safeToken.chainId == token.chainId) != undefined
         }
+    }).filter((token) => {
+        if (chain === 1151111081099710) {
+            return token.address == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" // Solana USDC
+        }
+        return true
     }) : []
 
     return <TokenComboboxes tokenList={tokenList} mode={mode} />

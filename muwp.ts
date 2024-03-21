@@ -25,7 +25,7 @@ export interface MUWPChain extends Chain {
     muwpContract: `0x${string}`;
 }
 
-export const muwpChains: MUWPChain[] = [
+export const muwpChains = [
     { ...mainnet, muwpContract: "0x447cEeC7e6bBa8f357C145d64854D7708ec92cBd" },
     { ...arbitrum, muwpContract: "0x5367E923548194E663A2CF431bA2C0224a753499" },
     { ...optimism, muwpContract: "0xA298f3265CeDFFf333f0fa939C64a292dd948993" },
@@ -47,4 +47,4 @@ export const muwpChains: MUWPChain[] = [
     ...(process.env.NODE_ENV !== 'production' ? [
         { ...goerli, muwpContract: "0x52249522A8b9D97E1DEcB257319EB94151e91618" as `0x${string}` },
     ] : []),
-]
+] as const;

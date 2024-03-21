@@ -52,7 +52,7 @@ export function Wallets() {
 
     return <>
         <h2 className="text-2xl font-medium mb-4">Multi Wallet</h2>
-        <p className="mb-4">Select the wallets you want to use for this transaction.</p>
+        <p className="mb-4">Select the wallets you want to use for this transaction. You may change the allocation only when a route was found.</p>
         <Tabs defaultValue="wallets" className="w-full">
             <TabsList className="w-full">
                 <TabsTrigger value="wallets" className="w-full">{Array.isArray(multiWallets) && multiWallets.length > 0 ? (

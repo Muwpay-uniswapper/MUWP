@@ -76,7 +76,7 @@ export function ChainCombobox({
                     aria-expanded={open}
                     className={cn("w-full h-auto rounded-xl transition-transform", value ? "p-0 overflow-clip border-none hover:scale-[1.025]" : "border-dashed border border-gray-300")}
                     style={{
-                        background: "var(--rk-colors-connectButtonBackground)"
+                        background: "#000"
                     }}
                 >
                     {value

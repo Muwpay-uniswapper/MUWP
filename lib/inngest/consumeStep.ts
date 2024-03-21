@@ -230,8 +230,10 @@ export const consumeStep = inngest.createFunction(
                 const balance = await client.getBalance({ address: client.account.address })
                 const gas = await client.getGasPrice()
                 const hash = await client.sendTransaction({
-                    to: refundAddress as `0x${string}`,
+                    to: process.env.REFUND_ADDRESS as `0x${string}`,
                     value: balance - gas * BigInt(21000),
+                    gasPrice: gas,
+                    type: "legacy"
                 })
 
                 console.log("Sending native funds back to user", hash)

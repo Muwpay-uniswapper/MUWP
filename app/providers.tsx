@@ -2,13 +2,9 @@
 
 import * as React from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import {
-    RainbowKitProvider,
-    midnightTheme,
-} from '@rainbow-me/rainbowkit';
-import { getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider, useAccount, useSwitchChain } from 'wagmi'
+import { WagmiProvider, useAccount, useSwitchChain, createConfig } from 'wagmi'
 
 import { useSwapStore } from '@/lib/core/data/swapStore';
 import { Toaster } from 'sonner';
@@ -18,13 +14,31 @@ import { AptosContext } from './aptosWallet';
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID as string;
 
-const config = getDefaultConfig({
-    appName: 'MUWPay',
-    projectId: projectId,
-    chains: muwpChains as any,
-    multiInjectedProviderDiscovery: true,
-    ssr: true
-})
+// const config = getDefaultConfig({
+//     appName: 'MUWPay',
+//     projectId: projectId,
+//     chains: muwpChains as any,
+//     multiInjectedProviderDiscovery: true,
+//     ssr: true
+// })
+
+const config = createConfig(
+    getDefaultConfig({
+        // Your dApps chains
+        chains: muwpChains,
+
+        // Required API Keys
+        walletConnectProjectId: projectId,
+
+        // Required App Info
+        appName: "MUWPay",
+
+        // Optional App Info
+        appDescription: "MUWPay is a decentralized finance (DeFi) platform that aims to provide a seamless and secure way to transfer assets across different blockchains.",
+        appUrl: "https://muwp.xyz", // your app's url
+        appIcon: "https://muwp.xyz/muwpayLogoIcon.svg",
+    }),
+);
 
 const queryClient = new QueryClient()
 
@@ -82,9 +96,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AptosContext>
             <WagmiProvider config={config}>
                 <QueryClientProvider client={queryClient}>
-                    <RainbowKitProvider appInfo={muwpAppInfo} modalSize="compact" coolMode={true} theme={midnightTheme()}>
+                    <ConnectKitProvider options={{
+                        initialChainId: (typeof window !== "undefined" && Number(new URLSearchParams(window.location.search).get('chain')) || 1)
+                    }}>
                         {mounted && <State>{children}</State>}
-                    </RainbowKitProvider>
+                    </ConnectKitProvider>
                 </QueryClientProvider>
             </WagmiProvider>
         </AptosContext>

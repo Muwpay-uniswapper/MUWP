@@ -25,7 +25,7 @@ export async function FinalAptosStepBuilder({
     const client = createPublicClient({
         chain: extractChain({
             chains: muwpChains,
-            id: fromChainId
+            id: fromChainId as any
         }),
         transport: http()
     });

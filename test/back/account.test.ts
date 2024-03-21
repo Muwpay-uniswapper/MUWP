@@ -1,5 +1,4 @@
-import { HDKey, hdKeyToAccount, generatePrivateKey } from 'viem/accounts'
-import { secp256k1 } from '@noble/curves/secp256k1'
+import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import { fromHex } from "viem";
 import { describe, it, expect } from "bun:test";
 

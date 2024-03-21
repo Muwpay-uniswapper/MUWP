@@ -164,7 +164,7 @@ export function TokenInput({
                         <TooltipContent>
                             <div className="text-left p-4">
                                 <div className="text-base font-semibold">{token.label} Token</div>
-                                <FormatTokenAddress address={token.address} chainId={chain?.id ?? 1} />
+                                <FormatTokenAddress address={token.address} chainId={mode == "input" ? (chain?.id ?? 1) : (outputChain ?? 1)} />
                             </div>
                         </TooltipContent>
                     </Tooltip>

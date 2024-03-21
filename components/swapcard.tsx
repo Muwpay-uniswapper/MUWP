@@ -1,3 +1,4 @@
+
 import { Suspense } from "react";
 import {
     Card,
@@ -8,11 +9,14 @@ import {
 } from "@/components/ui/card"
 import { cn } from '@/lib/core/utils'
 import { ConnectButton } from '@/components/connectbutton'
-import { ArrowDown } from "lucide-react"
+import { ArrowDown, Wallet } from "lucide-react"
 import { TokenSelector, ChainSelector } from '@/components/dataFetch'
 import { Separator } from "./ui/separator"
 import Loader from "../app/loading";
 import { FindRoutesButton } from "./layout/FindRoutesButton";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Wallets } from "./preview/wallets";
 
 export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string }) {
     return <Card className={cn('md:w-4/12 relative mx-4')}>
@@ -28,7 +32,17 @@ export function SwapCard({ chain, toChain }: { chain?: string, toChain?: string 
                 </Suspense>
                 <ConnectButton />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-2 w-full mt-8">
+            <Suspense fallback={<Loader />}>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button className="w-full bg-black mt-2" variant="secondary"><Wallet className="w-4 h-4 mr-1" /> Multi-Wallets</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <Wallets />
+                    </DialogContent>
+                </Dialog>
+            </Suspense>
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-2 w-full mt-2">
                 <Suspense fallback={<Loader />}>
                     <TokenSelector id='from-token' chain={chain ? parseInt(chain) : undefined} mode="input" />
                 </Suspense>

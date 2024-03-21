@@ -3,7 +3,6 @@ import './globals.scss'
 import { Inter } from 'next/font/google'
 import { cn } from '@/lib/core/utils'
 import { Viewport, Metadata } from 'next'
-import '@rainbow-me/rainbowkit/styles.css';
 import { Providers } from './providers';
 // import { VercelToolbar } from '@vercel/toolbar/next';
 import Footer from '@/components/layout/footer'
