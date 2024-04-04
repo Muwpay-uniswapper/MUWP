@@ -127,7 +127,7 @@ export function Review({
                     error: (error) => {
                         reject(error);
                         setIsSending(false);
-                        if (error instanceof BaseError) {
+                        if (typeof error.shortMessage !== "undefined") {
                             return error.shortMessage;
                         }
                         if (error instanceof Error) {
