@@ -118,7 +118,7 @@ export function Approvals({
                 {isWaiting == 0 && <Loader2 className="h-6 w-6 animate-spin mx-2" />}
                 Unlock {toApprove[index].token.symbol}
             </Button>
-            <Button className="w-full" onClick={() => approve(true)} disabled={isWaiting != -1}>
+            <Button className="w-full" onClick={() => approve(true)} disabled={true}>
                 {isWaiting == 1 && <Loader2 className="h-6 w-6 animate-spin mx-2" />}
                 Unlock {toApprove[index].token.symbol} Permanently
             </Button>
