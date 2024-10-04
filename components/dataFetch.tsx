@@ -6,7 +6,7 @@ import { ChainCombobox } from "@/components/chains/chain-selector";
 import api from "@/lib/core/data/api"
 import { muwpChains } from "@/muwp";
 import { TokenList } from '@uniswap/token-lists'
-import { AptosChainId } from "@/lib/layerzero/aptos/omnichains";
+import { AptosChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
 import { tokensGet } from "@/lib/core/data/tokenLib";
 
 export async function TokenSelector({
@@ -82,6 +82,13 @@ export async function ChainSelector({
             logoURI: "https://aptosfoundation.org/brandbook/logomark/SVG/Aptos_mark_WHT.svg",
             chainId: AptosChainId,
             type: "Aptos"
+        })
+        chainList.push({
+            value: `stellar:${StellarChainId}`, // 12360001 is the arbitrary chainId for Aptos by cBridge
+            label: "Stellar",
+            logoURI: "/icons/stellar.svg",
+            chainId: StellarChainId,
+            type: "Stellar"
         })
     }
 
