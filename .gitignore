@@ -222,3 +222,10 @@ n
 /blob-report/
 /playwright/.cache/
 deriveKey.ts
+
+# sst
+.sst
+
+
+# open-next
+.open-next

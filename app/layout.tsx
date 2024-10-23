@@ -28,8 +28,8 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={cn(inter.className)}>
-				<NextNProgressClient />
 				<Providers>
+					<NextNProgressClient />
 					<div className="bg-home-gradient font-poppins min-h-100vh bg-50 bg-cover bg-no-repeat">
 						<Navbar />
 						{children}

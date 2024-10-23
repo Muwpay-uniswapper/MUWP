@@ -41,7 +41,7 @@
     "next.config.js"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules","sst.config.ts"
   ],
   "ts-node": {
     // Do not forget to `npm i -D tsconfig-paths`
