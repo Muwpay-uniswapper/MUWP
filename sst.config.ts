@@ -54,16 +54,16 @@ export default $config({
 
     // Create the Vultr Kubernetes cluster
     const k8sCluster = new vultr.Kubernetes("k8sCluster", {
-      label: "vke-test",
+      label: $app.stage === "production" ? "vke-prod" : "vke-test",
       nodePools: {
         autoScaler: true,
         label: "vke-nodepool",
-        maxNodes: 2,
+        maxNodes: $app.stage === "production" ? 3 : 1,
         minNodes: 1,
         nodeQuantity: 1,
         plan: "vc2-1c-2gb",
       },
-      region: "fra",
+      region: "cdg",
       version: "v1.31.0+1",
     });
 
@@ -168,6 +168,66 @@ export default $config({
       { provider },
     );
 
+    // Deploy Kubernetes Dashboard
+    const dashboardNamespace = new kubernetes.core.v1.Namespace("kubernetes-dashboard", {
+      metadata: {
+        name: "kubernetes-dashboard"
+      }
+    }, { provider });
+
+    // Create Dashboard deployment using the official image
+    const dashboardDeployment = new kubernetes.yaml.ConfigFile("kubernetes-dashboard", {
+      file: "https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml"
+    }, { provider });
+
+    // Create admin user for dashboard access
+    const adminUser = new kubernetes.core.v1.ServiceAccount("admin-user", {
+      metadata: {
+        name: "admin-user",
+        namespace: "kubernetes-dashboard"
+      }
+    }, { provider, dependsOn: dashboardNamespace });
+
+    // Create cluster role binding for the admin user
+    const adminBinding = new kubernetes.rbac.v1.ClusterRoleBinding("admin-user", {
+      metadata: {
+        name: "admin-user"
+      },
+      roleRef: {
+        apiGroup: "rbac.authorization.k8s.io",
+        kind: "ClusterRole",
+        name: "cluster-admin"
+      },
+      subjects: [{
+        kind: "ServiceAccount",
+        name: "admin-user",
+        namespace: "kubernetes-dashboard"
+      }]
+    }, { provider, dependsOn: adminUser });
+
+    // Generate bearer token for dashboard access
+    adminUser.metadata.name.apply(async (name) => {
+      const token = new kubernetes.core.v1.Secret("admin-user-token", {
+        metadata: {
+          name: "admin-user-token",
+          namespace: "kubernetes-dashboard",
+          annotations: {
+            "kubernetes.io/service-account.name": name
+          }
+        },
+        type: "kubernetes.io/service-account-token"
+      }, { provider });
+
+      // Output the commands to access dashboard
+      token.metadata.name.apply((tokenName) => {
+        console.log("\n=== Kubernetes Dashboard Access Instructions ===");
+        console.log("1. Run: kubectl proxy");
+        console.log("2. Access dashboard at: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/");
+        console.log("3. Get token by running:");
+        console.log(`   kubectl -n kubernetes-dashboard get secret ${tokenName} -o jsonpath="{.data.token}" | base64 --decode\n`);
+      });
+    });
+
     const externalIp = service.status.loadBalancer.ingress[0].ip;
 
     // Output the IP
@@ -175,10 +235,8 @@ export default $config({
       console.log(`Service is available at: http://${ip}`);
     });
 
-    return await new Promise<string>((resolve) => {
-      deployment.id.apply((id) => {
-        resolve(id);
-      });
-    });
+    return {
+      id: deployment.id
+    }
   },
 });
