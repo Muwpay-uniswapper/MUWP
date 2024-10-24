@@ -46,8 +46,8 @@ type PoolSubscription = {
   token0: Address;
   token1: Address;
   version: string;
-  clients: Map<WebSocketClient, ClientSubscriptionData>;
-  walletClients: Map<string, Set<WebSocketClient>>;
+  clients: Map<ServerWebSocket, ClientSubscriptionData>;
+  walletClients: Map<string, Set<ServerWebSocket>>;
   lastData?: any;
 };
 
@@ -67,7 +67,7 @@ const chainWatchers: {
 const poolSubscriptions: Map<string, PoolSubscription> = new Map();
 
 // Map from client to set of PoolIdentifiers they are subscribed to
-const clientSubscriptions: Map<WebSocketClient, Set<string>> = new Map();
+const clientSubscriptions: Map<ServerWebSocket, Set<string>> = new Map();
 
 function getPoolIdentifier(
   chainId: number,
@@ -141,6 +141,16 @@ const app = new Hono()
                   version,
                 );
 
+                // Check if client is already subscribed to this pool
+                const existingClientPools = ws.raw && clientSubscriptions.get(ws.raw);
+                if (existingClientPools?.has(poolIdentifier)) {
+                  ws.send(JSON.stringify({
+                    error: "Already subscribed to this pool",
+                    poolIdentifier,
+                  }));
+                  return;
+                }
+
                 let poolSubscription = poolSubscriptions.get(poolIdentifier);
                 if (!poolSubscription) {
                   // Create new PoolSubscription
@@ -156,7 +166,7 @@ const app = new Hono()
                 }
 
                 // Add client to PoolSubscription
-                poolSubscription.clients.set(ws, {
+                ws.raw && poolSubscription.clients.set(ws.raw, {
                   walletAddress: walletAddress as Address | undefined,
                 });
 
@@ -172,14 +182,14 @@ const app = new Hono()
                       walletClientsSet,
                     );
                   }
-                  walletClientsSet.add(ws);
+                  ws.raw && walletClientsSet.add(ws.raw);
                 }
 
                 // Add PoolIdentifier to clientSubscriptions
-                let clientPools = clientSubscriptions.get(ws);
+                let clientPools = ws.raw && clientSubscriptions.get(ws.raw);
                 if (!clientPools) {
                   clientPools = new Set();
-                  clientSubscriptions.set(ws, clientPools);
+                  ws.raw && clientSubscriptions.set(ws.raw, clientPools);
                 }
                 clientPools.add(poolIdentifier);
 
@@ -302,7 +312,7 @@ const app = new Hono()
                 const { poolIdentifier } = params;
                 if (poolIdentifier && poolSubscriptions.has(poolIdentifier)) {
                   const poolSubscription = poolSubscriptions.get(poolIdentifier)!;
-                  const clientData = poolSubscription.clients.get(ws);
+                  const clientData = ws.raw && poolSubscription.clients.get(ws.raw);
 
                   if (clientData && clientData.walletAddress) {
                     const walletAddrStr = clientData.walletAddress.toLowerCase();
@@ -310,21 +320,21 @@ const app = new Hono()
                       walletAddrStr,
                     );
                     if (walletClientsSet) {
-                      walletClientsSet.delete(ws);
+                      ws.raw && walletClientsSet.delete(ws.raw);
                       if (walletClientsSet.size === 0) {
                         poolSubscription.walletClients.delete(walletAddrStr);
                       }
                     }
                   }
 
-                  poolSubscription.clients.delete(ws);
+                  ws.raw && poolSubscription.clients.delete(ws.raw);
 
                   // Remove poolIdentifier from clientSubscriptions
-                  const clientPools = clientSubscriptions.get(ws);
+                  const clientPools = ws.raw && clientSubscriptions.get(ws.raw);
                   if (clientPools) {
                     clientPools.delete(poolIdentifier);
                     if (clientPools.size === 0) {
-                      clientSubscriptions.delete(ws);
+                      ws.raw && clientSubscriptions.delete(ws.raw);
                     }
                   }
 
@@ -371,25 +381,25 @@ const app = new Hono()
         },
         onClose: (event, ws: WebSocketClient) => {
           // Remove client from all poolSubscriptions
-          const clientPools = clientSubscriptions.get(ws);
+          const clientPools = ws.raw && clientSubscriptions.get(ws.raw);
           if (clientPools) {
             for (const poolIdentifier of clientPools) {
               const poolSubscription = poolSubscriptions.get(poolIdentifier);
               if (poolSubscription) {
-                const clientData = poolSubscription.clients.get(ws);
+                const clientData = ws.raw && poolSubscription.clients.get(ws.raw);
                 if (clientData && clientData.walletAddress) {
                   const walletAddrStr = clientData.walletAddress.toLowerCase();
                   const walletClientsSet = poolSubscription.walletClients.get(
                     walletAddrStr,
                   );
                   if (walletClientsSet) {
-                    walletClientsSet.delete(ws);
+                    ws.raw && walletClientsSet.delete(ws.raw);
                     if (walletClientsSet.size === 0) {
                       poolSubscription.walletClients.delete(walletAddrStr);
                     }
                   }
                 }
-                poolSubscription.clients.delete(ws);
+                ws.raw && poolSubscription.clients.delete(ws.raw);
 
                 // If no clients left in poolSubscription, remove it
                 if (poolSubscription.clients.size === 0) {
@@ -409,12 +419,55 @@ const app = new Hono()
                 }
               }
             }
-            clientSubscriptions.delete(ws);
+            ws.raw && clientSubscriptions.delete(ws.raw);
           }
         },
       };
     }),
-  );
+  )
+  .get("/status", (c) => {
+    // Collect system statistics
+    const stats = {
+      // Overall stats
+      totalPoolSubscriptions: poolSubscriptions.size,
+      totalUniqueClients: clientSubscriptions.size,
+      activeChainWatchers: Object.keys(chainWatchers).length,
+
+      // Chain-specific stats
+      chainStats: Object.fromEntries(
+        Object.keys(chainWatchers).map(chainId => {
+          const poolsOnChain = Array.from(poolSubscriptions.values())
+            .filter(ps => ps.chainId === Number(chainId));
+
+          return [chainId, {
+            totalPools: poolsOnChain.length,
+            totalClients: poolsOnChain.reduce((acc, pool) => acc + pool.clients.size, 0),
+            totalWalletSubscriptions: poolsOnChain.reduce(
+              (acc, pool) => acc + pool.walletClients.size, 0
+            ),
+          }];
+        })
+      ),
+
+      // Pool subscription details
+      pools: Array.from(poolSubscriptions.entries()).map(([identifier, pool]) => ({
+        identifier,
+        chainId: pool.chainId,
+        token0: pool.token0,
+        token1: pool.token1,
+        version: pool.version,
+        connectedClients: pool.clients.size,
+        walletSubscriptions: pool.walletClients.size,
+        hasLastData: !!pool.lastData,
+      })),
+
+      // System timestamp
+      timestamp: new Date().toISOString(),
+    };
+
+    return c.json(stats);
+  });
+
 
 const server = {
   app,
