@@ -2,9 +2,9 @@
 
 import {
 	AllbridgeCoreSdk,
-	nodeRpcUrlsDefault,
-	ChainSymbol,
 	Messenger,
+	TokenWithChainDetails,
+	ChainDetailsWithTokens,
 } from "@allbridge/bridge-core-sdk";
 import { nanoid } from "nanoid";
 import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
@@ -25,68 +25,32 @@ export async function FinalAllbridgeStepBuilder({
 	fromAmount: string;
 	fromAddress: `0x${string}` | string;
 	toAddress: `0x${string}` | string;
+}, {
+	sourceToken,
+	destinationToken,
+	destinationChain,
+	sdk,
+}: {
+	sourceToken: TokenWithChainDetails | undefined;
+	destinationToken: TokenWithChainDetails | undefined;
+	sourceChain: ChainDetailsWithTokens;
+	destinationChain: ChainDetailsWithTokens;
+	sdk: AllbridgeCoreSdk;
 }): Promise<Step> {
-	// Initialize the Allbridge SDK
-	const sdk = new AllbridgeCoreSdk(nodeRpcUrlsDefault);
-
-	// Get chain details
-	const chainDetailsMap = await sdk.chainDetailsMap();
-
-	// Map fromChainId to ChainSymbol
-	const chainIdToSymbol: { [key: number]: ChainSymbol } = {};
-	for (const chainSymbol in chainDetailsMap) {
-		const chainDetails = chainDetailsMap[chainSymbol as ChainSymbol];
-		chainIdToSymbol[Number(chainDetails.chainId)] =
-			chainSymbol as ChainSymbol;
-	}
-
-	const fromChainSymbol = chainIdToSymbol[fromChainId];
-	const toChainSymbol = ChainSymbol.STLR; // Stellar
-
-	if (!fromChainSymbol) {
-		throw new Error(`Unsupported fromChainId: ${fromChainId}`);
-	}
-
-	const sourceChain = chainDetailsMap[fromChainSymbol];
-	const destinationChain = chainDetailsMap[toChainSymbol];
-
-	// Get tokens
-	const sourceToken = sourceChain.tokens.find(
-		(tokenInfo) =>
-			tokenInfo.tokenAddress.toLowerCase() ===
-			fromTokenAddress.toLowerCase(),
-	);
-
-	const destinationToken = destinationChain.tokens.find(
-		(tokenInfo) =>
-			tokenInfo.tokenAddress.toLowerCase() === target.toLowerCase(),
-	);
-
 	if (!sourceToken || !destinationToken) {
-		throw new Error("Tokens not supported on the given chains");
+		throw new Error(`Tokens not supported on the given chains. Source token: ${sourceToken}, destination token: ${destinationToken}`);
 	}
 
 	const steps: Step[] = [];
 
-	// Estimate amount to be received
-	const amountToBeReceived = await sdk.getAmountToBeReceived(
-		fromAmount,
-		sourceToken,
-		destinationToken,
-	);
-
-	// Get gas fee options
-	const gasFeeOptions = await sdk.getGasFeeOptions(
-		sourceToken,
-		destinationToken,
-		Messenger.ALLBRIDGE,
-	);
+	const [amountToBeReceived, gasFeeOptions, nativeToken] = await Promise.all([
+		sdk.getAmountToBeReceived(fromAmount, sourceToken, destinationToken),
+		sdk.getGasFeeOptions(sourceToken, destinationToken, Messenger.ALLBRIDGE),
+		tokenGet(fromChainId, zeroAddress),
+	]);
 
 	// Assume we pay gas fee in native currency
 	const gasFee = BigInt(gasFeeOptions.native.int);
-
-	// Get native token info
-	const nativeToken = await tokenGet(fromChainId, zeroAddress);
 
 	// Compute gas fee amount in USD
 	const gasFeeAmountUSD = Number(gasFeeOptions.stablecoin?.float);
@@ -109,6 +73,9 @@ export async function FinalAllbridgeStepBuilder({
 	// 	destinationToken: destinationToken,
 	// 	messenger: Messenger.ALLBRIDGE,
 	// });
+
+
+	const approvalAddress = sourceToken.bridgeAddress;
 
 	// Add send step
 	steps.push({
@@ -137,6 +104,7 @@ export async function FinalAllbridgeStepBuilder({
 			slippage: 0,
 		},
 		estimate: {
+			approvalAddress,
 			fromAmount: fromAmount,
 			toAmount: amountToBeReceived,
 			toAmountMin: amountToBeReceived, // Adjust for slippage if needed
