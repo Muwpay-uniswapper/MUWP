@@ -1,9 +1,11 @@
 import {
 	AptosChainId,
 	getTokensAptosBridge,
+	StellarChainId,
 } from "@/lib/layerzero/aptos/omnichains";
 import { type Token, TokensGet200Response } from "@/lib/li.fi-ts";
 import api from "./api";
+import { getTokensAllBridge } from "@/lib/allbridge/omnichain";
 
 export async function tokensGet(chain: number): Promise<TokensGet200Response> {
 	let tokens: TokensGet200Response;
@@ -11,6 +13,9 @@ export async function tokensGet(chain: number): Promise<TokensGet200Response> {
 		switch (chain) {
 			case AptosChainId:
 				tokens = await getTokensAptosBridge();
+				break;
+			case StellarChainId:
+				tokens = await getTokensAllBridge();
 				break;
 			default:
 				tokens = await api.tokensGet(chain.toString());

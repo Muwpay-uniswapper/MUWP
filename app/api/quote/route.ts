@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { generateAccount } from "./generateAccount";
 import { handleLiFiRoutes } from "./fetchRoutesLiFi";
 import { Address, EthereumAddress } from "@/lib/core/model/Address";
-import { AptosChainId } from "@/lib/layerzero/aptos/omnichains";
+import { AptosChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
 import { handleAptosRoutes } from "./fetchRoutesAptos";
+import { handleAllbridgeRoutes } from "./fetchRoutesAllBridge";
 
 const Token = z.object({
     address: Address,
@@ -71,7 +72,18 @@ export async function POST(request: Request) {
 
             console.log(`Fetching routes for ${input.inputTokens.length} input tokens on ${input.inputChain} and ${input.outputTokens.length} output tokens on ${input.outputChain}`);
 
-            const { routes } = await (input.outputChain == AptosChainId ? handleAptosRoutes(input, tempAccount) : handleLiFiRoutes(input, tempAccount));
+            let routes;
+            switch (input.outputChain) {
+                case AptosChainId:
+                    routes = (await handleAptosRoutes(input, tempAccount)).routes;
+                    break;
+                case StellarChainId:
+                    routes = (await handleAllbridgeRoutes(input, tempAccount)).routes;
+                    break;
+                default:
+                    routes = (await handleLiFiRoutes(input, tempAccount)).routes;
+                    break;
+            }
 
             return JSON.stringify({
                 routes,

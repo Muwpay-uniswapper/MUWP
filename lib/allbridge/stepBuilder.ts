@@ -9,11 +9,13 @@ import {
 import { nanoid } from "nanoid";
 import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
 import { tokenGet } from "../core/data/tokenLib";
-import { zeroAddress } from "viem";
+import { formatUnits, parseUnits, zeroAddress } from "viem";
+import { format } from "path";
 
 export async function FinalAllbridgeStepBuilder({
 	target,
 	fromChainId,
+	toChainId,
 	fromTokenAddress,
 	fromAmount,
 	fromAddress,
@@ -21,6 +23,7 @@ export async function FinalAllbridgeStepBuilder({
 }: {
 	target: `0x${string}` | string;
 	fromChainId: number;
+	toChainId: number;
 	fromTokenAddress: `0x${string}` | string;
 	fromAmount: string;
 	fromAddress: `0x${string}` | string;
@@ -43,11 +46,15 @@ export async function FinalAllbridgeStepBuilder({
 
 	const steps: Step[] = [];
 
-	const [amountToBeReceived, gasFeeOptions, nativeToken] = await Promise.all([
-		sdk.getAmountToBeReceived(fromAmount, sourceToken, destinationToken),
+	const fromAmountFloat = formatUnits(BigInt(fromAmount), sourceToken.decimals);
+
+	const [_amountToBeReceived, gasFeeOptions, nativeToken] = await Promise.all([
+		sdk.getAmountToBeReceived(fromAmountFloat, sourceToken, destinationToken),
 		sdk.getGasFeeOptions(sourceToken, destinationToken, Messenger.ALLBRIDGE),
 		tokenGet(fromChainId, zeroAddress),
 	]);
+
+	const amountToBeReceived = parseUnits(_amountToBeReceived, destinationToken.decimals);
 
 	// Assume we pay gas fee in native currency
 	const gasFee = BigInt(gasFeeOptions.native.int);
@@ -91,12 +98,12 @@ export async function FinalAllbridgeStepBuilder({
 				chainId: fromChainId,
 				name: sourceToken.name,
 			},
-			toChainId: Number(destinationChain.chainId),
+			toChainId: destinationChain.chainId ? Number.parseInt(destinationChain.chainId.split("0x")[1], 16) : toChainId,
 			toToken: {
 				address: destinationToken.tokenAddress,
 				symbol: destinationToken.symbol,
 				decimals: destinationToken.decimals,
-				chainId: Number(destinationChain.chainId),
+				chainId: destinationChain.chainId ? Number.parseInt(destinationChain.chainId.split("0x")[1], 16) : toChainId,
 				name: destinationToken.name,
 			},
 			fromAddress: fromAddress,
@@ -106,8 +113,8 @@ export async function FinalAllbridgeStepBuilder({
 		estimate: {
 			approvalAddress,
 			fromAmount: fromAmount,
-			toAmount: amountToBeReceived,
-			toAmountMin: amountToBeReceived, // Adjust for slippage if needed
+			toAmount: amountToBeReceived.toString(),
+			toAmountMin: amountToBeReceived.toString(), // Adjust for slippage if needed
 			tool: "Allbridge",
 			feeCosts: [
 				{

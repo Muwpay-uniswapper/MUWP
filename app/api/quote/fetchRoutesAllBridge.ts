@@ -207,6 +207,7 @@ export async function handleAllbridgeRoutes(
 				fromAddress:
 					steps[steps.length - 1]?.action.toAddress ?? tempAccount,
 				toAddress: req.toAddress,
+				toChainId: req.toChainId,
 				target: req.toTokenAddress,
 			}, {
 				sourceToken,
