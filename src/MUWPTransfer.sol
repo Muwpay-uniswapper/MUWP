@@ -3,25 +3,44 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
-contract MUWPTransfer {
+contract MUWPTransfer is Ownable, Pausable {
     using SafeERC20 for IERC20;
+
+    constructor() Ownable(msg.sender) {}
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
 
     function transfer(
         address[] calldata senders,
         address[] calldata tokens,
         uint256[] calldata amounts,
         uint256 totalGas,
-        address recipient
+        address recipient,
+        bytes memory signature
     ) 
         public 
         payable 
+        whenNotPaused
     {
         require(
             tokens.length == amounts.length && 
             senders.length == tokens.length, 
             "Arrays must be of equal length"
         );
+
+        // Verify signature
+        bytes32 messageHash = keccak256(abi.encodePacked(recipient));
+        require(SignatureChecker.isValidSignatureNow(owner(), messageHash, signature), "Invalid signature");
 
         uint256 totalEthRequired = totalGas;
 
