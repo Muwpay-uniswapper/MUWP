@@ -1,6 +1,5 @@
 import type { InputType } from "./route";
 import type { Route } from "@/lib/li.fi-ts";
-import { AvailablePairs } from "@/lib/allbridge/availablePairs"; // You need to define this based on supported tokens
 import {
 	AllbridgeCoreSdk,
 	nodeRpcUrlsDefault,
@@ -8,7 +7,14 @@ import {
 import { nanoid } from "nanoid";
 import { FinalAllbridgeStepBuilder } from "@/lib/allbridge/stepBuilder"; // We'll create this
 import { handleLiFiRoutes } from "./fetchRoutesLiFi";
-import { ensure } from "@/utils/utils"; // Utility function to ensure non-null values
+
+// ensure is a function that returns a value or throws an error if the value is undefined or null
+function ensure<T>(value: T | undefined): T {
+	if (value === undefined || value === null) {
+		throw new Error("Value is undefined");
+	}
+	return value;
+}
 
 export async function handleAllbridgeRoutes(
 	input: InputType,
@@ -24,18 +30,18 @@ export async function handleAllbridgeRoutes(
 				mode === "single"
 					? input.inputAmount[token.value]?.toString()
 					: (
-							(input.inputAmount[input.inputTokens[0].value] *
-								BigInt(
-									input.distribution[
-										input.outputTokens.findIndex(
-											(t) =>
-												t.address === token.address &&
-												t.value === token.value,
-										)
-									],
-								)) /
-							100n
-						).toString(),
+						(input.inputAmount[input.inputTokens[0].value] *
+							BigInt(
+								input.distribution[
+								input.outputTokens.findIndex(
+									(t) =>
+										t.address === token.address &&
+										t.value === token.value,
+								)
+								],
+							)) /
+						100n
+					).toString(),
 			fromChainId: input.inputChain,
 			fromTokenAddress:
 				mode === "single"
@@ -64,7 +70,7 @@ export async function handleAllbridgeRoutes(
 	const chainIdToSymbol: { [key: number]: string } = {};
 	for (const chainSymbol in chainDetailsMap) {
 		const chainDetails = chainDetailsMap[chainSymbol];
-		chainIdToSymbol[Number(chainDetails.chainId)] = chainSymbol;
+		chainIdToSymbol[chainDetails.chainId ? Number.parseInt(chainDetails.chainId?.split("0x")[1] ?? "", 16) : Number(chainDetails.allbridgeChainId)] = chainSymbol;
 	}
 
 	for (const req of queries) {
@@ -201,9 +207,13 @@ export async function handleAllbridgeRoutes(
 				fromAddress:
 					steps[steps.length - 1]?.action.toAddress ?? tempAccount,
 				toAddress: req.toAddress,
-				sourceToken: sourceToken,
-				destinationToken: destinationToken,
-				sdk: sdk,
+				target: req.toTokenAddress,
+			}, {
+				sourceToken,
+				destinationToken,
+				sourceChain,
+				destinationChain,
+				sdk,
 			});
 
 			steps.push(finalStep);
