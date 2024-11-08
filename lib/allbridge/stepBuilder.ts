@@ -8,9 +8,10 @@ import {
 } from "@allbridge/bridge-core-sdk";
 import { nanoid } from "nanoid";
 import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
-import { tokenGet } from "../core/data/tokenLib";
+import { tokenGet, tokensGet } from "../core/data/tokenLib";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
 import { format } from "path";
+import { StellarChainId } from "../layerzero/aptos/omnichains";
 
 export async function FinalAllbridgeStepBuilder(
   {
@@ -83,15 +84,12 @@ export async function FinalAllbridgeStepBuilder(
 
   const executionDuration = (transferTimeMs ?? 1000000) / 1000; // Convert ms to seconds
 
-  // // Build send transaction
-  // const rawTransactionSend = await sdk.bridge.rawTxBuilder.send({
-  // 	amount: fromAmount,
-  // 	fromAccountAddress: fromAddress,
-  // 	toAccountAddress: toAddress,
-  // 	sourceToken: sourceToken,
-  // 	destinationToken: destinationToken,
-  // 	messenger: Messenger.ALLBRIDGE,
-  // });
+  // Fee Costs are fromAmount - toAmount
+  const feeCosts =
+    ((BigInt(fromAmount) - amountToBeReceived) * 10n ** 9n) /
+    BigInt(Math.round(Number(nativeToken.priceUSD ?? "1") * 1e9));
+  const feeCostsFloat = Number(formatUnits(feeCosts, sourceToken.decimals));
+  const feeCostsUSD = feeCostsFloat;
 
   const approvalAddress = sourceToken.bridgeAddress;
 
@@ -125,7 +123,7 @@ export async function FinalAllbridgeStepBuilder(
       },
       fromAddress: fromAddress,
       toAddress: toAddress,
-      slippage: 0,
+      slippage: 0.005,
     },
     estimate: {
       approvalAddress,
@@ -135,13 +133,16 @@ export async function FinalAllbridgeStepBuilder(
       tool: "Allbridge",
       feeCosts: [
         {
-          amount: gasFee.toString(),
-          amountUSD: gasFeeAmountUSD.toString(),
+          amount: feeCosts.toString(),
+          amountUSD: feeCostsUSD.toString(),
           included: true,
-          name: "Gas Fee",
-          percentage: ((Number(gasFee) / Number(fromAmount)) * 100).toString(),
+          name: "AllBridge Fee",
+          percentage: (
+            (Number(feeCosts) / Number(fromAmount)) *
+            100
+          ).toString(),
           token: nativeToken,
-          description: "Gas fee for transaction",
+          description: "Fee for transaction",
         },
       ],
       executionDuration: executionDuration,
@@ -152,7 +153,7 @@ export async function FinalAllbridgeStepBuilder(
           token: nativeToken,
           amountUSD: gasFeeAmountUSD.toString(),
           estimate: gasFee.toString(),
-          price: "0", // Need to get gas price if available
+          price: nativeToken.priceUSD, // Need to get gas price if available
         },
       ],
     },
