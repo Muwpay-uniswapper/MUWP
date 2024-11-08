@@ -1,17 +1,15 @@
 // FinalStellarStepBuilder.ts
 
 import {
-  AllbridgeCoreSdk,
+  type AllbridgeCoreSdk,
   Messenger,
-  TokenWithChainDetails,
-  ChainDetailsWithTokens,
+  type TokenWithChainDetails,
+  type ChainDetailsWithTokens,
 } from "@allbridge/bridge-core-sdk";
 import { nanoid } from "nanoid";
 import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
-import { tokenGet, tokensGet } from "../core/data/tokenLib";
+import { tokenGet } from "../core/data/tokenLib";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
-import { format } from "path";
-import { StellarChainId } from "../layerzero/aptos/omnichains";
 
 export async function FinalAllbridgeStepBuilder(
   {

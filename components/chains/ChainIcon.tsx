@@ -4,7 +4,9 @@ import Image from "next/image";
 
 export default function ChainIcons({ id }: { id: number }) {
   if (id === StellarChainId) {
-    return <Image src="/icons/stellar.svg" width={20} height={20} />;
+    return (
+      <Image src="/icons/stellar.svg" width={20} height={20} alt="Stellar" />
+    );
   }
   return <ChainIcon id={id} />;
 }
