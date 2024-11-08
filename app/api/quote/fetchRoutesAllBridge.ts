@@ -7,6 +7,7 @@ import {
 import { nanoid } from "nanoid";
 import { FinalAllbridgeStepBuilder } from "@/lib/allbridge/stepBuilder"; // We'll create this
 import { handleLiFiRoutes } from "./fetchRoutesLiFi";
+import { formatUnits, parseUnits } from "viem";
 
 // ensure is a function that returns a value or throws an error if the value is undefined or null
 function ensure<T>(value: T | undefined): T {
@@ -226,18 +227,38 @@ export async function handleAllbridgeRoutes(
         steps,
         fromAmount: steps[0].action.fromAmount,
         fromChainId: steps[0].action.fromChainId,
-        fromAmountUSD: "", // Compute if needed
+        fromAmountUSD: formatUnits(
+          parseUnits(
+            steps[0].action.fromToken.priceUSD ?? "0",
+            steps[0].action.fromToken.decimals,
+          ) * BigInt(steps[0].action.fromAmount),
+          steps[0].action.fromToken.decimals * 2,
+        ),
         fromToken: steps[0].action.fromToken,
         toAmount: steps[steps.length - 1].estimate?.toAmount ?? "0",
         toAmountMin: steps[steps.length - 1].estimate?.toAmount ?? "0",
-        toAmountUSD: "", // Compute if needed
+        toAmountUSD: formatUnits(
+          parseUnits(
+            steps[steps.length - 1].action.toToken.priceUSD ?? "0",
+            steps[steps.length - 1].action.toToken.decimals,
+          ) * BigInt(steps[steps.length - 1].estimate?.toAmount ?? "0"),
+          steps[steps.length - 1].action.toToken.decimals * 2,
+        ), // Compute if needed
         toChainId: steps[steps.length - 1].action.toChainId,
         toToken: steps[steps.length - 1].action.toToken,
         containsSwitchChain: true,
         fromAddress: steps[0].action.fromAddress,
         tags: prevRoute.tags,
         toAddress: steps[steps.length - 1].action.toAddress,
-        gasCostUSD: "", // Compute if needed
+        gasCostUSD: steps
+          .map(
+            (step) =>
+              step.estimate?.gasCosts
+                ?.map((gas) => Number(gas.amountUSD ?? "0"))
+                .reduce((a, b) => a + b, 0) ?? 0,
+          )
+          .reduce((a, b) => a + b, 0)
+          .toString(),
       };
 
       return route;
