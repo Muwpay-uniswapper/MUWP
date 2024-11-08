@@ -85,8 +85,9 @@ export async function FinalAllbridgeStepBuilder(
   const executionDuration = (transferTimeMs ?? 1000000) / 1000; // Convert ms to seconds
 
   // Fee Costs are fromAmount - toAmount
+  const abs = (a: bigint, b: bigint) => (a > b ? a - b : b - a);
   const feeCosts =
-    ((BigInt(fromAmount) - amountToBeReceived) * 10n ** 9n) /
+    (abs(BigInt(fromAmount), amountToBeReceived) * 10n ** 9n) /
     BigInt(Math.round(Number(nativeToken.priceUSD ?? "1") * 1e9));
   const feeCostsFloat = Number(formatUnits(feeCosts, sourceToken.decimals));
   const feeCostsUSD = feeCostsFloat;
