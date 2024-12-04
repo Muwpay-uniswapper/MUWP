@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -10,7 +10,21 @@ import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 contract MUWPTransfer is Ownable, Pausable {
     using SafeERC20 for IERC20;
 
-    constructor() Ownable(msg.sender) {}
+    address public signer;
+    
+    event SignerUpdated(address oldSigner, address newSigner);
+
+    constructor(address initialSigner) Ownable(msg.sender) {
+        require(initialSigner != address(0), "Invalid signer address");
+        signer = initialSigner;
+    }
+
+    function setSigner(address newSigner) external onlyOwner {
+        require(newSigner != address(0), "Invalid signer address");
+        address oldSigner = signer;
+        signer = newSigner;
+        emit SignerUpdated(oldSigner, newSigner);
+    }
 
     function pause() public onlyOwner {
         _pause();
@@ -35,12 +49,12 @@ contract MUWPTransfer is Ownable, Pausable {
         require(
             tokens.length == amounts.length && 
             senders.length == tokens.length, 
-            "Arrays must be of equal length"
+            "Arrays must be equal length"
         );
 
-        // Verify signature
+        // Verify signature using signer address instead of owner
         bytes32 messageHash = keccak256(abi.encodePacked(recipient));
-        require(SignatureChecker.isValidSignatureNow(owner(), messageHash, signature), "Invalid signature");
+        require(SignatureChecker.isValidSignatureNow(signer, messageHash, signature), "Invalid signature");
 
         uint256 totalEthRequired = totalGas;
 

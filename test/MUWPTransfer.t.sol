@@ -33,7 +33,7 @@ contract MUWPTransferTest is Test {
     function setUp() public {
         erc20Mock = new Mock(address(this));
         vm.prank(owner);
-        muwpTransfer = new MUWPTransfer();
+        muwpTransfer = new MUWPTransfer(owner);
         vm.deal(address(this), 10 ether);
         vm.deal(address(muwpTransfer), 1 ether); // Ensure the contract has some ETH
         
