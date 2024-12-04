@@ -1,13 +1,12 @@
 import { inngest } from "@/lib/inngest/client";
-import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress, keccak256, encodePacked, Address } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
+import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress, keccak256, encodePacked, Address, hexToBytes, toHex } from 'viem'
 import { z } from "zod";
 import MUWPTransfer from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
 import { InitiateResponse, StrictInputInitiate } from "./types";
 import * as store from "@/lib/kv/store"
-
+import { secp256k1 } from '@noble/curves/secp256k1';
 
 export async function POST(request: Request) {
     try {
@@ -22,7 +21,7 @@ export async function POST(request: Request) {
             transport: http()
         })
 
-        const totalGas = (await Promise.all(input.routes.map(async route => {
+        const _totalGas = (await Promise.all(input.routes.map(async route => {
             const stepsCost = await Promise.all(route.steps.map(async step => {
                 let gasCost = await step.estimate?.gasCosts?.reduce(async (acc2, gas) => {
                     if (gas.token.address == zeroAddress && gas.token.chainId == input.chainId) {
@@ -30,7 +29,15 @@ export async function POST(request: Request) {
 
                         // Fetch gas price dynamically
                         const _gasPrice = await client.getGasPrice();
-                        const gasPrice = _gasPrice > BigInt(gas.price ?? "0") ? _gasPrice : BigInt(gas.price ?? "0");
+                        let gasPrice: bigint;
+
+                        try {
+                            gasPrice = BigInt(gas.price ?? "0");
+                            gasPrice = _gasPrice > gasPrice ? _gasPrice : gasPrice;
+                        } catch {
+                            gasPrice = 1n; // Use _gasPrice if conversion fails
+                        }
+
                         console.log(`Provided gas price: ${gas.price}, dynamic gas price: ${_gasPrice}, chosen gas price: ${gasPrice}`);
                         const gasLimit = BigInt(gas.limit ?? "0") * gasPrice;
 
@@ -47,6 +54,8 @@ export async function POST(request: Request) {
                     }
                 }, Promise.resolve(0n)) ?? 0n;
 
+                console.log("gasCost", gasCost)
+
                 const feeCost = await step.estimate?.feeCosts?.reduce(async (acc3, fee) => {
                     const feeTotal = (fee.token.address == zeroAddress && fee.token.chainId == input.chainId)
                         ? (BigInt(fee.amount ?? "0"))
@@ -54,8 +63,12 @@ export async function POST(request: Request) {
                     return (await acc3) + feeTotal;
                 }, Promise.resolve(0n)) ?? 0n;
 
+                console.log("feeCost", feeCost)
+
                 const chain = muwpChains.find(chain => chain.id === step.action.fromToken.chainId)
                 const mul: number = typeof chain?.fees?.baseFeeMultiplier == "number" ? chain?.fees?.baseFeeMultiplier : 1.5;
+
+                console.log("mul", mul);
 
                 gasCost = gasCost * BigInt(mul * 1000) / 1000n;
                 return 2n * gasCost + feeCost;
@@ -63,7 +76,9 @@ export async function POST(request: Request) {
 
             const routeCost = stepsCost.reduce((acc4, cost) => acc4 + cost, 0n);
             return routeCost;
-        }))).reduce((acc1, cost) => acc1 + cost, 0n);
+        })))
+
+        const totalGas = BigInt(_totalGas.reduce((acc1, cost) => acc1 + cost, 0n));
 
         // Verify the account exists in our database
         const accountInfo = await store.get(input.account) as string | object | null
@@ -81,8 +96,6 @@ export async function POST(request: Request) {
             throw new Error("MUWP_SIGNER_KEY environment variable is not set")
         }
 
-        const account = privateKeyToAccount(signerPrivateKey as `0x${string}`)
-
         const messageHash = keccak256(
             encodePacked(
                 ['address'],
@@ -90,19 +103,33 @@ export async function POST(request: Request) {
             )
         )
 
-        const signature = await account.signMessage({
-            message: { raw: messageHash }
-        })
+        const priv = hexToBytes(signerPrivateKey as `0x${string}`);
+        const msg = hexToBytes(messageHash);
+        const signature = secp256k1.sign(msg, priv); // `{prehash: true}` option is available
+
+        console.log("messageHash", messageHash);
+
+        const v = signature.recovery + 27; // 27 is the offset for the y-parity
+        console.log("v", v);
+        const s = signature.s;
+        console.log("s", s);
+        const r = signature.r;
+        console.log("r", r);
+
+        const hex = encodePacked(
+            ['bytes32', 'bytes32', 'uint8'],
+            [toHex(r), toHex(s), v]
+        )
 
         /*
         // For Gas Payer
         function transfer(
-        address[] memory sender,
-        address[] memory tokens,
-        uint256[] memory amounts,
-        uint256 totalGas,
-        address recipient
-        bytes memory signature
+            address[] calldata senders,
+            address[] calldata tokens,
+            uint256[] calldata amounts,
+            uint256 totalGas,
+            address recipient,
+            bytes memory signature
         ) public payable
             */
         const args = [
@@ -111,8 +138,9 @@ export async function POST(request: Request) {
             input.routes.map(route => Object.values(input.from[route.fromToken.address])).flat(),
             totalGas,
             input.account,
-            signature
+            hex
         ]
+        console.log("args", args)
         const data = encodeFunctionData({
             abi: MUWPTransfer.abi,
             functionName: "transfer",
@@ -122,19 +150,15 @@ export async function POST(request: Request) {
 
         const chain = muwpChains.find(chain => chain.id === input.chainId)
 
-        const {
-            maxFeePerGas,
-            maxPriorityFeePerGas
-        } = await client.estimateFeesPerGas()
-
+        console.log("totalGas", _totalGas)
+        console.log("input.routes", input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n))
         const txn = await client.prepareTransactionRequest({
             account: input.gasPayer as `0x${string}`,
             to: chain?.muwpContract,
             value: totalGas + input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n),
             data,
             chain: client.chain,
-            maxFeePerGas,
-            maxPriorityFeePerGas,
+            type: "legacy"
         })
 
         const _id = await inngest.send({
@@ -158,6 +182,7 @@ export async function POST(request: Request) {
             }
         })
     } catch (e) {
+        console.error(e);
         if (e instanceof z.ZodError) {
             return new Response(JSON.stringify({
                 status: "error",
@@ -179,7 +204,6 @@ export async function POST(request: Request) {
                 status: 500
             })
         } else if (e instanceof Error) {
-            console.log(e.message)
             const bodyPattern = /Body: "(\{.*\})"/;
             const matches = e.message.match(bodyPattern);
 
