@@ -1,11 +1,12 @@
 import { inngest } from "@/lib/inngest/client";
-import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress } from 'viem'
+import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress, keccak256, encodePacked, Address } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 import { z } from "zod";
 import MUWPTransfer from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
 import { InitiateResponse, StrictInputInitiate } from "./types";
-
+import * as store from "@/lib/kv/store"
 
 
 export async function POST(request: Request) {
@@ -64,6 +65,35 @@ export async function POST(request: Request) {
             return routeCost;
         }))).reduce((acc1, cost) => acc1 + cost, 0n);
 
+        // Verify the account exists in our database
+        const accountInfo = await store.get(input.account) as string | object | null
+        const storedAccount = typeof accountInfo === "string" ? JSON.parse(accountInfo)
+            : typeof accountInfo === "object" ? (accountInfo as any)
+                : null
+
+        if (!storedAccount || typeof storedAccount.index === "undefined") {
+            throw new Error("Invalid account: not generated through our system")
+        }
+
+        // Continue with signature generation
+        const signerPrivateKey = process.env.MUWP_SIGNER_KEY
+        if (!signerPrivateKey) {
+            throw new Error("MUWP_SIGNER_KEY environment variable is not set")
+        }
+
+        const account = privateKeyToAccount(signerPrivateKey as `0x${string}`)
+
+        const messageHash = keccak256(
+            encodePacked(
+                ['address'],
+                [input.account as Address]
+            )
+        )
+
+        const signature = await account.signMessage({
+            message: { raw: messageHash }
+        })
+
         /*
         // For Gas Payer
         function transfer(
@@ -72,6 +102,7 @@ export async function POST(request: Request) {
         uint256[] memory amounts,
         uint256 totalGas,
         address recipient
+        bytes memory signature
         ) public payable
             */
         const args = [
@@ -80,6 +111,7 @@ export async function POST(request: Request) {
             input.routes.map(route => Object.values(input.from[route.fromToken.address])).flat(),
             totalGas,
             input.account,
+            signature
         ]
         const data = encodeFunctionData({
             abi: MUWPTransfer.abi,
