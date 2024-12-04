@@ -16,7 +16,7 @@ export async function generateAccount(input: InputType) {
 
         console.log("Account not found, generating new account");
 
-        const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
+        const master_hd = process.env.MASTER_HD?.trim().replace("\\n", "") as `0x${string}`
         const privateKey = fromHex(master_hd, "bytes")
         const hdKey = HDKey.fromMasterSeed(privateKey)
 
