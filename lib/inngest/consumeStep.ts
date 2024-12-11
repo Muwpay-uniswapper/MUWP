@@ -8,6 +8,7 @@ import { HDKey, hdKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
 import { Address, EthereumAddress } from "../core/model/Address";
 import { AptosBridgeTxData } from "../layerzero/aptos/txData";
+import { AllBridgeTxData } from "../allbridge/txData";
 
 
 const Hash = z.string().regex(/^0x[0-9a-fA-F]+$/, "Hash must be a valid hex string");
@@ -89,6 +90,8 @@ export const consumeStep = inngest.createFunction(
             let fullStep: Step;
             if (_step.tool == "layerzero") {
                 fullStep = await AptosBridgeTxData(_step as Step);
+            } else if (_step.tool == "Allbridge") {
+                fullStep = await AllBridgeTxData(_step as Step);
             } else {
                 fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
             }
@@ -146,7 +149,7 @@ export const consumeStep = inngest.createFunction(
                     nonce: _nonce
                 }
 
-                if (_step.tool == "layerzero") {
+                if (_step.tool == "layerzero" || _step.tool == "Allbridge") {
                     delete txData.gas;
                     delete txData.gasPrice;
                 }
