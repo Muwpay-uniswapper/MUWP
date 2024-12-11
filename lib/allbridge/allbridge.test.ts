@@ -2,6 +2,7 @@ import { handleAllbridgeRoutes } from "@/app/api/quote/fetchRoutesAllBridge";
 import { describe, expect, it } from "bun:test";
 import { zeroAddress } from "viem";
 import { AllBridgeTxData } from "./txData";
+import { transactionRequestSchema } from "../inngest/consumeStep";
 
 describe("Allbridge", () => {
     it("should be able to get quotes", async () => {
@@ -48,5 +49,7 @@ describe("Allbridge", () => {
 
         console.log(txData);
         expect(txData).toBeDefined();
+
+        const transactionRequest = await transactionRequestSchema.parseAsync(txData.transactionRequest);
     });
 });

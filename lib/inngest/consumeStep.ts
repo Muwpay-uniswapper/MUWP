@@ -18,9 +18,9 @@ export const transactionRequestSchema = z.object({
     to: Address, // Ethereum address format
     chainId: z.number().int(), // Chain ID should be an integer
     data: Hash, // Data field should start with 0x followed by hex characters
-    value: Hash, // Value should be in hex format
-    gasPrice: Hash, // Gas price should be in hex format
-    gasLimit: Hash, // Gas limit should be in hex format
+    value: Hash.optional(), // Value should be in hex format
+    gasPrice: Hash.optional(), // Gas price should be in hex format
+    gasLimit: Hash.optional(), // Gas limit should be in hex format
 });
 
 
@@ -136,16 +136,16 @@ export const consumeStep = inngest.createFunction(
                 const txData: {
                     data: `0x${string}`,
                     to: `0x${string}`,
-                    value: bigint,
+                    value?: bigint,
                     gas?: bigint,
                     gasPrice?: bigint,
                     nonce?: number,
                 } = {
                     data: transactionRequest.data as `0x${string}`,
                     to: transactionRequest.to as `0x${string}`,
-                    value: fromHex(transactionRequest.value as `0x${string}`, "bigint"),
-                    gas: fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint"),
-                    gasPrice: fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint"),
+                    value: transactionRequest.value ? fromHex(transactionRequest.value as `0x${string}`, "bigint") : undefined,
+                    gas: transactionRequest.gasLimit ? fromHex(transactionRequest.gasLimit as `0x${string}`, "bigint") : undefined,
+                    gasPrice: transactionRequest.gasPrice ? fromHex(transactionRequest.gasPrice as `0x${string}`, "bigint") : undefined,
                     nonce: _nonce
                 }
 
