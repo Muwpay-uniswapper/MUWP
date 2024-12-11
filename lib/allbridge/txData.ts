@@ -10,7 +10,21 @@ import {
 
 export async function AllBridgeTxData(step: Step): Promise<Step> {
 	// Initialize the Allbridge SDK
-	const sdk = new AllbridgeCoreSdk(nodeRpcUrlsDefault);
+	const sdk = new AllbridgeCoreSdk({
+		[ChainSymbol.ETH]: "https://cloudflare-eth.com",
+		[ChainSymbol.BSC]: "https://bsc-dataseed.binance.org",
+		[ChainSymbol.BAS]: "https://mainnet.base.org",
+		[ChainSymbol.SOL]: "https://api.mainnet-beta.solana.com",
+		[ChainSymbol.TRX]: "https://api.trongrid.io",
+		[ChainSymbol.POL]: "https://polygon-rpc.com",
+		[ChainSymbol.ARB]: "https://arb1.arbitrum.io/rpc",
+		[ChainSymbol.CEL]: "https://forno.celo.org",
+		[ChainSymbol.AVA]: "https://api.avax.network/ext/bc/C/rpc",
+		[ChainSymbol.SRB]: "https://rpc.soroban.stellar.org",
+		[ChainSymbol.STLR]: "https://horizon.stellar.org",
+		[ChainSymbol.OPT]: "https://mainnet.optimism.io",
+		...nodeRpcUrlsDefault
+	});
 
 	// Get chain details
 	const chainDetailsMap = await sdk.chainDetailsMap();
@@ -31,7 +45,7 @@ export async function AllBridgeTxData(step: Step): Promise<Step> {
 	}
 
 	const sourceChain = chainDetailsMap[fromChainSymbol];
-	const destinationChain = chainDetailsMap[toChainSymbol];
+	const destinationChain = chainDetailsMap[toChainSymbol] || chainDetailsMap[ChainSymbol.SRB];
 
 	// Get tokens
 	const sourceToken = sourceChain.tokens.find(
