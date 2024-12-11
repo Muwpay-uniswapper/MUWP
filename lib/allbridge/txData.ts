@@ -8,7 +8,7 @@ import {
 	Messenger,
 	RawEvmTransaction,
 } from "@allbridge/bridge-core-sdk";
-import { toHex } from "viem";
+import { formatUnits, toHex } from "viem";
 
 export async function AllBridgeTxData(step: Step): Promise<Step> {
 	// Initialize the Allbridge SDK
@@ -66,7 +66,7 @@ export async function AllBridgeTxData(step: Step): Promise<Step> {
 	}
 
 	const txRequest: RawEvmTransaction = await sdk.bridge.rawTxBuilder.send({
-		amount: step.action.fromAmount,
+		amount: formatUnits(BigInt(step.action.fromAmount), sourceToken.decimals),
 		fromAccountAddress: step.action.fromAddress ?? "",
 		toAccountAddress: step.action.toAddress ?? "",
 		sourceToken,
