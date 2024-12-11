@@ -6,7 +6,9 @@ import {
 	nodeRpcUrlsDefault,
 	ChainSymbol,
 	Messenger,
+	RawEvmTransaction,
 } from "@allbridge/bridge-core-sdk";
+import { toHex } from "viem";
 
 export async function AllBridgeTxData(step: Step): Promise<Step> {
 	// Initialize the Allbridge SDK
@@ -63,17 +65,21 @@ export async function AllBridgeTxData(step: Step): Promise<Step> {
 		throw new Error("Tokens not supported on the given chains");
 	}
 
-	const txRequest = await sdk.bridge.rawTxBuilder.send({
+	const txRequest: RawEvmTransaction = await sdk.bridge.rawTxBuilder.send({
 		amount: step.action.fromAmount,
 		fromAccountAddress: step.action.fromAddress ?? "",
 		toAccountAddress: step.action.toAddress ?? "",
 		sourceToken,
 		destinationToken,
 		messenger: Messenger.ALLBRIDGE,
-	});
+	}) as RawEvmTransaction;
 
 	return {
 		...step,
-		transactionRequest: txRequest,
-	};
+		transactionRequest: {
+			...txRequest,
+			chainId: step.action.fromChainId,
+			value: toHex(BigInt(txRequest.value?.toString() ?? 0n))
+		}
+	}
 }
