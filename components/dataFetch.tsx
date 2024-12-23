@@ -6,7 +6,7 @@ import { ChainCombobox } from "@/components/chains/chain-selector";
 import api from "@/lib/core/data/api"
 import { muwpChains } from "@/muwp";
 import { TokenList } from '@uniswap/token-lists'
-import { AptosChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
+import { AptosChainId, HashportChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
 import { tokensGet } from "@/lib/core/data/tokenLib";
 
 export async function TokenSelector({
@@ -89,6 +89,13 @@ export async function ChainSelector({
             logoURI: "/icons/stellar.svg",
             chainId: StellarChainId,
             type: "Stellar"
+        })
+        chainList.push({
+            value: `hedera:${HashportChainId}`,
+            label: "Hedera",
+            logoURI: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/hedera/info/logo.png",
+            chainId: HashportChainId,
+            type: "Hedera"
         })
     }
 

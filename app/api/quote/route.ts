@@ -3,9 +3,10 @@ import { z } from "zod";
 import { generateAccount } from "./generateAccount";
 import { handleLiFiRoutes } from "./fetchRoutesLiFi";
 import { Address, EthereumAddress } from "@/lib/core/model/Address";
-import { AptosChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
+import { AptosChainId, HashportChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
 import { handleAptosRoutes } from "./fetchRoutesAptos";
 import { handleAllbridgeRoutes } from "./fetchRoutesAllBridge";
+import { handleHashportRoutes } from "./fetchRoutesHashport";
 
 const Token = z.object({
   address: Address,
@@ -83,6 +84,9 @@ export async function POST(request: Request) {
             break;
           case StellarChainId:
             routes = (await handleAllbridgeRoutes(input, tempAccount)).routes;
+            break;
+          case HashportChainId: // Hedera
+            routes = (await handleHashportRoutes(input, tempAccount)).routes;
             break;
           default:
             routes = (await handleLiFiRoutes(input, tempAccount)).routes;

@@ -1,0 +1,87 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="18" y="12" width="64" height="77">
+<path d="M81.2509 12H18V88.9674H81.2509V12Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_322_167)">
+<mask id="mask1_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="-17" y="3" width="133" height="94">
+<path d="M115.415 3.68115H-16.1055V96.6765H115.415V3.68115Z" fill="white"/>
+</mask>
+<g mask="url(#mask1_322_167)">
+<mask id="mask2_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="18" y="28" width="57" height="39">
+<path d="M31.7418 36.9297C31.7418 41.7903 35.6821 45.73 40.5427 45.73C42.1503 45.73 43.6562 45.2969 44.9538 44.5437L53.4712 51.535V55.1159H35.352C34.4115 51.2678 30.9425 48.4115 26.8048 48.4115C21.9442 48.4115 18.0039 52.3512 18.0039 57.2123C18.0039 62.0729 21.9442 66.0132 26.8048 66.0132C30.9425 66.0132 34.4115 63.1568 35.352 59.3082H53.4712H54.2345H57.663V49.0628H57.065L47.9913 41.6148C48.488 40.8273 48.8626 39.9559 49.0899 39.0261H74.0222V34.8338H49.0899C48.1494 30.9858 44.6805 28.1294 40.5427 28.1294C35.6821 28.1294 31.7418 32.0697 31.7418 36.9297Z" fill="white"/>
+</mask>
+<g mask="url(#mask2_322_167)">
+<path d="M12.3926 28.9799L72.7646 19.8325L79.6327 65.1627L19.2607 74.3095L12.3926 28.9799Z" fill="url(#paint0_linear_322_167)"/>
+</g>
+</g>
+<mask id="mask3_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="-17" y="3" width="133" height="94">
+<path d="M115.415 3.68115H-16.1055V96.6765H115.415V3.68115Z" fill="white"/>
+</mask>
+<g mask="url(#mask3_322_167)">
+<mask id="mask4_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="49" y="46" width="19" height="19">
+<path d="M49.9902 55.6475C49.9902 60.508 53.9305 64.4478 58.7911 64.4478C63.6517 64.4478 67.592 60.508 67.592 55.6475C67.592 50.7869 63.6517 46.8472 58.7911 46.8472C53.9305 46.8472 49.9902 50.7875 49.9902 55.6475Z" fill="white"/>
+</mask>
+<g mask="url(#mask4_322_167)">
+<path d="M67.5914 46.8472H49.9902V64.4478H67.5914V46.8472Z" fill="url(#paint1_linear_322_167)"/>
+</g>
+</g>
+<mask id="mask5_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="-17" y="3" width="133" height="94">
+<path d="M115.415 3.68115H-16.1055V96.6765H115.415V3.68115Z" fill="white"/>
+</mask>
+<g mask="url(#mask5_322_167)">
+<mask id="mask6_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="26" y="12" width="56" height="77">
+<path d="M68.2558 12.1699C65.2385 12.648 61.8253 14.0717 58.2838 16.2553C59.2024 15.8852 60.1086 15.5809 60.9984 15.3457C73.671 12 77.5112 28.6759 69.5574 47.8391C61.9479 66.171 48.3371 80.6582 37.6749 82.8671C31.6742 84.1103 25.7949 80.4287 26.2207 68.637C25.1503 81.2196 29.0315 90.4755 39.2049 88.7627C51.963 86.6151 68.4729 69.1905 76.8997 47.8391C84.8524 27.6909 81.4763 12.0023 70.332 12C69.6671 12.0006 68.9758 12.0563 68.2558 12.1699Z" fill="white"/>
+</mask>
+<g mask="url(#mask6_322_167)">
+<path d="M20.0605 12.3313L84.5984 8.12939L89.9383 90.1447L25.4004 94.3466L20.0605 12.3313Z" fill="url(#paint2_radial_322_167)"/>
+</g>
+</g>
+<mask id="mask7_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="-17" y="3" width="133" height="94">
+<path d="M115.415 3.68115H-16.1055V96.6765H115.415V3.68115Z" fill="white"/>
+</mask>
+<g mask="url(#mask7_322_167)">
+<mask id="mask8_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="34" y="12" width="48" height="77">
+<path d="M69.0025 12.0737C79.524 12.7689 82.7061 27.8541 74.9492 47.5073C66.5229 68.8592 50.0124 86.2837 37.2544 88.4314C36.1119 88.6237 35.0505 88.6744 34.0645 88.6012C35.5545 89.0169 37.2622 89.0895 39.1984 88.7638C51.9564 86.6162 68.4664 69.1916 76.8932 47.8402C84.8458 27.6915 81.4691 12.0045 70.3243 12.0039C69.8951 12.0028 69.4547 12.0264 69.0025 12.0737Z" fill="white"/>
+</mask>
+<g mask="url(#mask8_322_167)">
+<path d="M84.8453 12.0029H34.0645V89.0891H84.8453V12.0029Z" fill="url(#paint3_radial_322_167)"/>
+</g>
+</g>
+<mask id="mask9_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="-17" y="3" width="133" height="94">
+<path d="M115.415 3.68115H-16.1055V96.6765H115.415V3.68115Z" fill="white"/>
+</mask>
+<g mask="url(#mask9_322_167)">
+<mask id="mask10_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="-17" y="3" width="133" height="94">
+<path d="M115.417 3.68164H-16.1035V96.6769H115.417V3.68164Z" fill="white"/>
+</mask>
+<g mask="url(#mask10_322_167)">
+<g opacity="0.4">
+<mask id="mask11_322_167" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="34" y="12" width="48" height="77">
+<path d="M81.2559 12.0044H34.0723V88.9685H81.2559V12.0044Z" fill="white"/>
+</mask>
+<g mask="url(#mask11_322_167)">
+<path d="M69.0103 12.0744C79.5318 12.7696 82.7139 27.8548 74.9576 47.5079C66.5308 68.8599 50.0202 86.2844 37.2622 88.4321C36.1197 88.6244 35.0583 88.6756 34.0723 88.6019C35.5618 89.0176 37.2701 89.0902 39.2062 88.7645C51.9642 86.6169 68.4742 69.1923 76.901 47.8404C85.1602 26.9148 81.2013 10.802 69.0103 12.0744Z" fill="#020000"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_322_167" x1="24.4494" y1="50.3053" x2="53.2672" y2="45.9391" gradientUnits="userSpaceOnUse">
+<stop stop-color="#5641E1"/>
+<stop offset="1" stop-color="#4083E5"/>
+</linearGradient>
+<linearGradient id="paint1_linear_322_167" x1="49.9508" y1="55.6532" x2="67.5628" y2="55.6532" gradientUnits="userSpaceOnUse">
+<stop stop-color="#5641E1"/>
+<stop offset="1" stop-color="#4083E5"/>
+</linearGradient>
+<radialGradient id="paint2_radial_322_167" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(53.5794 50.6065) rotate(-3.7252) scale(36.3701 49.2993)">
+<stop stop-color="#5B3EE1"/>
+<stop offset="1" stop-color="#8023E5"/>
+</radialGradient>
+<radialGradient id="paint3_radial_322_167" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(57.5686 50.5004) scale(31.9717 37.4948)">
+<stop stop-color="#8023E5"/>
+<stop offset="1" stop-color="#5B3EE1"/>
+</radialGradient>
+</defs>
+</svg>
