@@ -16,5 +16,5 @@ export interface Token extends CellLike {
 
 export interface Chain extends CellLike {
     chainId: number
-    type: "EVM" | "SVM" | "Aptos" | "Stellar"
+    type: "EVM" | "SVM" | "Aptos" | "Stellar" | "Hedera"
 }
