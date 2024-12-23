@@ -9,6 +9,7 @@ import * as chains from 'viem/chains'
 import { Address, EthereumAddress } from "../core/model/Address";
 import { AptosBridgeTxData } from "../layerzero/aptos/txData";
 import { AllBridgeTxData } from "../allbridge/txData";
+import { HashportTxData } from "../hashport/txData";
 
 
 const Hash = z.string().regex(/^0x[0-9a-fA-F]+$/, "Hash must be a valid hex string");
@@ -92,6 +93,8 @@ export const consumeStep = inngest.createFunction(
                 fullStep = await AptosBridgeTxData(_step as Step);
             } else if (_step.tool == "Allbridge") {
                 fullStep = await AllBridgeTxData(_step as Step);
+            } else if (_step.tool == "Hashport") {
+                fullStep = await HashportTxData(_step as Step);
             } else {
                 fullStep = await advancedAPI.advancedStepTransactionPost(_step as Step);
             }
