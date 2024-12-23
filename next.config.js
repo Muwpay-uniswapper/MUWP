@@ -15,7 +15,7 @@ const nextConfig = {
       },
     ];
   },
-  webpack: (config) => {
+  webpack: (config, { nextRuntime }) => {
     config.resolve.fallback = { fs: false };
     config.externals.push(
       "pino-pretty",
@@ -25,6 +25,18 @@ const nextConfig = {
       "utf-8-validate",
     );
 
+    if (nextRuntime === 'edge') {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'cross-fetch': require.resolve('./fetch-shim.js')
+      };
+      
+      // Add a fallback for the dynamic import
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'cross-fetch': require.resolve('./fetch-shim.js')
+      };
+    }
     return config;
   },
 }
