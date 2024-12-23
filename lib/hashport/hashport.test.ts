@@ -2,7 +2,6 @@ import { describe, expect, it } from "bun:test";
 import { HashportTxData } from "./txData";
 import { transactionRequestSchema } from "../inngest/consumeStep";
 import { handleHashportRoutes } from "@/app/api/quote/fetchRoutesHashport";
-import { zeroAddress } from "viem";
 
 describe("Hashport", () => {
     it("should be able to get quotes", async () => {
