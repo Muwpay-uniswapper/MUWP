@@ -69,26 +69,27 @@ export async function handleHashportRoutes(
 
   for (const req of queries) {
     const previousRoutes: Route[] = [];
+    const tokens = Object.values(await hashportApiClient.networkAssets(req.fromChainId));
+    const commonSymbols = req.toTokenAddress === "0.0.1055459" ? ["usdc"] : ["hbar"];
+
+    const intermediateTokenSymbol = commonSymbols[0];
+
+    const intermediateSourceToken = ensure(
+      tokens.find((t) => t.symbol.includes(intermediateTokenSymbol.toUpperCase())),
+    );
 
     let canBridgeDirectly = false;
     if (
       Object.values(chainDetailsMap).some(chain => chain.id === req.fromChainId) &&
-      Object.values(chainDetailsMap).some(chain => chain.id === req.toChainId)
+      Object.values(chainDetailsMap).some(chain => chain.id === req.toChainId) &&
+      // Check from token is either USDC or HBAR
+      req.fromTokenAddress == intermediateSourceToken.id
     ) {
       canBridgeDirectly = true;
       console.log("Can bridge directly");
     }
 
     if (!canBridgeDirectly) {
-      const tokens = Object.values(await hashportApiClient.networkAssets(req.fromChainId));
-
-      const commonSymbols = req.toTokenAddress === "0.0.1055459" ? ["usdc"] : ["hbar"];
-
-      const intermediateTokenSymbol = commonSymbols[0];
-
-      const intermediateSourceToken = ensure(
-        tokens.find((t) => t.symbol.includes(intermediateTokenSymbol.toUpperCase())),
-      );
 
       // Use LiFi to swap to the intermediate token on the source chain
       const lifiInput: InputType = {
