@@ -10,9 +10,9 @@ import { HashportApiClient } from "@hashport/sdk";
 import { FinalHashportStepBuilder } from "@/lib/hashport/stepBuilder";
 
 // ensure is a function that returns a value or throws an error if the value is undefined or null
-function ensure<T>(value: T | undefined): T {
+function ensure<T>(value: T | undefined, error?: string): T {
   if (value === undefined || value === null) {
-    throw new Error("Value is undefined");
+    throw new Error(error ?? "Value is undefined");
   }
   return value;
 }
@@ -76,6 +76,7 @@ export async function handleHashportRoutes(
 
     const intermediateSourceToken = ensure(
       tokens.find((t) => t.symbol.includes(intermediateTokenSymbol.toUpperCase())),
+      `No intermediate token found for ${intermediateTokenSymbol}`,
     );
 
     let canBridgeDirectly = false;

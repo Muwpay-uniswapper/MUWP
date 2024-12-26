@@ -106,7 +106,7 @@ export async function FinalHashportStepBuilder(
   });
 
   const gasPrice = await client.getGasPrice();
-  const fullGasEstimate = gasEstimate * gasPrice;
+  const fullGasEstimate = gasEstimate * gasPrice * 3n; // Triple the gas estimate, because I absolutely have no idea how much gas is needed
 
   const gasFeeAmountUSD = Number(fullGasEstimate * BigInt(Math.round(Number(nativeToken.priceUSD ?? "1") * 1e9)) / 10n ** 18n) / 1e9;
 
