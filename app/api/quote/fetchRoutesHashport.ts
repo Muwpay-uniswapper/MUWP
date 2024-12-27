@@ -70,7 +70,17 @@ export async function handleHashportRoutes(
   for (const req of queries) {
     const previousRoutes: Route[] = [];
     const tokens = Object.values(await hashportApiClient.networkAssets(req.fromChainId));
-    const commonSymbols = req.toTokenAddress === "0.0.1055459" ? ["usdc"] : ["hbar"];
+    let commonSymbols: string[];
+    switch (req.toTokenAddress) {
+      case "0.0.1302528":
+        commonSymbols = ["busd"];
+        break;
+      case "0.0.1055459":
+        commonSymbols = ["usdc"];
+        break;
+      default:
+        commonSymbols = ["hbar"];
+    }
 
     const intermediateTokenSymbol = commonSymbols[0];
 
