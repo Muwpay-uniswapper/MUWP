@@ -16,6 +16,17 @@ export async function getTokensHashportBridge(): Promise<TokensGet200Response> {
                 chainId: HashportChainId,
             },
             {
+                name: "BUSD",
+                symbol: "BUSD[hts]",
+                coinKey: "busd:hedera:hashport",
+                logoURI:
+                    "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56/logo.png",
+                address: "0.0.1302528",
+                decimals: 18,
+                priceUSD: "1",
+                chainId: HashportChainId,
+            },
+            {
                 name: "HBAR",
                 symbol: "HBAR",
                 coinKey: "hbar:hedera:hashport",
