@@ -23,20 +23,45 @@ export function AddressSelector({
 }) {
     const { connected, account } = useWallet();
     const { address } = useAccount();
-    useEffect(() => {
-        if (chain.chainId == AptosChainId) {
-            setTargetAddress(connected ? account?.address || "" : "")
-        } else {
-            setTargetAddress(address || "")
-        }
-    }, [connected, address, chain.chainId, setTargetAddress, account?.address])
 
-    return <div className="relative">
-        <Input placeholder={`Your ${chain?.label} address`}
-            value={targetAddress}
-            onChange={(e) => setTargetAddress(e.target.value)} />
-        {chain.chainId == AptosChainId && <AptosWalletCombobox className="absolute right-0 top-0" />}
-    </div>
+    useEffect(() => {
+        if (chain.chainId === AptosChainId) {
+            // For Aptos, use the wallet adapter's account if connected.
+            setTargetAddress(connected ? account?.address || "" : "");
+        } else if (chain.chainId === 7) { // StellarChainId
+            // For Stellar, verify that the address looks like a typical Stellar public key:
+            // Stellar public keys are 56 characters long and start with 'G'
+            if (address && /^G[A-Z0-9]{55}$/.test(address)) {
+                setTargetAddress(address);
+            } else {
+                setTargetAddress("");
+            }
+        } else if (chain.chainId === 0x127) { // HashportChainId
+            // For Hashport (e.g., Hedera), perform a basic validation.
+            // For illustration, assume valid addresses are in the format "shard.realm.account", e.g., "0.0.1234"
+            if (address && /^\d+\.\d+\.\d+$/.test(address)) {
+                setTargetAddress(address);
+            } else {
+                setTargetAddress("");
+            }
+        } else {
+            // Default: for EVM and other supported chains, simply use the wagmi address if available.
+            setTargetAddress(address || "");
+        }
+    }, [connected, address, chain.chainId, setTargetAddress, account?.address]);
+
+    return (
+        <div className="relative">
+            <Input
+                placeholder={`Your ${chain?.label} address`}
+                value={targetAddress}
+                onChange={(e) => setTargetAddress(e.target.value)}
+            />
+            {chain.chainId === AptosChainId && (
+                <AptosWalletCombobox className="absolute right-0 top-0" />
+            )}
+        </div>
+    );
 }
 
 export function AptosWalletCombobox({
