@@ -10,6 +10,7 @@ import { nanoid } from "nanoid";
 import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
 import { tokenGet } from "../core/data/tokenLib";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
+import { native } from "bun:sqlite";
 
 export async function FinalAllbridgeStepBuilder(
   {
@@ -87,7 +88,7 @@ export async function FinalAllbridgeStepBuilder(
   const feeCosts =
     (abs(BigInt(fromAmount), amountToBeReceived) * 10n ** 9n) /
     BigInt(Math.round(Number(nativeToken.priceUSD ?? "1") * 1e9));
-  const feeCostsFloat = Number(formatUnits(feeCosts, sourceToken.decimals));
+  const feeCostsFloat = Number(formatUnits(feeCosts, 8));
   const feeCostsUSD = feeCostsFloat;
 
   const approvalAddress = sourceToken.bridgeAddress;
