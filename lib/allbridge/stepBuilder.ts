@@ -10,7 +10,6 @@ import { nanoid } from "nanoid";
 import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
 import { tokenGet } from "../core/data/tokenLib";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
-import { native } from "bun:sqlite";
 
 export async function FinalAllbridgeStepBuilder(
   {
