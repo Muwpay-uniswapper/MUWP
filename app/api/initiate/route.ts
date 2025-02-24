@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
         const hex = encodePacked(
             ['bytes32', 'bytes32', 'uint8'],
-            [toHex(r), toHex(s), v]
+            [toHex(r, { size: 32 }), toHex(s, { size: 32 }), v]
         )
 
         /*
