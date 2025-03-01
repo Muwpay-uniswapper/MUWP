@@ -8,6 +8,11 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import React, { useState } from "react";
 import { zeroAddress } from "viem";
+import {
+  AptosChainId,
+  HashportChainId,
+  StellarChainId,
+} from "@/lib/layerzero/aptos/omnichains";
 
 export function FindRoutesButton() {
   const {
@@ -32,6 +37,7 @@ export function FindRoutesButton() {
   } = useRouteStore();
   const { address, chain } = useAccount();
   const [trials, setTrials] = useState(0);
+
   React.useEffect(() => {
     const interval = setInterval(async () => {
       if (process.env.NODE_ENV !== "production") return;
@@ -106,9 +112,41 @@ export function FindRoutesButton() {
     getRoutes()[0]?.id,
   ]);
 
+  // Function to validate target address based on chain
+  const validateTargetAddress = (
+    address: string | undefined,
+    chainId: number,
+  ) => {
+    if (!address) return false;
+
+    if (chainId === AptosChainId) {
+      // For Aptos, you might need specific validation logic
+      // This is a placeholder - implement actual Aptos address validation
+      return true;
+    } else if (chainId === StellarChainId) {
+      // Stellar public keys are 56 characters long and start with 'G'
+      return /^G[A-Z0-9]{55}$/.test(address);
+    } else if (chainId === HashportChainId) {
+      // For Hashport (e.g., Hedera), addresses are in the format "shard.realm.account"
+      return /^\d+\.\d+\.\d+$/.test(address);
+    } else {
+      // Default: for EVM and other supported chains, consider any non-empty string valid
+      // You might want to add more specific EVM address validation here
+      return address.length > 0;
+    }
+  };
+
   const onClick = async () => {
     if (!chain || !outputChain || !address || !outputTokens) return;
+
     try {
+      // Validate target address based on the output chain
+      if (!validateTargetAddress(targetAddress, outputChain)) {
+        throw new Error(
+          `Invalid target address for the selected chain: ${targetAddress}`,
+        );
+      }
+
       const distribution = outputDistribution.map(
         (a, i, arr) => a - (arr[i - 1] ?? 0),
       );
