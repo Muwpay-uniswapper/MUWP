@@ -1,0 +1,57 @@
+{
+  "name": "@muwp/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for MUWP wallet orchestration, asset management, and Stellar DEX swaps.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --config tsup.config.cjs",
+    "dev": "tsup src/index.ts --watch --config tsup.config.cjs",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@allbridge/bridge-core-sdk": "^4.2.2",
+    "@stellar/stellar-sdk": "^12.1.1",
+    "cross-fetch": "^4.0.0",
+    "eventemitter3": "^5.0.1",
+    "fraction.js": "^4.3.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.3",
+    "@types/node": "^20.12.7",
+    "rimraf": "^5.0.5",
+    "tslib": "^2.6.2",
+    "tsup": "^8.1.0",
+    "typescript": "^5.6.3",
+    "vitest": "^1.6.1"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "keywords": [
+    "muwp",
+    "sdk",
+    "stellar",
+    "dex",
+    "swap",
+    "wallet"
+  ]
+}
+
