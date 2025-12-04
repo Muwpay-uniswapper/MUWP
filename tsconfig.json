@@ -38,10 +38,12 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "next.config.js"
+    "next.config.js",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules","sst.config.ts"
+    "node_modules",
+    "sst.config.ts"
   ],
   "ts-node": {
     // Do not forget to `npm i -D tsconfig-paths`
