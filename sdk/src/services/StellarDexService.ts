@@ -1,9 +1,9 @@
 import {
   Asset,
   BASE_FEE,
+  Horizon,
   Keypair,
   Operation,
-  Server,
   TransactionBuilder,
 } from "@stellar/stellar-sdk";
 import { StellarAsset } from "../types/api";
@@ -22,11 +22,11 @@ export interface MarketOrderInput {
 }
 
 export class StellarDexService {
-  private readonly server: Server;
+  private readonly server: Horizon.Server;
   private readonly networkPassphrase: string;
 
   constructor(settings: StellarSettings) {
-    this.server = new Server(settings.horizonUrl);
+    this.server = new Horizon.Server(settings.horizonUrl);
     this.networkPassphrase = settings.networkPassphrase;
   }
 

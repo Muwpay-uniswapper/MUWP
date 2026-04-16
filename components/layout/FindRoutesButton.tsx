@@ -137,7 +137,7 @@ export function FindRoutesButton() {
   };
 
   const onClick = async () => {
-    if (!chain || !outputChain || !address || !outputTokens) return;
+    if (!chain || !outputChain || !address || !outputTokens.length || !inputTokens.length) return;
 
     try {
       // Validate target address based on the output chain

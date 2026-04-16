@@ -87,7 +87,7 @@ export function AptosWalletCombobox({
                     <CommandInput placeholder="Search wallet..." />
                     <CommandEmpty>No wallet found.</CommandEmpty>
                     <CommandGroup>
-                        {wallets.map((wallet) => (
+                        {(wallets ?? []).map((wallet) => (
                             <CommandItem
                                 key={wallet.name}
                                 value={wallet.name}

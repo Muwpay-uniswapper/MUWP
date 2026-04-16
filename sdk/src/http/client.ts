@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  resolveConfig,
+  resolveBaseSdkConfig,
   type BaseSdkConfig,
   type FetchImplementation,
   withBase
@@ -28,7 +28,7 @@ export class HttpClient {
   private readonly retryDelayMs: number;
 
   constructor(options: HttpClientOptions = {}) {
-    const config = resolveConfig(options);
+    const config = resolveBaseSdkConfig(options);
     this.baseUrl = config.baseUrl;
     this.apiKey = config.apiKey;
     this.fetcher = config.fetch;

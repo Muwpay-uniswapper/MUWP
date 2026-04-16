@@ -1,4 +1,4 @@
-import fetch, { RequestInit } from "cross-fetch";
+import fetch from "cross-fetch";
 import { ZodSchema } from "zod";
 import { retry } from "../utils/retry";
 

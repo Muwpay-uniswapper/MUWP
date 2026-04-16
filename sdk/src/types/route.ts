@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TokenSchema } from "./token";
+import { TokenSchema, type Token } from "./token";
 
 export const GasCostSchema = z.object({
   type: z.string(),
@@ -50,6 +50,20 @@ export const ToolDetailsSchema = z.object({
   logoURI: z.string().optional()
 });
 
+export interface Step {
+  id: string;
+  type: string;
+  tool: string;
+  action: z.infer<typeof ActionSchema>;
+  estimate?: z.infer<typeof EstimateSchema>;
+  integrator?: string;
+  referrer?: string;
+  execution?: unknown;
+  transactionRequest?: unknown;
+  includedSteps?: Step[];
+  toolDetails: z.infer<typeof ToolDetailsSchema>;
+}
+
 export const StepSchema: z.ZodType<Step> = z.lazy(() =>
   z.object({
     id: z.string(),
@@ -90,6 +104,4 @@ export type FeeCost = z.infer<typeof FeeCostSchema>;
 export type Action = z.infer<typeof ActionSchema>;
 export type Estimate = z.infer<typeof EstimateSchema>;
 export type ToolDetails = z.infer<typeof ToolDetailsSchema>;
-export type Step = z.infer<typeof StepSchema>;
 export type Route = z.infer<typeof RouteSchema>;
-
