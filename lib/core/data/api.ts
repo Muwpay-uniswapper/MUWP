@@ -12,7 +12,7 @@ class LiFiAuth implements SecurityAuthentication {
 }
 
 const config = createConfiguration({
-    baseServer: (process.env.NODE_ENV === "production" || process.env.LIFI_API_KEY) ? server1 : server2,
+    baseServer: server1,
     authMethods: {
         default: new LiFiAuth()
     }

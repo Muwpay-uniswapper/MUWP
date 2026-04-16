@@ -5,12 +5,16 @@ import { InputType } from "./route";
 
 
 export async function generateAccount(input: InputType) {
-    const accountInfo = await store.get(input.tempAccount ?? "") as string | object | null;
-    const _tempAccount = typeof accountInfo === "string" ? JSON.parse(accountInfo)
-        : typeof accountInfo === "object" ? (accountInfo as any)
-            : null;
-
-    console.log("Account info retrieved successfully");
+    let _tempAccount = null;
+    try {
+        const accountInfo = await store.get(input.tempAccount ?? "") as string | object | null;
+        _tempAccount = typeof accountInfo === "string" ? JSON.parse(accountInfo)
+            : typeof accountInfo === "object" ? (accountInfo as any)
+                : null;
+        console.log("Account info retrieved successfully");
+    } catch (e) {
+        console.log("KV get failed (treating as no account):", e instanceof Error ? e.message : e);
+    }
 
     if (!input.tempAccount || typeof input.tempAccount == "undefined" || _tempAccount == null || typeof _tempAccount == "undefined" || _tempAccount.index == null || typeof _tempAccount.index == "undefined") {
 
@@ -32,13 +36,16 @@ export async function generateAccount(input: InputType) {
 
         console.log("Account generated successfully");
 
-        await store.set(account.address, JSON.stringify({
-            index,
-            from: input.fromAddress,
-            to: input.toAddress
-        }));
-
-        console.log("Account stored successfully");
+        try {
+            await store.set(account.address, JSON.stringify({
+                index,
+                from: input.fromAddress,
+                to: input.toAddress
+            }));
+            console.log("Account stored successfully");
+        } catch (e) {
+            console.log("KV set failed (account won't be persisted):", e instanceof Error ? e.message : e);
+        }
 
         // await inngest.send({
         //     name: "app/account.created",

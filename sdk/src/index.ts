@@ -1,19 +1,42 @@
-export * from "./client";
-export * from "./config";
-export * from "./services/RouteService";
-export * from "./services/WalletService";
-export * from "./services/AssetService";
+// ─── Core config & HTTP ────────────────────────────────────────────────────
+export {
+  resolveBaseSdkConfig,
+  withBase,
+  type BaseSdkConfig,
+  type FetchImplementation,
+  type ResolvedSdkConfig,
+} from "./config";
+export { HttpClient, type HttpClientOptions, type HttpRequestConfig } from "./http/client";
+
+// ─── Services ──────────────────────────────────────────────────────────────
+// Primary services (new implementation)
+export * from "./services/asset";
+export * from "./services/wallet";
 export * from "./services/StellarDexService";
+
+// Swap & routing services
+export * from "./services/RouteService";
 export * from "./services/SwapService";
-export * from "./types/api";
-export * from "./types/routes";
-import { resolveConfig, type ResolvedSdkConfig } from "./config";
+
+// ─── Types ─────────────────────────────────────────────────────────────────
+// New type system
+export * from "./types";
+
+// Legacy types needed by RouteService / SwapService public API
+export type {
+  StellarAsset,
+  SwapSigner,
+  SwapSignerPayload,
+  InitiateRequest,
+  InitiateResponse,
+  QuoteRequest,
+} from "./types/api";
+
+// ─── MuwpSdk — primary entry point ─────────────────────────────────────────
+import { resolveBaseSdkConfig, type ResolvedSdkConfig } from "./config";
 import { HttpClient, type HttpClientOptions } from "./http/client";
-import {
-  StellarAssetService,
-  type StellarAssetServiceOptions,
-  WalletService
-} from "./services";
+import { WalletService } from "./services/wallet";
+import { StellarAssetService, type StellarAssetServiceOptions } from "./services/asset";
 
 export interface MuwpSdkOptions extends HttpClientOptions {
   assetOptions?: StellarAssetServiceOptions;
@@ -28,7 +51,7 @@ export class MuwpSdk {
   constructor(options: MuwpSdkOptions = {}) {
     const { assetOptions, ...httpOptions } = options;
     this.http = new HttpClient(httpOptions);
-    this.config = resolveConfig(httpOptions);
+    this.config = resolveBaseSdkConfig(httpOptions);
     this.wallets = new WalletService(this.http);
     this.assets = new StellarAssetService(assetOptions);
   }
@@ -40,18 +63,12 @@ export class MuwpSdk {
   async ping(): Promise<boolean> {
     const res = await this.http.request<{ status?: string }>({
       method: "GET",
-      path: "/api/status"
+      path: "/api/status",
     });
     return typeof res === "object";
   }
 }
 
-export function createMuwpSdk(config?: MuwpSdkOptions) {
-  return new MuwpSdk(config);
+export function createMuwpSdk(options?: MuwpSdkOptions): MuwpSdk {
+  return new MuwpSdk(options);
 }
-
-export * from "./config";
-export * from "./http/client";
-export * from "./types";
-export * from "./services";
-

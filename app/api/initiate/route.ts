@@ -66,7 +66,7 @@ export async function POST(request: Request) {
                 console.log("feeCost", feeCost)
 
                 const chain = muwpChains.find(chain => chain.id === step.action.fromToken.chainId)
-                const mul: number = typeof chain?.fees?.baseFeeMultiplier == "number" ? chain?.fees?.baseFeeMultiplier : 1.5;
+                const mul: number = typeof (chain?.fees as any)?.baseFeeMultiplier == "number" ? (chain?.fees as any)?.baseFeeMultiplier : 1.5;
 
                 console.log("mul", mul);
 
@@ -152,10 +152,15 @@ export async function POST(request: Request) {
 
         console.log("totalGas", _totalGas)
         console.log("input.routes", input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n))
-        const txn = await client.prepareTransactionRequest({
+        const txTo = chain?.muwpContract as Address;
+        const ethInputTotal = input.routes
+            .map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n)
+            .reduce((acc, value) => acc + value, 0n);
+        const txValue = totalGas + ethInputTotal;
+        const txn = await (client as any).prepareTransactionRequest({
             account: input.gasPayer as `0x${string}`,
-            to: chain?.muwpContract,
-            value: totalGas + input.routes.map(route => route.steps[0].action.fromToken.address === zeroAddress ? BigInt(route.steps[0].action.fromAmount) : 0n).reduce((acc, value) => acc + value, 0n),
+            to: txTo,
+            value: txValue,
             data,
             chain: client.chain,
             type: "legacy"

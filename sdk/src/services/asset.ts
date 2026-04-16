@@ -9,16 +9,27 @@ import {
   Address,
   Asset,
   BASE_FEE,
+  Horizon,
   Keypair,
   Networks,
   Operation,
   Memo,
-  Server as HorizonServer,
   SorobanRpc,
   TransactionBuilder,
   xdr
 } from "@stellar/stellar-sdk";
-import { formatUnits, parseUnits } from "viem";
+function formatUnits(value: bigint, decimals: number): string {
+  const s = value.toString().padStart(decimals + 1, "0");
+  const integer = s.slice(0, s.length - decimals);
+  const fraction = s.slice(s.length - decimals);
+  return fraction ? `${integer}.${fraction}` : integer;
+}
+
+function parseUnits(value: string, decimals: number): bigint {
+  const [integer = "0", fraction = ""] = value.split(".");
+  const padded = fraction.padEnd(decimals, "0").slice(0, decimals);
+  return BigInt(integer + padded);
+}
 
 export interface StellarAssetServiceOptions {
   horizonUrl?: string;
@@ -86,7 +97,7 @@ const DEFAULT_TRUST_LIMIT = "922337203685.4775807";
 
 export class StellarAssetService {
   protected readonly sdk: AllbridgeCoreSdk;
-  protected readonly horizon: HorizonServer;
+  protected readonly horizon: Horizon.Server;
   protected readonly soroban?: SorobanRpc.Server;
   protected readonly networkPassphrase: string;
   protected readonly defaultTimeout: number;
@@ -95,7 +106,7 @@ export class StellarAssetService {
 
   constructor(options: StellarAssetServiceOptions = {}) {
     this.sdk = new AllbridgeCoreSdk(options.rpcUrls ?? nodeRpcUrlsDefault);
-    this.horizon = new HorizonServer(options.horizonUrl ?? "https://horizon.stellar.org");
+    this.horizon = new Horizon.Server(options.horizonUrl ?? "https://horizon.stellar.org");
     this.networkPassphrase = options.networkPassphrase ?? Networks.PUBLIC;
     this.defaultTimeout = options.defaultTimeoutSeconds ?? 180;
     this.soroban = options.sorobanUrl
@@ -124,8 +135,11 @@ export class StellarAssetService {
       throw new Error("Missing Allbridge chain metadata");
     }
     const sourceToken = this.findToken(sourceChain, params.fromTokenAddress);
+    if (!sourceToken) {
+      throw new Error("Unsupported token pair for Allbridge");
+    }
     const destinationToken = this.locateDestinationToken(destinationChain, sourceToken.symbol);
-    if (!sourceToken || !destinationToken) {
+    if (!destinationToken) {
       throw new Error("Unsupported token pair for Allbridge");
     }
     return {
@@ -218,14 +232,22 @@ export class StellarAssetService {
 
   async fetchBalances(account: string): Promise<BalanceSummary[]> {
     const res = await this.horizon.loadAccount(account);
-    return res.balances.map((bal) => ({
-      assetCode: bal.asset_code ?? "XLM",
-      assetIssuer: bal.asset_issuer ?? undefined,
-      assetType: bal.asset_type,
-      balance: bal.balance,
-      limit: bal.limit ?? undefined,
-      isNative: bal.asset_type === "native"
-    }));
+    return res.balances.map((bal) => {
+      if (bal.asset_type === "native") {
+        return { assetCode: "XLM", assetIssuer: undefined, assetType: bal.asset_type, balance: bal.balance, limit: undefined, isNative: true };
+      }
+      if (bal.asset_type === "liquidity_pool_shares") {
+        return { assetCode: "LP", assetIssuer: undefined, assetType: bal.asset_type, balance: bal.balance, limit: undefined, isNative: false };
+      }
+      return {
+        assetCode: bal.asset_code,
+        assetIssuer: bal.asset_issuer,
+        assetType: bal.asset_type,
+        balance: bal.balance,
+        limit: bal.limit,
+        isNative: false,
+      };
+    });
   }
 
   async fetchSorobanBalance(contractId: string, account: string): Promise<SorobanBalance> {
@@ -236,7 +258,10 @@ export class StellarAssetService {
       xdr.ScVal.scvSymbol("BALANCE"),
       xdr.ScVal.scvAddress(Address.fromString(account).toScAddress())
     ]);
-    const entry = await this.soroban.getContractData(contractId, key);
+    const entry = await this.soroban.getContractData(contractId, key) as unknown as {
+      val?: xdr.ScVal;
+      latestLedger?: number;
+    };
     return {
       raw: entry.val?.toXDR("base64") ?? "",
       decoded: this.decodeBalance(entry.val),

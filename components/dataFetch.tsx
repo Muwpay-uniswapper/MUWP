@@ -5,7 +5,6 @@ import { Chain, Token } from "@/lib/core/model/CellLike";
 import { ChainCombobox } from "@/components/chains/chain-selector";
 import api from "@/lib/core/data/api"
 import { muwpChains } from "@/muwp";
-import { TokenList } from '@uniswap/token-lists'
 import { AptosChainId, HashportChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
 import { tokensGet } from "@/lib/core/data/tokenLib";
 
@@ -25,7 +24,7 @@ export async function TokenSelector({
 
     const tokens = await tokensGet(chain)
 
-    const safeTokens = await fetch("https://gateway.ipfs.io/ipns/tokens.uniswap.org").then((res) => res.json()) as TokenList
+    const safeTokens = await fetch("https://gateway.ipfs.io/ipns/tokens.uniswap.org").then((res) => res.json()) as { tokens: { address: string; chainId: number }[] }
 
     const tokenList: Token[] = Array.isArray(tokens.tokens) ? tokens.tokens.map((token) => {
         return {
