@@ -1,5 +1,5 @@
 import { StellarChainId } from "../layerzero/aptos/omnichains";
-import { TokensGet200Response } from "../li.fi-ts";
+import { TokensGet200Response } from "@muwp/lifi-client";
 
 export async function getTokensAllBridge(): Promise<TokensGet200Response> {
     return {

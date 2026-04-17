@@ -1,6 +1,6 @@
 import { inngest } from "./client";
 import { z } from "zod";
-import { Route } from "../li.fi-ts";
+import { Route } from "@muwp/lifi-client";
 import { createPublicClient, extractChain, http } from "viem";
 import * as chains from 'viem/chains'
 import { EthereumAddress } from "../core/model/Address";

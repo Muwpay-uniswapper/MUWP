@@ -1,7 +1,7 @@
 import { inngest } from "./client";
 import { z } from "zod";
 import * as store from "@/lib/kv/store";
-import { Step } from "../li.fi-ts";
+import { Step } from "@muwp/lifi-client";
 import { advancedAPI } from "../core/data/api";
 import { TransactionExecutionError, createPublicClient, createWalletClient, erc20Abi, extractChain, fromHex, getContract, http, publicActions, zeroAddress } from 'viem'
 import { HDKey, hdKeyToAccount } from 'viem/accounts'

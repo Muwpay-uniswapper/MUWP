@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import uniswap from './uniswap'
+import uniswap from './index'
 
 const app = new Hono()
 
