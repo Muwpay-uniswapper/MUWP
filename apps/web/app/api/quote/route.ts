@@ -1,0 +1,126 @@
+import { RouteOptions } from "@muwp/lifi-client";
+import { z } from "zod";
+import { generateAccount } from "./generateAccount";
+import { handleLiFiRoutes } from "./fetchRoutesLiFi";
+import { Address, EthereumAddress } from "@/lib/core/model/Address";
+import { AptosChainId, HashportChainId, StellarChainId } from "@/lib/layerzero/aptos/omnichains";
+import { handleAptosRoutes } from "./fetchRoutesAptos";
+import { handleAllbridgeRoutes } from "./fetchRoutesAllBridge";
+import { handleHashportRoutes } from "./fetchRoutesHashport";
+
+const Token = z.object({
+  address: Address,
+  value: z.string(),
+  image: z.string().optional(),
+});
+
+const Input = z.object({
+  inputTokens: z.array(Token).min(1),
+  outputTokens: z.array(Token).min(1),
+  distribution: z.array(z.number()).min(1),
+  inputChain: z.number(),
+  outputChain: z.number(),
+  inputAmount: z.record(z.coerce.bigint()),
+  fromAddress: EthereumAddress,
+  tempAccount: EthereumAddress.optional(),
+  toAddress: Address.optional(),
+  options: RouteOptions.zod.optional(),
+});
+
+// Export Input type for use in other files
+export type InputType = z.infer<typeof Input>;
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
+// Can be 'nodejs', but Vercel recommends using 'edge'
+export const runtime = "edge";
+// Prevents this route's response from being cached
+export const dynamic = "force-dynamic";
+
+function iteratorToStream(iterator: any) {
+  return new ReadableStream({
+    async pull(controller) {
+      const { value, done } = await iterator.next();
+
+      if (done) {
+        controller.close();
+      } else {
+        const chunk = new TextEncoder().encode(value);
+        controller.enqueue(chunk);
+      }
+    },
+  });
+}
+
+async function* iterator(promise: () => Promise<string>) {
+  yield "{"; // This way we bypass the Vercel function timeout
+  const response = await promise();
+  yield response.slice(1, -1);
+  yield "}";
+}
+
+export async function POST(request: Request) {
+  const stream = iteratorToStream(
+    iterator(async () => {
+      try {
+        // Parse the incoming request body as JSON data
+        const body = await request.json();
+        const input = await Input.parseAsync(body);
+
+        console.log("Input parsed successfully");
+
+        const { tempAccount } = await generateAccount(input);
+
+        console.log(
+          `Fetching routes for ${input.inputTokens.length} input tokens on ${input.inputChain} and ${input.outputTokens.length} output tokens on ${input.outputChain}`,
+        );
+
+        let routes;
+        switch (input.outputChain) {
+          case AptosChainId:
+            routes = (await handleAptosRoutes(input, tempAccount)).routes;
+            break;
+          case StellarChainId:
+            routes = (await handleAllbridgeRoutes(input, tempAccount)).routes;
+            break;
+          case HashportChainId: // Hedera
+            routes = (await handleHashportRoutes(input, tempAccount)).routes;
+            break;
+          default:
+            routes = (await handleLiFiRoutes(input, tempAccount)).routes;
+            break;
+        }
+
+        return JSON.stringify({
+          routes,
+          tempAccount,
+          validUntil: Date.now() + 1000 * 60 * 5, // 5 minutes
+        });
+      } catch (e) {
+        if (e instanceof Error) {
+          console.log(e.message);
+          console.log(e.stack);
+          const bodyPattern = /Body: "(\{.*\})"/;
+          const matches = e.message.match(bodyPattern);
+
+          if (matches && matches.length > 1) {
+            const bodyContent = JSON.parse(matches[1].replace(/\\/g, ""));
+            return JSON.stringify({ message: bodyContent.message });
+          }
+
+          return JSON.stringify({ message: e.message });
+        }
+        return JSON.stringify({ message: "Unexpected error", error: e });
+      }
+    }),
+  );
+
+  return new Response(stream, {
+    headers: {
+      "content-type": "application/json",
+      "cache-control": "no-cache",
+    },
+  });
+}
