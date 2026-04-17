@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi'
 import { Button } from './ui/button';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/core/utils';
-import React, { useEffect } from 'react';
+import React from 'react';
 export function ConnectButton({
     not = false,
     asChild = false,
@@ -21,17 +21,6 @@ export function ConnectButton({
 }) {
     const { isConnected } = useAccount();
     const { open } = useModal();
-    const [position, setPosition] = React.useState({ x: 0, y: 0 });
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const dialog = document.getElementById("__CONNECTKIT__")?.querySelector(".active > div:nth-child(3) > div");
-            if (dialog) {
-                const { x, y } = dialog.getBoundingClientRect();
-                setPosition(prev => (prev.x === x && prev.y === y) ? prev : { x, y });
-            }
-        }, 100);
-        return () => clearInterval(interval);
-    }, []);
     if (asChild) {
         return <>
             {isConnected !== not ? <div className={className}>
