@@ -1,5 +1,5 @@
 import type { InputType } from "./route";
-import type { Route } from "@/lib/li.fi-ts";
+import type { Route } from "@muwp/lifi-client";
 import {
   AllbridgeCoreSdk,
   nodeRpcUrlsDefault,

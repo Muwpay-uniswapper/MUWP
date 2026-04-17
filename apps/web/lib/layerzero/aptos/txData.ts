@@ -1,4 +1,4 @@
-import { Step } from "@/lib/li.fi-ts";
+import { Step } from "@muwp/lifi-client";
 import { muwpChains } from "@/muwp";
 import {
 	createPublicClient,

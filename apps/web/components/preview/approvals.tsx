@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { MUWPChain } from "@/muwp";
 import { Button } from "../ui/button";
 import { NextStep } from "./process";
-import { Token } from "@/lib/li.fi-ts";
+import { Token } from "@muwp/lifi-client";
 
 export function Approvals({
     nextStep,

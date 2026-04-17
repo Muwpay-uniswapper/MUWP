@@ -1,4 +1,4 @@
-import { Step } from "@/lib/li.fi-ts";
+import { Step } from "@muwp/lifi-client";
 import { HashportApiClient } from '@hashport/sdk';
 import { encodeFunctionData, toHex, toBytes } from "viem";
 

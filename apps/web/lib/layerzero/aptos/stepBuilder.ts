@@ -17,7 +17,7 @@ import {
 } from "viem";
 import { OmnichainAptosBridgeAbi } from "./abi";
 import { muwpChains } from "@/muwp";
-import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
+import { type Step, StepTypeEnum } from "@muwp/lifi-client";
 import { tokenGet } from "@/lib/core/data/tokenLib";
 
 export async function FinalAptosStepBuilder({

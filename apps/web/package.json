@@ -12,6 +12,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@muwp/lifi-client": "workspace:*",
     "@allbridge/bridge-core-sdk": "^3.18.0",
     "@aptos-labs/ts-sdk": "^6.3.1",
     "@aptos-labs/wallet-adapter-react": "^2.1.8",

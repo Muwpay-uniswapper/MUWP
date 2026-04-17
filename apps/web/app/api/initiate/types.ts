@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { EthereumAddress } from "@/lib/core/model/Address";
-import { Route } from "@/lib/li.fi-ts";
+import { Route } from "@muwp/lifi-client";
 import { zeroAddress } from "viem";
 
 BigInt.prototype.toJSON = function () {

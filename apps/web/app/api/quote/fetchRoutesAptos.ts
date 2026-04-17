@@ -1,5 +1,5 @@
 import { InputType } from "./route";
-import { Route } from "@/lib/li.fi-ts";
+import { Route } from "@muwp/lifi-client";
 import { AvailablePairs } from "@/lib/layerzero/aptos/omnichains";
 import { formatUnits, parseUnits } from "viem";
 import { nanoid } from "nanoid";

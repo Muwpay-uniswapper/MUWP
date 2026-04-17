@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Route, Token } from "@/lib/li.fi-ts";
+import { Route, Token } from "@muwp/lifi-client";
 import { formatUnits } from "viem";
 import { ArrowDown, Clock, DollarSign, Fuel } from "lucide-react";
 import { useRouteStore } from "@/lib/core/data/routeStore";

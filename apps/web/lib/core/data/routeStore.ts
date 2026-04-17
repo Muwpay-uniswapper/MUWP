@@ -1,5 +1,5 @@
 import { InputType } from '@/app/api/quote/route';
-import { Route } from '@/lib/li.fi-ts';
+import { Route } from '@muwp/lifi-client';
 import { Edge, FitView, Node, SetCenter } from 'reactflow';
 import { z } from 'zod';
 import { create, StoreApi } from 'zustand';

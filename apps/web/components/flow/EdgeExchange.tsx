@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { EdgeProps, EdgeLabelRenderer, useReactFlow, getBezierPath } from 'reactflow';
 import { UnfoldHorizontal } from 'lucide-react';
-import { ToolDetails } from '@/lib/li.fi-ts/models/ToolDetails';
+import { ToolDetails } from '@muwp/lifi-client/models/ToolDetails';
 
 const EdgeExchange: FC<EdgeProps> = ({
     id,
