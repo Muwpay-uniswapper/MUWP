@@ -16,7 +16,7 @@
  *   MUWP_API_KEY  – optional API key
  */
 
-import { MuwpSdk, RouteService, SwapService } from "../src/index";
+import { MuwpSdk, RouteService, SwapService } from "../dist/index.js";
 
 // ── Configuration ────────────────────────────────────────────────────────────
 

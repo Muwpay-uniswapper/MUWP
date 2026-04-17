@@ -17,7 +17,7 @@
  *   STELLAR_DESTINATION   – public key that will receive the issued tokens
  */
 
-import { MuwpSdk, StellarAssetService } from "../src/index";
+import { MuwpSdk, StellarAssetService } from "../dist/index.js";
 import { Networks } from "@stellar/stellar-sdk";
 
 // ── Configuration ────────────────────────────────────────────────────────────

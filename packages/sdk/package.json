@@ -23,10 +23,13 @@
     "dev": "tsup src/index.ts --watch --config tsup.config.cjs",
     "clean": "rimraf dist",
     "test": "vitest run",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "example:01": "bun run build && bun run examples/01-asset-management.ts",
+    "example:02": "bun run build && bun run examples/02-stellar-dex.ts",
+    "example:03": "bun run build && bun run examples/03-multi-token-swap.ts"
   },
   "dependencies": {
-    "@allbridge/bridge-core-sdk": "^3.30.0",
+    "@allbridge/bridge-core-sdk": "^3.18.0",
     "@stellar/stellar-sdk": "^12.1.1",
     "cross-fetch": "^4.0.0",
     "eventemitter3": "^5.0.1",

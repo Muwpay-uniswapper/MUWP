@@ -11,7 +11,7 @@
  *   bun run examples/02-stellar-dex.ts
  */
 
-import { StellarDexService } from "../src/index";
+import { StellarDexService } from "../dist/index.js";
 import { Networks } from "@stellar/stellar-sdk";
 
 // ── Configuration ────────────────────────────────────────────────────────────
