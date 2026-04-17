@@ -1,7 +1,7 @@
 import { inngest } from "@/lib/inngest/client";
 import { BaseError, createPublicClient, encodeFunctionData, extractChain, http, zeroAddress, keccak256, encodePacked, Address, hexToBytes, toHex } from 'viem'
 import { z } from "zod";
-import MUWPTransfer from "@/out/MUWPTransfer.sol/MUWPTransfer.json"
+import MUWPTransfer from "@/contracts/MUWPTransfer.json"
 import * as chains from 'viem/chains'
 import { muwpChains } from "@/muwp";
 import { InitiateResponse, StrictInputInitiate } from "./types";

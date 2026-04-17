@@ -9,7 +9,8 @@
   "dependencies": {
     "whatwg-fetch": "^3.0.0",
     "es6-promise": "^4.2.4",
-    "url-parse": "^1.4.3"
+    "url-parse": "^1.4.3",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "typescript": "^4.0",
