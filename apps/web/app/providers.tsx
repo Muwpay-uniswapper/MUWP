@@ -87,17 +87,20 @@ export function State({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (!hydrated) return;
 
+    const desiredChain = chain?.id.toString();
+    const desiredToChain = outputChain?.toString();
+
+    if (
+      searchParams?.get("chain") === (desiredChain ?? null) &&
+      searchParams?.get("toChain") === (desiredToChain ?? null)
+    ) return;
+
     const newParams = new URLSearchParams(searchParams?.toString());
-    if (chain) newParams.set("chain", chain.id.toString());
-    if (outputChain) newParams.set("toChain", outputChain.toString());
+    if (desiredChain) newParams.set("chain", desiredChain);
+    if (desiredToChain) newParams.set("toChain", desiredToChain);
 
-    // Just append the new params to the path.
-    router.replace(`${path}?${newParams.toString()}`, {
-      scroll: false,
-    });
-
-    console.log(`-> ${newParams.toString()}`);
-  }, [chain, hydrated, outputChain, router, searchParams]);
+    router.replace(`${path}?${newParams.toString()}`, { scroll: false });
+  }, [chain, hydrated, outputChain, path, router, searchParams]);
 
   return children;
 }
