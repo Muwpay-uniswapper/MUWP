@@ -65,13 +65,19 @@ export default function ProgressBar() {
         const mutationObserver = new MutationObserver(handleMutation);
         mutationObserver.observe(document, { childList: true, subtree: true });
 
-        window.history.pushState = new Proxy(window.history.pushState, {
+        const originalPushState = window.history.pushState.bind(window.history);
+        window.history.pushState = new Proxy(originalPushState, {
             apply: (target, thisArg, argArray: PushStateInput) => {
                 NProgress.done();
                 return target.apply(thisArg, argArray);
             },
         });
-    });
+
+        return () => {
+            mutationObserver.disconnect();
+            window.history.pushState = originalPushState;
+        };
+    }, []);
 
     return styles;
 }
