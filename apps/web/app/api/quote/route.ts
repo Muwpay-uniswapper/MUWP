@@ -1,4 +1,4 @@
-import { RouteOptions } from "@/lib/li.fi-ts";
+import { RouteOptions } from "@muwp/lifi-client";
 import { z } from "zod";
 import { generateAccount } from "./generateAccount";
 import { handleLiFiRoutes } from "./fetchRoutesLiFi";

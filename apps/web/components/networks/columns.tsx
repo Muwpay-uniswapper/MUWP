@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/checkbox";
-import { Exchange } from "@/lib/li.fi-ts";
+import { Exchange } from "@muwp/lifi-client";
 import { ChainIcon } from "connectkit";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useSwapStore } from "@/lib/core/data/swapStore";

@@ -1,6 +1,6 @@
 import { Transaction } from "@/lib/core/data/routeStore"
 import { Row } from "@tanstack/react-table"
-import { Route } from "@/lib/li.fi-ts";
+import { Route } from "@muwp/lifi-client";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { AlertTriangle, LoaderIcon } from "lucide-react";
 

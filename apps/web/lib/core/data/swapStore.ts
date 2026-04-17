@@ -1,7 +1,7 @@
 import { create, StoreApi } from 'zustand';
 import { Token } from '@/lib/core/model/CellLike';
 import { parseUnits } from "viem";
-import { AllowDenyPrefer } from '@/lib/li.fi-ts';
+import { AllowDenyPrefer } from '@muwp/lifi-client';
 
 type SwapStore = {
     targetAddress?: `0x${string}`;

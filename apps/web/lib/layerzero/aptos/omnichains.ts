@@ -1,5 +1,5 @@
 import api from "@/lib/core/data/api";
-import type { TokensGet200Response } from "@/lib/li.fi-ts";
+import type { TokensGet200Response } from "@muwp/lifi-client";
 import { zeroAddress } from "viem";
 
 export const AptosChains = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Exchange } from "@/lib/li.fi-ts";
+import { Exchange } from "@muwp/lifi-client";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { useSwapStore } from "@/lib/core/data/swapStore";

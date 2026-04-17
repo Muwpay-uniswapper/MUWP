@@ -29,6 +29,7 @@
         "@lifi/sdk": "^2.5.0",
         "@martianwallet/aptos-wallet-adapter": "^0.0.5",
         "@msafe/aptos-wallet-adapter": "^1.0.14",
+        "@muwp/lifi-client": "workspace:*",
         "@nightlylabs/aptos-wallet-adapter-plugin": "^0.2.12",
         "@onekeyfe/aptos-wallet-adapter": "^0.1.2",
         "@openblockhq/aptos-wallet-adapter": "^0.1.5",

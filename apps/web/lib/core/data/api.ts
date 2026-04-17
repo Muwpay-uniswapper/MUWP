@@ -1,4 +1,4 @@
-import { DefaultApi, createConfiguration, AdvancedApi, server1, server2, SecurityAuthentication, RequestContext } from "@/lib/li.fi-ts";
+import { DefaultApi, createConfiguration, AdvancedApi, server1, server2, SecurityAuthentication, RequestContext } from "@muwp/lifi-client";
 
 class LiFiAuth implements SecurityAuthentication {
     getName(): string {

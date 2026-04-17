@@ -1,6 +1,6 @@
 import { advancedAPI } from "@/lib/core/data/api";
 import type { InputType } from "./route";
-import type { Route } from "@/lib/li.fi-ts";
+import type { Route } from "@muwp/lifi-client";
 import { zeroAddress } from "viem";
 
 export async function handleLiFiRoutes(input: InputType, tempAccount: string) {

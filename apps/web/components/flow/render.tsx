@@ -1,4 +1,4 @@
-import { Route, Token } from "@/lib/li.fi-ts";
+import { Route, Token } from "@muwp/lifi-client";
 import { Edge, Node, Position } from "reactflow";
 import { TokenNodeData } from "./TokenNode";
 import { graphlib, layout } from "dagre";

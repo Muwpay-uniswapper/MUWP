@@ -1,5 +1,5 @@
 import { parseUnits } from "viem";
-import { createConfiguration, DefaultApi, AdvancedApi, server2, Step } from "../../lib/li.fi-ts";
+import { createConfiguration, DefaultApi, AdvancedApi, server2, Step } from "@muwp/lifi-client";
 import { LiFi, LifiStep } from '@lifi/sdk'
 import { describe, it, expect } from "bun:test";
 

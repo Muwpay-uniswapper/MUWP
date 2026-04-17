@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { NodeProps, useReactFlow, useUpdateNodeInternals } from 'reactflow';
-import { FeeCost, GasCost, Step } from '@/lib/li.fi-ts';
+import { FeeCost, GasCost, Step } from '@muwp/lifi-client';
 import { formatUnits } from "viem";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDownToLine, Diff, DollarSign, Fuel, X } from 'lucide-react';

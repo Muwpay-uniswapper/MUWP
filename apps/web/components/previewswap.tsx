@@ -5,7 +5,7 @@ import { Card, CardContent } from "./ui/card";
 import React from "react";
 import { Clock, DollarSign, Fuel, Layers2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import { Route } from "@/lib/li.fi-ts";
+import { Route } from "@muwp/lifi-client";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/core/utils";
 

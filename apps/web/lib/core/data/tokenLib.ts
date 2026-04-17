@@ -4,7 +4,7 @@ import {
 	HashportChainId,
 	StellarChainId,
 } from "@/lib/layerzero/aptos/omnichains";
-import { type Token, TokensGet200Response } from "@/lib/li.fi-ts";
+import { type Token, TokensGet200Response } from "@muwp/lifi-client";
 import api from "./api";
 import { getTokensAllBridge } from "@/lib/allbridge/omnichain";
 import { getTokensHashportBridge } from "@/lib/hashport/omnichain";

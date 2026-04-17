@@ -2,7 +2,7 @@
 
 import { EvmBridgeStep, HashportApiClient } from '@hashport/sdk';
 import { nanoid } from "nanoid";
-import { type Step, StepTypeEnum } from "@/lib/li.fi-ts";
+import { type Step, StepTypeEnum } from "@muwp/lifi-client";
 import { tokenGet } from "../core/data/tokenLib";
 import { Address, createPublicClient, encodeFunctionData, extractChain, formatUnits, http, toBytes, toHex, zeroAddress } from "viem";
 import { muwpChains } from '@/muwp';
