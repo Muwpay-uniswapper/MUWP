@@ -17,5 +17,5 @@ export const { GET, POST, PUT } = serve({
         terminateAccount,
         consumeStep
     ],
-    streaming: "allow",
+    streaming: true,
 });

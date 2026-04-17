@@ -19,8 +19,7 @@ const portfolioSchema = z.object({
 });
 
 export const terminateAccount = inngest.createFunction(
-    { id: "terminate-account" },
-    { event: "app/terminate.account" },
+    { id: "terminate-account", triggers: [{ event: "app/terminate.account" }] },
     async ({ event, step }) => {
         const data = await z.object({
             address: EthereumAddress,
