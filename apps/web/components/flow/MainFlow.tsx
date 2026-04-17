@@ -22,6 +22,11 @@ const nodeTypes = {
     detail: DetailNode,
 }
 
+const defaultEdgeOptions: DefaultEdgeOptions = {
+    type: 'exchange',
+    markerEnd: 'edge-circle',
+}
+
 export function MainFlow() {
     return <ReactFlowProvider>
         <Flow />
@@ -61,12 +66,7 @@ export function Flow() {
         return () => window.removeEventListener("resize", onResize);
     }, []);
 
-    const defaultEdgeOptions: DefaultEdgeOptions = {
-        type: 'exchange',
-        markerEnd: 'edge-circle'
-    };
-
-    const onConnect = useCallback((params: Edge | Connection) => setEdges((els) => addEdge(params, els)), [edges]);
+    const onConnect = useCallback((params: Edge | Connection) => setEdges((els) => addEdge(params, els)), [setEdges]);
 
     return <Card className="w-full h-[75vh]">
         <GradientIdContext.Provider value={gradientId}>
