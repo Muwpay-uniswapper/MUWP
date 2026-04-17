@@ -1,5 +1,5 @@
 {
   "installCommand": "bun install --frozen-lockfile",
-  "buildCommand": "bun run build --filter=@muwp/web",
+  "buildCommand": "turbo build --filter=@muwp/web",
   "outputDirectory": "apps/web/.next"
 }
