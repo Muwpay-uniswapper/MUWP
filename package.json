@@ -5,9 +5,8 @@
   "packageManager": "bun@1.3.10",
   "engines": { "bun": ">=1.3" },
   "workspaces": [
-    "sdk",
-    "kv",
-    "lib/li.fi-ts"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "build": "next build",
