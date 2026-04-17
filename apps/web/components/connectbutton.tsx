@@ -27,7 +27,7 @@ export function ConnectButton({
             const dialog = document.getElementById("__CONNECTKIT__")?.querySelector(".active > div:nth-child(3) > div");
             if (dialog) {
                 const { x, y } = dialog.getBoundingClientRect();
-                setPosition({ x, y });
+                setPosition(prev => (prev.x === x && prev.y === y) ? prev : { x, y });
             }
         }, 100);
         return () => clearInterval(interval);
