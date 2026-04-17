@@ -32,7 +32,8 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
     return (
         <AptosWalletAdapterProvider
-            plugins={wallets}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            plugins={wallets as any}
             autoConnect={true}
             onError={(error) => {
                 console.error("Custom error handling", error);

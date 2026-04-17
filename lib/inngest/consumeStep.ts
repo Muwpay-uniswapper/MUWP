@@ -29,8 +29,8 @@ export const consumeStep = inngest.createFunction(
     {
         id: "consume-step",
         retries: 10, // This way, we can ensure that the step will be executed over 2 hours (backoff time is exponential)
+        triggers: [{ event: "app/consume.steps" }],
     },
-    { event: "app/consume.steps" },
     async ({ event, step }) => {
         const { remainingSteps, address, id, originalChainId, totalRoutes, index, refundAddress } = await z.object({
             address: EthereumAddress, // temp account

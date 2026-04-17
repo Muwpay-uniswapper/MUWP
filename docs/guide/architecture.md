@@ -4,14 +4,25 @@
 
 | Directory | Purpose |
 |-----------|---------|
-| `MUWP/` | Main Next.js 14 frontend + backend (API routes, smart contract, Inngest workflows) |
-| `MUWP/sdk/` | `@muwp/sdk` — standalone TypeScript package |
-| `MUWP-on-XRPL/` | Technical design documents |
-| `Muwp-Stellar/` | Technical design documents |
+| `app/` | Next.js App Router — pages, API routes, layouts |
+| `components/` | React UI components (swap card, ReactFlow graph, modals) |
+| `lib/` | Core business logic — bridge adapters (LI.FI, Allbridge, Hashport, LayerZero), Zustand stores, Inngest workflows, KV client |
+| `backend/` | Server-side helpers, Uniswap V2/V3 quote backend |
+| `sdk/` | `@muwp/sdk` — standalone TypeScript package built with tsup |
+| `src/` | Solidity smart contracts (`MUWPTransfer.sol`) |
+| `script/` | Foundry deployment scripts (`Deploy.s.sol`) |
+| `test/` | Foundry Solidity tests |
+| `tests/` | Playwright end-to-end tests |
+| `public/` | Static assets served by Next.js |
+| `docs/` | VitePress documentation site (this site) |
+| `kv/` | Vercel KV helpers and type definitions |
+| `broadcast/` | Foundry broadcast logs from on-chain deployments |
+| `certificates/` | Local HTTPS certificates for `next dev --experimental-https` |
+| `out/` | Foundry compilation output (generated, not committed) |
 
 ## Frontend
 
-The Next.js App Router entry point is `app/page.tsx` → `components/swapcard.tsx`.
+The Next.js 16 App Router entry point is `app/page.tsx` → `components/swapcard.tsx`.
 
 Two Zustand stores drive the swap UI:
 - **`swapStore`** — ephemeral UI state (tokens, amounts, sliders, bridge allow/deny lists)

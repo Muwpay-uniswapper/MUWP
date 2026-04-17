@@ -17,9 +17,9 @@ const Data = z.object({
 export const initiateTransfer = inngest.createFunction(
     {
         id: "initiate-transfer",
-        retries: 10
+        retries: 10,
+        triggers: [{ event: "app/transfer.initiate" }],
     },
-    { event: "app/transfer.initiate" },
     async ({ event, step, runId }) => {
         // const accountData = await z.object({
         //     address: EthereumAddress,

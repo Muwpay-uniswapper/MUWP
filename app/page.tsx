@@ -10,14 +10,14 @@ export const metadata: Metadata = {
     "MUWPay helps you swap multiple tokens across multiple chains, in a single transaction.",
 };
 
-export default function Home({
+export default async function Home({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const chain =
-    typeof searchParams["chain"] === "string" ? searchParams["chain"] : "1";
-  const toChain = searchParams["toChain"] as string | undefined;
+  const { chain: chainParam, toChain: toChainParam } = await searchParams;
+  const chain = typeof chainParam === "string" ? chainParam : "1";
+  const toChain = typeof toChainParam === "string" ? toChainParam : undefined;
   return (
     <main className="flex flex-col items-center py-2 mt-8">
       <div className="flex flex-col md:flex-row gap-2 max-w-screen-xl w-full mx-4">
