@@ -1,8 +1,7 @@
 # Deliverable 1 — Core SDK
 
 **Status:** Complete  
-**Due:** 2025-05-14  
-**Branch:** `arthur/sdk`
+**Branch:** `main`
 
 ---
 

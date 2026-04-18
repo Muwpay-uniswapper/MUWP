@@ -2,7 +2,43 @@
 
 #### **Overview**
 
-![SDK Architecture Diagram](https://github.com/user-attachments/assets/0cc1aba8-b991-4bf2-9d67-f863fb2f5f62)
+```
+┌─────────────────────────────────────────────────────────┐
+│              App Creators & Developers                  │
+└───────────────────────┬─────────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────────┐
+│                   SDK Core Layer                        │
+│         (Orchestration & Communication Hub)             │
+└───┬───────────────────┬──────────────────┬──────────────┘
+    │                   │                  │
+┌───▼────────┐  ┌───────▼──────┐  ┌───────▼──────────────┐
+│  Security  │  │  Multi-Token │  │   Token Bridge       │
+│   Module   │  │ Swap Engine  │  │      Module          │
+│            │  │              │  │                      │
+│ • Encrypt  │  │ • Accept     │  │ • Cross-chain        │
+│ • Access   │  │   tokens     │  │   transfers          │
+│   Control  │  │ • Convert    │  │ • Monitor bridge     │
+│ • Key Mgmt │  │   to XLM     │  │   transactions       │
+│            │  │ • Stellar    │  │ • Fallback           │
+│            │  │   DEX        │  │   mechanisms         │
+└────────────┘  └───────┬──────┘  └───────┬──────────────┘
+                        │                  │
+        ┌───────────────▼──────────────────▼──────────────┐
+        │                   API Layer                     │
+        │          (Data Retrieval · Webhooks)            │
+        └───────────────────┬─────────────────────────────┘
+                            │
+        ┌───────────────────┴─────────────────────────────┐
+        │                                                 │
+┌───────▼──────────────┐         ┌───────────────────────▼┐
+│   Developer Toolkit  │         │  Performance Monitoring │
+│                      │         │                         │
+│ • Pre-built templates│         │ • Analyze swap          │
+│ • Sandbox environment│         │   execution             │
+│ • SDK documentation  │         │ • Optimize API usage    │
+└──────────────────────┘         └─────────────────────────┘
+```
 
 This SDK architecture is designed to simplify blockchain integration for developers and app creators, focusing on multi-token swaps, cross-chain transactions, and robust API functionalities. The diagram reflects a hierarchical structure that emphasizes security, scalability, and developer experience.
 

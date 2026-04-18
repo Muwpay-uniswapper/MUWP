@@ -1,8 +1,7 @@
 # Deliverable 2 — Multi-Token Swap Prototype
 
 **Status:** Complete  
-**Due:** 2025-06-15  
-**Branch:** `arthur/sdk`
+**Branch:** `main`
 
 ---
 

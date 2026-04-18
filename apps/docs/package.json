@@ -9,6 +9,8 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
-    "vitepress": "latest"
+    "mermaid": "^11.14.0",
+    "vitepress": "latest",
+    "vitepress-plugin-mermaid": "^2.0.17"
   }
 }
