@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
   title: "MUWP Docs",
-  base: "/docs/",
+  base: "/",
   vite: {
     css: {
       // Prevent VitePress from inheriting the parent MUWP/ tailwind.config.js
