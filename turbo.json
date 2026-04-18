@@ -4,7 +4,20 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": [
+        "LIFI_API_KEY",
+        "MASTER_HD",
+        "ZERION_API_KEY",
+        "INNGEST_SIGNING_KEY",
+        "INNGEST_EVENT_KEY",
+        "REFUND_ADDRESS",
+        "MUWP_SIGNER_KEY",
+        "KV_REST_API_URL",
+        "KV_REST_API_TOKEN",
+        "KV_REST_API_READ_ONLY_TOKEN",
+        "KV_URL"
+      ]
     },
     "dev": {
       "cache": false,
