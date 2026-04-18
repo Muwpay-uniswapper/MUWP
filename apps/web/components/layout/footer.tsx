@@ -29,7 +29,7 @@ export default function Footer() {
             </a>
             <span className="text-gray-300">|</span>
             <a
-                href="https://docs.muwp.xyz"
+                href="https://www.muwp.xyz/docs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-48 text-center"
