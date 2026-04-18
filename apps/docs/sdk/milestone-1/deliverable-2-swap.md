@@ -16,7 +16,7 @@
 
 ### Core Logic — `SwapService.quoteToStellar()`
 
-**File:** `MUWP/sdk/src/services/SwapService.ts`
+**File:** `packages/sdk/src/services/SwapService.ts`
 
 The D2 constraint is enforced in `quoteToStellar()`:
 
@@ -45,7 +45,7 @@ The full swap flow (`executeSwap`) orchestrates:
 
 ### API Route — `/api/quote`
 
-**File:** `MUWP/app/api/quote/route.ts`
+**File:** `apps/web/app/api/quote/route.ts`
 
 Aggregates routes across bridge providers based on `outputChain`:
 
@@ -62,7 +62,7 @@ The route endpoint streams JSON to avoid Vercel's function timeout on multi-brid
 
 ## Performance Reporting
 
-`PerfTimer` (`sdk/src/utils/perf.ts`) wraps each phase of `executeSwap()`:
+`PerfTimer` (`packages/sdk/src/utils/perf.ts`) wraps each phase of `executeSwap()`:
 
 ```typescript
 timer.start("initiate");
@@ -83,7 +83,7 @@ The `metrics` field in `SwapExecutionResult` contains millisecond timings per ph
 
 ## Tests
 
-**File:** `sdk/tests/swap.spec.ts`
+**File:** `packages/sdk/tests/swap.spec.ts`
 
 ```
 ✓ SwapService: runs multi-token prototype
@@ -95,7 +95,7 @@ The test verifies:
 - `result.stellarSwap.hash` is present
 - `result.metrics.initiate` is a non-negative number
 
-**Example:** `MUWP/sdk/examples/03-multi-token-swap.ts`
+**Example:** `packages/sdk/examples/03-multi-token-swap.ts`
 
 Demonstrates:
 1. Requesting a quote for USDC + USDT → XLM
@@ -108,10 +108,10 @@ Demonstrates:
 ## Running
 
 ```bash
-cd MUWP/sdk
+cd packages/sdk
 
 # Run D2 test
-bun run test tests/swap.spec.ts
+bunx vitest run tests/swap.spec.ts
 
 # Run D2 example (offline-friendly — falls back to demo data without a live API)
 bun run examples/03-multi-token-swap.ts

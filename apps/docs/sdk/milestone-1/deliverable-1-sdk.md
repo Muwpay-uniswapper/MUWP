@@ -16,7 +16,7 @@
 
 ### Entry Point
 
-`MuwpSdk` is the primary public interface, exposed from `MUWP/sdk/src/index.ts`:
+`MuwpSdk` is the primary public interface, exposed from `packages/sdk/src/index.ts`:
 
 ```typescript
 import { MuwpSdk } from "@muwp/sdk";
@@ -37,7 +37,7 @@ const xdr = await sdk.assets.buildTrustlineTransaction({ ... });
 
 ### Wallet Creation — `WalletService`
 
-**File:** `MUWP/sdk/src/services/wallet.ts`
+**File:** `packages/sdk/src/services/wallet.ts`
 
 | Method | Purpose |
 |--------|---------|
@@ -54,7 +54,7 @@ The temp account is a MUWP-managed Stellar account created server-side. Users se
 
 ### Asset Management — `StellarAssetService`
 
-**File:** `MUWP/sdk/src/services/asset.ts`
+**File:** `packages/sdk/src/services/asset.ts`
 
 | Method | Purpose |
 |--------|---------|
@@ -82,13 +82,13 @@ The temp account is a MUWP-managed Stellar account created server-side. Users se
 ✓ resolveBridgePair: throws when token is unsupported on source chain
 ```
 
-**Example:** `MUWP/sdk/examples/01-asset-management.ts`
+**Example:** `packages/sdk/examples/01-asset-management.ts`
 
 ---
 
 ### Stellar DEX Integration — `StellarDexService`
 
-**File:** `MUWP/sdk/src/services/StellarDexService.ts`
+**File:** `packages/sdk/src/services/StellarDexService.ts`
 
 | Method | Purpose |
 |--------|---------|
@@ -106,13 +106,13 @@ The temp account is a MUWP-managed Stellar account created server-side. Users se
 ✓ swapToXlm: throws when no bids are available
 ```
 
-**Example:** `MUWP/sdk/examples/02-stellar-dex.ts`
+**Example:** `packages/sdk/examples/02-stellar-dex.ts`
 
 ---
 
 ### Route Selection — `RouteService`
 
-**File:** `MUWP/sdk/src/services/RouteService.ts`
+**File:** `packages/sdk/src/services/RouteService.ts`
 
 | Method | Purpose |
 |--------|---------|
@@ -130,7 +130,7 @@ The temp account is a MUWP-managed Stellar account created server-side. Users se
 ## File Structure
 
 ```
-MUWP/sdk/
+packages/sdk/
 ├── src/
 │   ├── index.ts                    ← Public API (MuwpSdk, all exports)
 │   ├── config.ts                   ← BaseSdkConfig, resolveBaseSdkConfig
@@ -160,10 +160,11 @@ MUWP/sdk/
 ## Running
 
 ```bash
-cd MUWP/sdk
+cd packages/sdk
 
 # Tests
-bun run test
+bun run test                            # all tests
+bunx vitest run tests/asset.spec.ts    # single file
 
 # Build
 bun run build      # outputs to dist/

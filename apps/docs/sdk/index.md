@@ -82,13 +82,13 @@ const routes = await sdk.routes.selectRoutes({ from: 1, to: 7, token: "USDC", am
 ## Running Tests
 
 ```bash
-cd MUWP/sdk
-bun test                           # all tests
-bun test tests/asset.spec.ts       # StellarAssetService
-bun test tests/dex.spec.ts         # StellarDexService
-bun test tests/swap.spec.ts        # SwapService
-bun test tests/wallet.spec.ts      # WalletService
-bun test tests/quote.spec.ts       # RouteService
+cd packages/sdk
+bun run test                                        # all tests
+bunx vitest run tests/asset.spec.ts                # StellarAssetService
+bunx vitest run tests/dex.spec.ts                  # StellarDexService
+bunx vitest run tests/swap.spec.ts                 # SwapService
+bunx vitest run tests/wallet.spec.ts               # WalletService
+bunx vitest run tests/quote.spec.ts                # RouteService
 ```
 
 ## Deliverables

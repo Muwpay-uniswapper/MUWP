@@ -2,23 +2,32 @@
 
 ## Repository Layout
 
+```
+MUWP/
+├── apps/
+│   ├── web/          Next.js 16 frontend + API routes
+│   └── docs/         VitePress documentation (this site)
+├── packages/
+│   ├── sdk/          @muwp/sdk — TypeScript SDK (tsup)
+│   ├── kv/           Vercel KV helpers and type definitions
+│   └── lifi-client/  Generated LI.FI OpenAPI client
+└── contracts/        Foundry — Solidity smart contracts
+    ├── src/          MUWPTransfer.sol
+    ├── script/       Deploy.s.sol
+    ├── test/         Solidity tests
+    └── broadcast/    On-chain deployment logs
+```
+
+Inside `apps/web/`:
+
 | Directory | Purpose |
 |-----------|---------|
 | `app/` | Next.js App Router — pages, API routes, layouts |
 | `components/` | React UI components (swap card, ReactFlow graph, modals) |
-| `lib/` | Core business logic — bridge adapters (LI.FI, Allbridge, Hashport, LayerZero), Zustand stores, Inngest workflows, KV client |
-| `backend/` | Server-side helpers, Uniswap V2/V3 quote backend |
-| `sdk/` | `@muwp/sdk` — standalone TypeScript package built with tsup |
-| `src/` | Solidity smart contracts (`MUWPTransfer.sol`) |
-| `script/` | Foundry deployment scripts (`Deploy.s.sol`) |
-| `test/` | Foundry Solidity tests |
-| `tests/` | Playwright end-to-end tests |
+| `lib/` | Core business logic — bridge adapters (LI.FI, Allbridge, Hashport, LayerZero), Zustand stores, Inngest workflows |
 | `public/` | Static assets served by Next.js |
-| `docs/` | VitePress documentation site (this site) |
-| `kv/` | Vercel KV helpers and type definitions |
-| `broadcast/` | Foundry broadcast logs from on-chain deployments |
+| `e2e/` | Playwright end-to-end tests |
 | `certificates/` | Local HTTPS certificates for `next dev --experimental-https` |
-| `out/` | Foundry compilation output (generated, not committed) |
 
 ## Frontend
 
@@ -54,7 +63,7 @@ Output chain determines the bridge handler:
 
 ## Smart Contract
 
-`src/MUWPTransfer.sol` — Ownable+Pausable batch transfer contract. `transfer()` verifies a secp256k1 signature from `MUWP_SIGNER_KEY`, then forwards tokens/ETH to the temp escrow address.
+`contracts/src/MUWPTransfer.sol` — Ownable+Pausable batch transfer contract. `transfer()` verifies a secp256k1 signature from `MUWP_SIGNER_KEY`, then forwards tokens/ETH to the temp escrow address.
 
 ## Inngest Workflows
 
