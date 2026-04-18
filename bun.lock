@@ -165,6 +165,7 @@
         "es6-promise": "^4.2.4",
         "url-parse": "^1.4.3",
         "whatwg-fetch": "^3.0.0",
+        "zod": "^3.22.4",
       },
       "devDependencies": {
         "@types/url-parse": "1.4.4",
