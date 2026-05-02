@@ -37,7 +37,9 @@ export async function FinalHashportStepBuilder(
       //@ts-expect-error - chain id are strictly typed, not just numbers.
       id: fromChainId,
     }),
-    transport: fromChainId == 1 ? http("https://ultra-convincing-snowflake.quiknode.pro/3595d9810284be8e56eaa7a9093090ca62b5ad90/") : http(),
+    transport: fromChainId === 1
+      ? http(process.env.MAINNET_RPC ?? "https://eth.llamarpc.com")
+      : http(),
   });
 
   const hashportApiClient = new HashportApiClient('mainnet');

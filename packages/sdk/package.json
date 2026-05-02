@@ -26,7 +26,8 @@
     "lint": "biome check .",
     "example:01": "bun run build && bun run examples/01-asset-management.ts",
     "example:02": "bun run build && bun run examples/02-stellar-dex.ts",
-    "example:03": "bun run build && bun run examples/03-multi-token-swap.ts"
+    "example:03": "bun run build && bun run examples/03-multi-token-swap.ts",
+    "example:04": "bun run build && bun run examples/04-soroban-subscription.ts"
   },
   "dependencies": {
     "@allbridge/bridge-core-sdk": "^3.18.0",

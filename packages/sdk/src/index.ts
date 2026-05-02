@@ -13,6 +13,8 @@ export { HttpClient, type HttpClientOptions, type HttpRequestConfig } from "./ht
 export * from "./services/asset";
 export * from "./services/wallet";
 export * from "./services/StellarDexService";
+export * from "./services/SorobanSubscriptionService";
+export * from "./types/subscription";
 
 // Swap & routing services
 export * from "./services/RouteService";

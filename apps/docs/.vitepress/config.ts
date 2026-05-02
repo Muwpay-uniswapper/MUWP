@@ -8,6 +8,9 @@ export default withMermaid({
       // Prevent VitePress from inheriting the parent MUWP/ tailwind.config.js
       postcss: { plugins: [] },
     },
+    optimizeDeps: {
+      include: ["mermaid", "dayjs"],
+    },
   },
   description: "Documentation for the MUWP cross-chain swap protocol and SDK",
   themeConfig: {
@@ -39,6 +42,13 @@ export default withMermaid({
           items: [
             { text: "Core SDK", link: "/sdk/milestone-1/deliverable-1-sdk" },
             { text: "Multi-Token Swap", link: "/sdk/milestone-1/deliverable-2-swap" },
+          ],
+        },
+        {
+          text: "Milestone 2",
+          items: [
+            { text: "Soroban Subscriptions", link: "/sdk/milestone-2/deliverable-3-soroban" },
+            { text: "Testing Report", link: "/sdk/milestone-2/deliverable-4-testing-report" },
           ],
         },
         {
