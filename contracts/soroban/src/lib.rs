@@ -1,6 +1,6 @@
 #![no_std]
 use soroban_sdk::{
-    contract, contracterror, contractimpl, contracttype, panic_with_error, symbol_short,
+    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error,
     token, Address, BytesN, Env,
 };
 
@@ -27,7 +27,6 @@ pub enum SubscriptionError {
     ArithmeticOverflow = 9,
     InvalidRecipient   = 10,
     InvalidToken       = 11,
-    NoPendingOwner     = 12,
     InvalidCount       = 13,
 }
 
@@ -49,7 +48,96 @@ pub enum DataKey {
     Counter,
     Owner,
     Paused,
-    PendingOwner,
+}
+
+// ===========================================================================
+// Contract events
+//
+// Each `#[contractevent]` struct emits an event whose first static topic is
+// the struct name in `snake_case` (e.g. `TriggerN` -> `trigger_n`). Fields
+// annotated `#[topic]` are appended to the topic list; the remaining fields
+// form the data payload, shaped by `data_format`:
+// * `single-value`: data is the lone non-topic field, emitted directly.
+// * `vec`: non-topic fields are packed into a `Vec<Val>` in declaration order.
+// * default (no attribute): non-topic fields are packed into a `Map` keyed by
+//   field name.
+// ===========================================================================
+
+/// Emitted once at deployment by `__constructor`.
+#[contractevent(data_format = "single-value")]
+#[derive(Clone)]
+pub struct Init {
+    pub owner: Address,
+}
+
+/// Emitted by `pause`. Empty payload — the topic alone carries the signal.
+#[contractevent]
+#[derive(Clone)]
+pub struct Pause {}
+
+/// Emitted by `unpause`.
+#[contractevent]
+#[derive(Clone)]
+pub struct Unpause {}
+
+/// Emitted by `transfer_ownership` after the new owner has been stored.
+#[contractevent(data_format = "single-value")]
+#[derive(Clone)]
+pub struct OwnXfer {
+    pub new_owner: Address,
+}
+
+/// Emitted by `upgrade`.
+#[contractevent(data_format = "single-value")]
+#[derive(Clone)]
+pub struct Upgrade {
+    pub new_wasm_hash: BytesN<32>,
+}
+
+/// Emitted on successful subscription creation.
+#[contractevent(data_format = "vec")]
+#[derive(Clone)]
+pub struct Create {
+    #[topic]
+    pub id: u64,
+    pub subscriber: Address,
+    pub recipient: Address,
+    pub amount: i128,
+    pub interval: u64,
+}
+
+/// Emitted by `trigger` after a successful single-cycle pull.
+#[contractevent(data_format = "vec")]
+#[derive(Clone)]
+pub struct Trigger {
+    #[topic]
+    pub id: u64,
+    pub subscriber: Address,
+    pub recipient: Address,
+    pub amount: i128,
+}
+
+/// Emitted by `trigger_n` after a successful multi-cycle pull. `cycles`
+/// reports how many cycles were actually settled (capped at `due_cycles`).
+#[contractevent(data_format = "vec")]
+#[derive(Clone)]
+pub struct TriggerN {
+    #[topic]
+    pub id: u64,
+    pub subscriber: Address,
+    pub recipient: Address,
+    pub total_amount: i128,
+    pub cycles: u64,
+}
+
+/// Emitted by `cancel`. Frontends listening for this event should prompt the
+/// subscriber to revoke their token allowance: `token.approve(contract, 0)`.
+#[contractevent(data_format = "single-value")]
+#[derive(Clone)]
+pub struct Cancel {
+    #[topic]
+    pub id: u64,
+    pub subscriber: Address,
 }
 
 #[contract]
@@ -62,54 +150,65 @@ impl SubscriptionContract {
     /// two-step `deploy` + `initialize` flow would expose.
     pub fn __constructor(env: Env, owner: Address) {
         owner.require_auth();
-        env.storage().instance().set(&DataKey::Owner, &owner);
-        env.storage().instance().set(&DataKey::Paused, &false);
+        // Governance flags live in PERSISTENT storage, not instance storage.
+        // Instance storage TTL-expires silently after a period of inactivity,
+        // and `unwrap_or(false)` on a missing `Paused` would default to
+        // "unpaused" — meaning a long emergency-pause window with no other
+        // successful calls to bump instance TTL could expire the entry and
+        // silently resume `create`/`trigger`, while admin entrypoints become
+        // unusable because `Owner` would also be gone. Persistent entries
+        // can be bumped indefinitely and, if archived, must be explicitly
+        // restored — their value is never silently "defaulted".
+        env.storage().persistent().set(&DataKey::Owner, &owner);
+        env.storage().persistent().set(&DataKey::Paused, &false);
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Owner, TTL_MIN, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Paused, TTL_MIN, TTL_BUMP);
+        // Bump the contract instance TTL so the contract itself stays alive.
         env.storage().instance().extend_ttl(TTL_MIN, TTL_BUMP);
-        env.events().publish((symbol_short!("init"),), owner);
+        Init { owner }.publish(&env);
     }
 
     /// Pause all payment triggers and new subscription creation. Owner only.
+    /// The `Paused` flag lives in persistent storage and its TTL is bumped
+    /// on every toggle so a prolonged pause window cannot silently expire.
     pub fn pause(env: Env) {
         Self::require_owner(&env);
-        env.storage().instance().set(&DataKey::Paused, &true);
+        env.storage().persistent().set(&DataKey::Paused, &true);
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Paused, TTL_MIN, TTL_BUMP);
         env.storage().instance().extend_ttl(TTL_MIN, TTL_BUMP);
-        env.events().publish((symbol_short!("pause"),), ());
+        Pause {}.publish(&env);
     }
 
     /// Resume normal operation. Owner only.
     pub fn unpause(env: Env) {
         Self::require_owner(&env);
-        env.storage().instance().set(&DataKey::Paused, &false);
+        env.storage().persistent().set(&DataKey::Paused, &false);
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Paused, TTL_MIN, TTL_BUMP);
         env.storage().instance().extend_ttl(TTL_MIN, TTL_BUMP);
-        env.events().publish((symbol_short!("unpause"),), ());
+        Unpause {}.publish(&env);
     }
 
-    /// Propose a new owner. The transfer is NOT complete until the
-    /// `new_owner` calls `accept_ownership` — guards against transferring to
-    /// a wrong or unresponsive address. Owner only.
+    /// Atomically transfer ownership. The transaction must carry signatures
+    /// from BOTH the current owner and the new owner — this rules out
+    /// transferring to a wrong or unresponsive address (the wrong key cannot
+    /// sign) without requiring a separate acceptance step.
     pub fn transfer_ownership(env: Env, new_owner: Address) {
         Self::require_owner(&env);
+        new_owner.require_auth();
+        env.storage().persistent().set(&DataKey::Owner, &new_owner);
         env.storage()
-            .instance()
-            .set(&DataKey::PendingOwner, &new_owner);
+            .persistent()
+            .extend_ttl(&DataKey::Owner, TTL_MIN, TTL_BUMP);
         env.storage().instance().extend_ttl(TTL_MIN, TTL_BUMP);
-        env.events()
-            .publish((symbol_short!("own_prop"),), new_owner);
-    }
-
-    /// Pending owner finalizes the transfer by providing their
-    /// signature. The pending slot is cleared on success.
-    pub fn accept_ownership(env: Env) {
-        let pending: Address = match env.storage().instance().get(&DataKey::PendingOwner) {
-            Some(p) => p,
-            None => panic_with_error!(&env, SubscriptionError::NoPendingOwner),
-        };
-        pending.require_auth();
-        env.storage().instance().set(&DataKey::Owner, &pending);
-        env.storage().instance().remove(&DataKey::PendingOwner);
-        env.storage().instance().extend_ttl(TTL_MIN, TTL_BUMP);
-        env.events()
-            .publish((symbol_short!("own_acc"),), pending);
+        OwnXfer { new_owner }.publish(&env);
     }
 
     /// Hot-swap the contract WASM. Owner only. Use to patch bugs without
@@ -119,8 +218,7 @@ impl SubscriptionContract {
         Self::require_owner(&env);
         env.deployer()
             .update_current_contract_wasm(new_wasm_hash.clone());
-        env.events()
-            .publish((symbol_short!("upgrade"),), new_wasm_hash);
+        Upgrade { new_wasm_hash }.publish(&env);
     }
 
     /// Create a new recurring subscription.
@@ -174,9 +272,10 @@ impl SubscriptionContract {
         let id: u64 = env
             .storage()
             .persistent()
-            .get(&DataKey::Counter)
+            .get::<_, u64>(&DataKey::Counter)
             .unwrap_or(0)
-            + 1;
+            .checked_add(1)
+            .unwrap_or_else(|| panic_with_error!(&env, SubscriptionError::ArithmeticOverflow));
         env.storage().persistent().set(&DataKey::Counter, &id);
         env.storage()
             .persistent()
@@ -193,10 +292,14 @@ impl SubscriptionContract {
         };
         env.storage().persistent().set(&DataKey::Sub(id), &sub);
         env.storage().persistent().extend_ttl(&DataKey::Sub(id), TTL_MIN, TTL_BUMP);
-        env.events().publish(
-            (symbol_short!("create"), id),
-            (subscriber, recipient, amount, interval),
-        );
+        Create {
+            id,
+            subscriber,
+            recipient,
+            amount,
+            interval,
+        }
+        .publish(&env);
         id
     }
 
@@ -252,10 +355,13 @@ impl SubscriptionContract {
             &amount,
         );
 
-        env.events().publish(
-            (symbol_short!("trigger"), id),
-            (subscriber, recipient, amount),
-        );
+        Trigger {
+            id,
+            subscriber,
+            recipient,
+            amount,
+        }
+        .publish(&env);
     }
 
     /// Batch-catch up to `count` consecutive due cycles in a single tx.
@@ -287,10 +393,19 @@ impl SubscriptionContract {
             panic_with_error!(&env, SubscriptionError::NotDue);
         }
 
-        // How many cycles are actually due as of `now`? Safe subtraction:
-        // we just verified `now >= next_payment`.
-        let elapsed = now - sub.next_payment;
-        let due_cycles: u64 = (elapsed / sub.interval) + 1;
+        // How many cycles are actually due as of `now`? Subtraction is safe
+        // by the `now >= next_payment` check above; division is safe because
+        // `interval >= 1` is enforced at creation. Both are written with
+        // checked arithmetic so any future invariant change cannot silently
+        // wrap or panic.
+        let elapsed = now
+            .checked_sub(sub.next_payment)
+            .unwrap_or_else(|| panic_with_error!(&env, SubscriptionError::ArithmeticOverflow));
+        let due_cycles: u64 = elapsed
+            .checked_div(sub.interval)
+            .unwrap_or_else(|| panic_with_error!(&env, SubscriptionError::ArithmeticOverflow))
+            .checked_add(1)
+            .unwrap_or_else(|| panic_with_error!(&env, SubscriptionError::ArithmeticOverflow));
         let cycles: u64 = (count as u64).min(due_cycles);
 
         // Style overflow guards on every arithmetic step.
@@ -324,10 +439,14 @@ impl SubscriptionContract {
             &total_amount,
         );
 
-        env.events().publish(
-            (symbol_short!("trigger_n"), id),
-            (subscriber, recipient, total_amount, cycles),
-        );
+        TriggerN {
+            id,
+            subscriber,
+            recipient,
+            total_amount,
+            cycles,
+        }
+        .publish(&env);
     }
 
     /// Cancel a subscription. Only the subscriber can cancel.
@@ -343,8 +462,11 @@ impl SubscriptionContract {
         env.storage().persistent().extend_ttl(&DataKey::Sub(id), TTL_MIN, TTL_BUMP);
         // Frontends listening for this event should prompt the subscriber to
         // revoke their token allowance: token.approve(contract_address, 0)
-        env.events()
-            .publish((symbol_short!("cancel"), id), sub.subscriber.clone());
+        Cancel {
+            id,
+            subscriber: sub.subscriber.clone(),
+        }
+        .publish(&env);
     }
 
     /// Read a subscription by id.
@@ -357,20 +479,31 @@ impl SubscriptionContract {
     }
 
     fn require_owner(env: &Env) {
-        let owner: Address = match env.storage().instance().get(&DataKey::Owner) {
+        let owner: Address = match env.storage().persistent().get(&DataKey::Owner) {
             Some(o) => o,
             None => panic_with_error!(env, SubscriptionError::NotInitialized),
         };
         owner.require_auth();
+        // Bump both the persistent Owner entry and the contract instance
+        // TTL so admin calls keep governance state and the contract alive.
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Owner, TTL_MIN, TTL_BUMP);
         env.storage().instance().extend_ttl(TTL_MIN, TTL_BUMP);
     }
 
+    /// Fail-closed paused check.
+    ///
+    /// A missing `Paused` entry is treated as `NotInitialized` rather than
+    /// defaulting to `false`. Combined with persistent storage, this means
+    /// that even if the governance state were somehow lost — archive
+    /// expiry, migration bug — the contract will refuse to pull tokens
+    /// rather than silently revert to "unpaused" while no admin can fix it.
     fn require_not_paused(env: &Env) {
-        let paused: bool = env
-            .storage()
-            .instance()
-            .get(&DataKey::Paused)
-            .unwrap_or(false);
+        let paused: bool = match env.storage().persistent().get(&DataKey::Paused) {
+            Some(p) => p,
+            None => panic_with_error!(env, SubscriptionError::NotInitialized),
+        };
         if paused {
             panic_with_error!(env, SubscriptionError::ContractPaused);
         }
@@ -684,29 +817,22 @@ mod tests {
         assert_eq!(id3, 3);
     }
 
-    // ========== Two-step ownership transfer ==========
+    // ========== Ownership transfer ==========
 
-    /// Happy path: propose + accept completes the transfer.
+    /// Happy path: a transfer carrying both signatures (mock_all_auths)
+    /// rotates ownership in a single transaction.
     #[test]
-    fn test_transfer_ownership_two_step_succeeds() {
+    fn test_transfer_ownership_succeeds() {
         let (env, client, _owner) = setup();
         let new_owner = Address::generate(&env);
         client.transfer_ownership(&new_owner);
-        client.accept_ownership();
-        // New owner (via mock_all_auths) can still exercise owner-only fns.
+        // The new owner (via mock_all_auths) can immediately exercise
+        // owner-only entrypoints.
         client.pause();
         client.unpause();
     }
 
-    /// Acceptance without a prior proposal must fail.
-    #[test]
-    #[should_panic]
-    fn test_accept_ownership_without_proposal_fails() {
-        let (_env, client, _owner) = setup();
-        client.accept_ownership();
-    }
-
-    /// `transfer_ownership` without owner auth must fail.
+    /// `transfer_ownership` without the current owner's auth must fail.
     #[test]
     #[should_panic]
     fn test_transfer_ownership_without_owner_auth_fails() {
@@ -716,16 +842,26 @@ mod tests {
         client.transfer_ownership(&attacker);
     }
 
-    /// After `transfer_ownership`, acceptance requires the pending owner's
-    /// signature — no anonymous acceptance.
+    /// `transfer_ownership` must also reject a tx where only the current
+    /// owner signed but the new owner did not — this is the scout-audit
+    /// regression for the *missing_new_admin_auth* finding.
     #[test]
     #[should_panic]
-    fn test_accept_ownership_without_pending_auth_fails() {
-        let (env, client, _owner) = setup();
+    fn test_transfer_ownership_without_new_owner_auth_fails() {
+        use soroban_sdk::testutils::{MockAuth, MockAuthInvoke};
+        use soroban_sdk::IntoVal;
+        let (env, client, owner) = setup();
         let new_owner = Address::generate(&env);
+        env.mock_auths(&[MockAuth {
+            address: &owner,
+            invoke: &MockAuthInvoke {
+                contract: &client.address,
+                fn_name: "transfer_ownership",
+                args: (new_owner.clone(),).into_val(&env),
+                sub_invokes: &[],
+            },
+        }]);
         client.transfer_ownership(&new_owner);
-        env.mock_auths(&[]);
-        client.accept_ownership();
     }
 
     // ========== Address validation in create ==========
@@ -770,6 +906,70 @@ mod tests {
     fn test_pause_without_owner_auth_fails() {
         let (env, client, _owner) = setup();
         env.mock_auths(&[]);
+        client.pause();
+    }
+
+    // ========== Governance state fail-closed (Almanax MEDIUM) ==========
+
+    /// Regression for the *instance TTL expiry bypass pause* finding.
+    ///
+    /// Simulates the scenario where the `Paused` entry is lost (archive
+    /// expiry, migration bug, etc.). With the previous design — `Paused`
+    /// in instance storage, read as `unwrap_or(false)` — the contract
+    /// would have silently defaulted to *unpaused* and let `trigger` pull
+    /// tokens again while the owner was unable to intervene.
+    ///
+    /// After the fix (persistent storage + fail-closed read), any
+    /// payment-moving entrypoint must panic when `Paused` is missing.
+    #[test]
+    #[should_panic]
+    fn test_trigger_fails_closed_when_paused_entry_missing() {
+        let (env, client, _) = setup();
+        let subscriber = Address::generate(&env);
+        let recipient = Address::generate(&env);
+        let token = deploy_token(&env, &subscriber);
+        let id = client.create(&subscriber, &token, &recipient, &100, &3600);
+        approve(&env, &token, &subscriber, &client.address, 1_000_000);
+
+        // Directly remove the persistent `Paused` entry from the contract's
+        // storage to simulate a lost governance flag.
+        env.as_contract(&client.address, || {
+            env.storage().persistent().remove(&DataKey::Paused);
+        });
+
+        env.ledger().with_mut(|l| l.timestamp += 3601);
+        client.trigger(&id);
+    }
+
+    /// `create` must also refuse to proceed when `Paused` is missing — the
+    /// fail-closed check applies to every entrypoint that goes through
+    /// `require_not_paused`.
+    #[test]
+    #[should_panic]
+    fn test_create_fails_closed_when_paused_entry_missing() {
+        let (env, client, _) = setup();
+        let subscriber = Address::generate(&env);
+        let recipient = Address::generate(&env);
+        let token = deploy_token(&env, &subscriber);
+
+        env.as_contract(&client.address, || {
+            env.storage().persistent().remove(&DataKey::Paused);
+        });
+
+        client.create(&subscriber, &token, &recipient, &100, &3600);
+    }
+
+    /// If the `Owner` entry is missing, admin entrypoints must panic with
+    /// `NotInitialized` rather than silently accept the caller.
+    #[test]
+    #[should_panic]
+    fn test_pause_fails_when_owner_entry_missing() {
+        let (env, client, _) = setup();
+
+        env.as_contract(&client.address, || {
+            env.storage().persistent().remove(&DataKey::Owner);
+        });
+
         client.pause();
     }
 
