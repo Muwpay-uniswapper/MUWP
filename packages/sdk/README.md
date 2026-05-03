@@ -147,10 +147,6 @@ bun run examples/03-multi-token-swap.ts   # multi-token EVM → XLM
 
 ```bash
 bun run build        # compile to dist/
-bun run test         # 19 tests across 5 suites
+bun run test         # 25 tests across 7 suites
 bunx tsc --noEmit    # type check
 ```
-
-## Grant Context
-
-This SDK is the core deliverable for the [MUWPAY Stellar Community Fund grant (#40)](../../docs/README.md). Full milestone documentation is in [`docs/`](../../docs/).
