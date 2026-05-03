@@ -484,11 +484,12 @@ impl SubscriptionContract {
             None => panic_with_error!(env, SubscriptionError::NotInitialized),
         };
         owner.require_auth();
-        // Bump both the persistent Owner entry and the contract instance
-        // TTL so admin calls keep governance state and the contract alive.
         env.storage()
             .persistent()
             .extend_ttl(&DataKey::Owner, TTL_MIN, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Paused, TTL_MIN, TTL_BUMP);
         env.storage().instance().extend_ttl(TTL_MIN, TTL_BUMP);
     }
 
@@ -499,6 +500,10 @@ impl SubscriptionContract {
     /// that even if the governance state were somehow lost — archive
     /// expiry, migration bug — the contract will refuse to pull tokens
     /// rather than silently revert to "unpaused" while no admin can fix it.
+    ///
+    /// Both governance keys (`Paused` and `Owner`) have their TTL bumped on
+    /// every successful call so that normal user activity (create / trigger /
+    /// trigger_n) keeps them alive without requiring periodic admin touch.
     fn require_not_paused(env: &Env) {
         let paused: bool = match env.storage().persistent().get(&DataKey::Paused) {
             Some(p) => p,
@@ -507,6 +512,12 @@ impl SubscriptionContract {
         if paused {
             panic_with_error!(env, SubscriptionError::ContractPaused);
         }
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Paused, TTL_MIN, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&DataKey::Owner, TTL_MIN, TTL_BUMP);
     }
 }
 
