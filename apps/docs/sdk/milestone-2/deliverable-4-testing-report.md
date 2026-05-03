@@ -16,18 +16,25 @@
 
 All transactions below are **actually broadcast** on the Stellar Testnet network (passphrase `Test SDF Network ; September 2015`).
 
-### Soroban subscription — full lifecycle on testnet
+### Soroban subscription contract
 
-MUWP contract deployed: [`CBOKTWNHNLCC253HVHAXR2557RRNA2RA6SNGRFFIVVB2WHTWCEBUAKJX`](https://stellar.expert/explorer/testnet/contract/CBOKTWNHNLCC253HVHAXR2557RRNA2RA6SNGRFFIVVB2WHTWCEBUAKJX) (WASM hash `e28c6ce2…b1c5`)
+The contract (`contracts/soroban/src/lib.rs`) is deployed on testnet — 37 / 37 Rust tests passing, security scan completed with 1 Low severity finding (resolved). Full documentation in `deliverable-3-soroban.md`.
 
-| Step | Result | Testnet tx hash |
+| Field | Value |
+|---|---|
+| Contract ID | [`CAH3T7NSZMZTX2KPKK5IKKMCKE4ZDYVK4OO64OISB6OY7W3OLS6OJJMP`](https://stellar.expert/explorer/testnet/contract/CAH3T7NSZMZTX2KPKK5IKKMCKE4ZDYVK4OO64OISB6OY7W3OLS6OJJMP) |
+| WASM hash | `5f72dd9ce62f3c7e3f7c21d428c5a1e7284edbbdeae9a7ec3e3727a6b98ef285` |
+| Upload tx | [`fa3402c8…`](https://stellar.expert/explorer/testnet/tx/fa3402c87d89f1cc01cb602477be456cd118711e3c2525ecf0ef3bd0cb0e2fc1) |
+| Deploy tx | [`86be0ca7…`](https://stellar.expert/explorer/testnet/tx/86be0ca7eaba38a3611817f610219cbb3dd57145db9352e039da83435523b698) |
+
+The full subscription lifecycle was exercised end-to-end on testnet. The `trigger` transaction emitted a real `transfer` event from the XLM SAC: subscriber → recipient, `10000000` stroops (1 XLM), pulled by the contract via `transfer_from`.
+
+| Step | Result | Tx hash |
 |---|---|---|
-| Upload WASM | success | [`db5540fd…`](https://stellar.expert/explorer/testnet/tx/db5540fd7730bd9e95bbe379590adf179c5b2c174e5066310365aaece94f5df7) |
-| Deploy contract | success | [`181df653…`](https://stellar.expert/explorer/testnet/tx/181df65325e9594de71319f7be4eded851b9650fa263019343c262d6c74e7842) |
-| `create` subscription | id=1 returned | [`65ea6245…`](https://stellar.expert/explorer/testnet/tx/65ea62458a143de081049b5b8a411f204681ab4df4d08dc600d6f03e73dc9963) |
-| `approve` (XLM SAC) | allowance 100 XLM | [`1d21c431…`](https://stellar.expert/explorer/testnet/tx/1d21c431d7e3dd02167c181708117033e199d7f30d63741f69ed6e17a4329ccf) |
-| `trigger` payment | **1 XLM transferred on-chain** | [`d61e1155…`](https://stellar.expert/explorer/testnet/tx/d61e1155f6bcb41b402cb694d59984bf3dee02eb01c846b70e116eddab81eb3b) |
-| `cancel` | `active=false` | [`8b7583b3…`](https://stellar.expert/explorer/testnet/tx/8b7583b3ac6505f943cdaac6a3c68f258e9a47855a3968227a29d6d4bea45ee1) |
+| `create` (subscriber, XLM SAC, recipient, 1 XLM, 60s) | id=1 returned, `Create` event emitted | [`71aa2744…`](https://stellar.expert/explorer/testnet/tx/71aa2744a1e84b1ce118330b6409644b012f5da1722485dcf2e8e0401d767b3e) |
+| `approve` (XLM SAC → contract, 100 XLM) | allowance set | [`e3d66eab…`](https://stellar.expert/explorer/testnet/tx/e3d66eab49b835e74cba23f72185e97c86b54958a283e35eb4f5a6ff486bff94) |
+| `trigger` (after 60s) | **1 XLM transferred on-chain**, `Trigger` event emitted | [`62622e13…`](https://stellar.expert/explorer/testnet/tx/62622e133f3cd30c6daf78df5b4f42c1b219103f8994a585a0d90c4090998ad4) |
+| `cancel` | `active=false`, `Cancel` event emitted | [`4fa14ecf…`](https://stellar.expert/explorer/testnet/tx/4fa14ecf60df945ad63c5027c316f550675bcae543d680444956be679eab10e1) |
 
 ### Stellar classic payment — testnet broadcast
 
@@ -89,7 +96,7 @@ Demonstrates the SDK's classic payment channel used as the destination for cross
 - Route validated and transaction data verified via `transactionRequestSchema.parseAsync()`
 - Real calldata captured: `to=0x367e59b559283C8506207d75B0c5D8C66c4Cd4B7`, function encoded toward the Hashport mainnet router.
 
-**RPC note:** The mainnet RPC is read from `process.env.MAINNET_RPC` (defined in `apps/web/.env`, historically QuickNode). Public fallback `https://eth.llamarpc.com` is used if the variable is missing. The URL is no longer hardcoded in `apps/web/lib/hashport/stepBuilder.ts`.
+**RPC note:** The mainnet RPC is read from `process.env.MAINNET_RPC` (defined in `apps/web/.env`). Public fallback `https://eth.llamarpc.com` is used if the variable is missing.
 
 ---
 
@@ -131,6 +138,22 @@ Demonstrates the SDK's classic payment channel used as the destination for cross
 
 ---
 
+## Soroban contract — Rust test suite
+
+The embedded Rust test suite covers the full contract surface: lifecycle (`create` / `trigger` / `trigger_n` / `cancel` / `get`), admin operations (`pause` / `unpause` / `transfer_ownership` / `upgrade`), input validation (amount, interval bounds, self-addressed token/recipient), reentrancy and CEI ordering, overflow guards via checked arithmetic, ID uniqueness, and the permissionless trigger invariant.
+
+```bash
+cd contracts/soroban && cargo test --lib
+```
+
+```
+test result: ok. 37 passed; 0 failed; 0 ignored
+```
+
+Release WASM build (`wasm32v1-none`) passes — binary deployed on testnet.
+
+---
+
 ## Full SDK suite
 
 ```
@@ -155,3 +178,4 @@ No regression on Milestone 1 tests.
 - The Hashport (EVM → Hedera) and LayerZero (EVM → Aptos) bridges pass their integration tests.
 - Concurrency is correctly handled: 10 parallel requests resolve in 2ms, 5 requests with 200ms network latency complete in 201ms (×5 parallelism confirmed).
 - Zero regression on the 19 Milestone 1 tests after adding the 6 Milestone 2 tests.
+- Soroban subscription contract: deployed and validated on testnet — 37 / 37 Rust tests passing, security scan (Almanax.ai) completed with 1 Low severity finding resolved before deployment, full lifecycle exercised on-chain (`create` → `approve` → `trigger` → `cancel`), 1 XLM transferred on-chain via `transfer_from`.
