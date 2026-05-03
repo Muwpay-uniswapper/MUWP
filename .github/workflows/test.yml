@@ -49,6 +49,7 @@ jobs:
           NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
           LIFI_API_KEY: ${{ secrets.LIFI_API_KEY }}
           MASTER_HD: ${{ secrets.MASTER_HD }}
+          MAINNET_RPC: ${{ secrets.MAINNET_RPC }}
         run: bun run test
 
   playwright-tests:
