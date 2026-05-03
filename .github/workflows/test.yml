@@ -69,7 +69,7 @@ jobs:
       - name: Install Playwright Browsers
         run: |
           cd apps/web
-          bunx playwright install --with-deps
+          bunx playwright install chromium --with-deps
 
       - name: Run Playwright tests
         env:
