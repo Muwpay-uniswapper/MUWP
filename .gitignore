@@ -229,3 +229,6 @@ deriveKey.ts
 .open-next
 
 certificates
+
+# Soroban
+test_snapshots
