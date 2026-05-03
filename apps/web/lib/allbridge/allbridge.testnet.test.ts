@@ -18,11 +18,11 @@
  * accordingly.
  */
 
-import { handleAllbridgeRoutes } from "@/app/api/quote/fetchRoutesAllBridge";
 import { describe, expect, it } from "bun:test";
 import { zeroAddress } from "viem";
-import { AllBridgeTxData } from "./txData";
+import { handleAllbridgeRoutes } from "@/app/api/quote/fetchRoutesAllBridge";
 import { transactionRequestSchema } from "../inngest/consumeStep";
+import { AllBridgeTxData } from "./txData";
 
 // Polygon USDC (bridgeable via Allbridge) → Stellar USDC
 const INPUT = {
@@ -54,74 +54,68 @@ const INPUT = {
 	],
 	distribution: [100],
 	options: { bridges: { deny: [] }, exchanges: { deny: [] } },
-} as const;
+};
 
 const TEMP_ACCOUNT = "0xD34FDA64241a3D3ba71041AC4BbFc188d795BF15";
 
 describe("Allbridge — cross-chain bridge integration", () => {
-	it(
-		"gets a quote from EVM to Stellar",
-		async () => {
-			const result = await handleAllbridgeRoutes(INPUT, TEMP_ACCOUNT);
+	it("gets a quote from EVM to Stellar", async () => {
+		const result = await handleAllbridgeRoutes(INPUT, TEMP_ACCOUNT);
 
-			console.log("Allbridge quote result:", JSON.stringify(result, null, 2));
+		console.log("Allbridge quote result:", JSON.stringify(result, null, 2));
 
-			expect(result).toBeDefined();
-			expect(result.routes).toBeDefined();
+		expect(result).toBeDefined();
+		expect(result.routes).toBeDefined();
 
-			// The route map is keyed by the input token address (zeroAddress for native POL)
-			const routeList = result.routes[zeroAddress];
-			expect(routeList).toBeDefined();
-			expect(routeList.length).toBeGreaterThan(0);
+		// The route map is keyed by the input token address (zeroAddress for native POL)
+		const routeList = result.routes[zeroAddress];
+		expect(routeList).toBeDefined();
+		expect(routeList.length).toBeGreaterThan(0);
 
-			const route = routeList[0];
-			expect(route).toBeDefined();
-			expect(route.steps.length).toBeGreaterThan(0);
+		const route = routeList[0];
+		expect(route).toBeDefined();
+		expect(route.steps.length).toBeGreaterThan(0);
 
-			// The last step must be the Allbridge bridge step
-			const bridgeStep = route.steps.at(-1)!;
-			expect(bridgeStep.tool).toBeDefined();
-			expect(bridgeStep.estimate?.toAmount).toBeDefined();
+		// The last step must be the Allbridge bridge step
+		const bridgeStep = route.steps.at(-1);
+		if (!bridgeStep) {
+			throw new Error("No bridge step found");
+		}
+		expect(bridgeStep.tool).toBeDefined();
+		expect(bridgeStep.estimate?.toAmount).toBeDefined();
 
-			console.log(
-				"Bridge step toAmount:",
-				bridgeStep.estimate?.toAmount,
-				"(destination token units)",
-			);
-		},
-		60_000, // 60 s — network calls to Allbridge API + LiFi can be slow
-	);
+		console.log(
+			"Bridge step toAmount:",
+			bridgeStep.estimate?.toAmount,
+			"(destination token units)",
+		);
+	}, 60_000); // 60 s — network calls to Allbridge API + LiFi can be slow
 
-	it(
-		"builds transaction data for the bridge step",
-		async () => {
-			const result = await handleAllbridgeRoutes(INPUT, TEMP_ACCOUNT);
+	it("builds transaction data for the bridge step", async () => {
+		const result = await handleAllbridgeRoutes(INPUT, TEMP_ACCOUNT);
 
-			const bridgeStep = result.routes[zeroAddress][0].steps.at(-1)!;
+		const bridgeStep = result.routes[zeroAddress][0].steps.at(-1);
+		if (!bridgeStep) {
+			throw new Error("No bridge step found");
+		}
 
-			const stepWithTx = await AllBridgeTxData(bridgeStep);
+		const stepWithTx = await AllBridgeTxData(bridgeStep);
 
-			console.log(
-				"AllBridgeTxData result:",
-				JSON.stringify(stepWithTx, null, 2),
-			);
+		console.log("AllBridgeTxData result:", JSON.stringify(stepWithTx, null, 2));
 
-			expect(stepWithTx).toBeDefined();
-			expect(stepWithTx.transactionRequest).toBeDefined();
+		expect(stepWithTx).toBeDefined();
+		expect(stepWithTx.transactionRequest).toBeDefined();
 
-			// Validate that the transaction request matches the expected schema
-			// (same validation performed by the Inngest consumeStep handler)
-			const transactionRequest =
-				await transactionRequestSchema.parseAsync(
-					stepWithTx.transactionRequest,
-				);
+		// Validate that the transaction request matches the expected schema
+		// (same validation performed by the Inngest consumeStep handler)
+		const transactionRequest = await transactionRequestSchema.parseAsync(
+			stepWithTx.transactionRequest,
+		);
 
-			expect(transactionRequest).toBeDefined();
-			// Must have a callable contract address
-			expect(transactionRequest.to).toBeDefined();
-			// Must carry encoded calldata
-			expect(transactionRequest.data).toBeDefined();
-		},
-		60_000,
-	);
+		expect(transactionRequest).toBeDefined();
+		// Must have a callable contract address
+		expect(transactionRequest.to).toBeDefined();
+		// Must carry encoded calldata
+		expect(transactionRequest.data).toBeDefined();
+	}, 60_000);
 });

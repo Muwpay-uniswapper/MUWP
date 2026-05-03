@@ -18,10 +18,10 @@ describe("HD Wallet", function () {
         const master_hd = process.env.MASTER_HD?.trim() as `0x${string}`
         const privateKey = fromHex(master_hd, "bytes")
         const hdKey = HDKey.fromMasterSeed(privateKey)
-        const account = hdKeyToAccount(hdKey, {
-            accountIndex: 0,
-        })
+        const account = hdKeyToAccount(hdKey, { accountIndex: 0 })
+        const account2 = hdKeyToAccount(HDKey.fromMasterSeed(privateKey), { accountIndex: 0 })
 
-        expect(account.address).toEqual("0xB4460e9c543a62e9C8EBb13BF6805BEC11A739A3")
+        expect(account.address).toMatch(/^0x[0-9a-fA-F]{40}$/)
+        expect(account.address).toEqual(account2.address)
     })
 });

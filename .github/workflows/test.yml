@@ -80,7 +80,6 @@ jobs:
           KV_REST_API_TOKEN: ${{ secrets.KV_REST_API_TOKEN }}
         run: |
           cd apps/web
-          bunx inngest-cli@latest dev &
           bunx playwright test --project=chromium
 
       - uses: actions/upload-artifact@v4
