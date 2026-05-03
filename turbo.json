@@ -25,7 +25,14 @@
     },
     "lint": {},
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "passThroughEnv": [
+        "MAINNET_RPC",
+        "LIFI_API_KEY",
+        "MASTER_HD",
+        "WALLET_PK",
+        "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID"
+      ]
     },
     "typecheck": {
       "dependsOn": ["^build"]
