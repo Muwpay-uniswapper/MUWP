@@ -52,6 +52,12 @@ export default withMermaid({
           ],
         },
         {
+          text: "Milestone 3",
+          items: [
+            { text: "Mainnet Launch", link: "/sdk/milestone-3/deliverable-5-mainnet" },
+          ],
+        },
+        {
           text: "Architecture",
           items: [
             { text: "Stellar Architecture", link: "/sdk/architecture/stellar-architecture" },
