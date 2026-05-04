@@ -1,6 +1,6 @@
 {
   "name": "@muwp/sdk",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "TypeScript SDK for MUWP wallet orchestration, asset management, and Stellar DEX swaps.",
   "license": "MIT",
   "type": "module",

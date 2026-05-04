@@ -30,7 +30,7 @@ export class SorobanSubscriptionService {
 		this.server = new SorobanRpc.Server(options.sorobanUrl, {
 			allowHttp: options.sorobanUrl.startsWith("http://"),
 		});
-		this.networkPassphrase = options.networkPassphrase ?? Networks.TESTNET;
+		this.networkPassphrase = options.networkPassphrase ?? Networks.PUBLIC;
 	}
 
 	async createSubscription(params: CreateSubscriptionParams): Promise<number> {
