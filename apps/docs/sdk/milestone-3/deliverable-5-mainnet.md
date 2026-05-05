@@ -91,7 +91,7 @@ A standalone Next.js demo app is available in [`apps/demo/`](https://github.com/
 
 ```bash
 git clone https://github.com/muwpay/muwp
-cd MUWP/apps/demo
+cd apps/demo
 cp .env.example .env   # fill in your keys
 bun install
 bun dev
