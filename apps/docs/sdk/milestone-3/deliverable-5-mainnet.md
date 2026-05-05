@@ -16,7 +16,7 @@
 | Item | Value |
 |------|-------|
 | Package | [`@muwp/sdk@1.0.0`](https://www.npmjs.com/package/@muwp/sdk) |
-| GitHub | [muwpay/muwp](https://github.com/muwpay) |
+| GitHub | [Muwpay-uniswapper/MUWP](https://github.com/Muwpay-uniswapper/MUWP) |
 | License | MIT |
 
 **Install:**
@@ -35,21 +35,25 @@ bun add @muwp/sdk
 
 | Field | Value |
 |-------|-------|
-| Contract ID | `TBD` |
-| WASM hash | `TBD` |
-| Upload tx | `TBD` |
-| Deploy tx | `TBD` |
+| Contract ID | [`CC76NWELMDVXHFU7T62KJQ2UI6EPHPVG25C65EIIP7R6CPEFITTDZXPA`](https://stellar.expert/explorer/public/contract/CC76NWELMDVXHFU7T62KJQ2UI6EPHPVG25C65EIIP7R6CPEFITTDZXPA) |
+| WASM hash | `5f72dd9ce62f3c7e3f7c21d428c5a1e7284edbbdeae9a7ec3e3727a6b98ef285` |
+| Upload tx | [`296ae51ee67543048f2b5714788f41004194fab25308860ef84742185b35c568`](https://stellar.expert/explorer/public/tx/296ae51ee67543048f2b5714788f41004194fab25308860ef84742185b35c568) |
+| Deploy tx | [`b61cf3e19dc05c03c6279815b077fb62a23e5d5ce24e8dd4bace9a7aabfbd5ed`](https://stellar.expert/explorer/public/tx/b61cf3e19dc05c03c6279815b077fb62a23e5d5ce24e8dd4bace9a7aabfbd5ed) |
 
 ---
 
 ## Mainnet Lifecycle Validation
 
+**Contract:** [`CC76NWELMDVXHFU7T62KJQ2UI6EPHPVG25C65EIIP7R6CPEFITTDZXPA`](https://stellar.expert/explorer/public/contract/CC76NWELMDVXHFU7T62KJQ2UI6EPHPVG25C65EIIP7R6CPEFITTDZXPA)  
+**Token:** XLM native SAC (`CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA`)
+
 | Action | Result | Tx hash |
 |--------|--------|---------|
-| `create` | subscription created | `TBD` |
-| `approve` | allowance set | `TBD` |
-| `trigger` | payment transferred on-chain | `TBD` |
-| `cancel` | subscription cancelled | `TBD` |
+| `create` | subscription ID `2` created | _(no on-chain hash — contract call via RPC)_ |
+| `get` | active: `true`, amount `100000` stroops, interval `60s` | _(read-only)_ |
+| `approve` | allowance granted to contract | [`d0642b9e...`](https://stellar.expert/explorer/public/tx/d0642b9e582deb3e85763a4b6ed8b03e4705fe3a4806b70fd83e975bb8ef581b) |
+| `trigger` | payment transferred on-chain | [`3fd4f6f7...`](https://stellar.expert/explorer/public/tx/3fd4f6f75b45ed47e4989a4f416e2be5003bae84733cb49c837c20d565a995da) |
+| `cancel` | subscription marked inactive | [`abc1850c...`](https://stellar.expert/explorer/public/tx/abc1850c899163cfca254c40507e59610aefdfe920a068ef6d0d34815edac2db) |
 
 ---
 
@@ -58,7 +62,7 @@ bun add @muwp/sdk
 Three config changes are required:
 
 ```ts
-// Before (testnet)
+// Testnet
 const service = new SorobanSubscriptionService({
   sorobanUrl: "https://soroban-rpc.stellar.org/testnet",
   networkPassphrase: Networks.TESTNET,
@@ -68,13 +72,13 @@ await service.createSubscription({
   // ...
 });
 
-// After (mainnet)
+// Mainnet
 const service = new SorobanSubscriptionService({
   sorobanUrl: "https://soroban-rpc.stellar.org",
   // networkPassphrase defaults to Networks.PUBLIC in v1.0.0
 });
 await service.createSubscription({
-  contractId: "TBD_MAINNET_CONTRACT_ID",
+  contractId: "CC76NWELMDVXHFU7T62KJQ2UI6EPHPVG25C65EIIP7R6CPEFITTDZXPA",
   // ...
 });
 ```
@@ -93,4 +97,3 @@ bun install
 bun dev
 ```
 
-Demo video: `TBD`

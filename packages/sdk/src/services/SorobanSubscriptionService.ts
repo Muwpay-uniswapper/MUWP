@@ -6,7 +6,7 @@ import {
 	Keypair,
 	Networks,
 	nativeToScVal,
-	SorobanRpc,
+	rpc,
 	scValToNative,
 	TransactionBuilder,
 } from "@stellar/stellar-sdk";
@@ -23,11 +23,11 @@ export interface SorobanSubscriptionServiceOptions {
 }
 
 export class SorobanSubscriptionService {
-	private readonly server: SorobanRpc.Server;
+	private readonly server: rpc.Server;
 	private readonly networkPassphrase: string;
 
 	constructor(options: SorobanSubscriptionServiceOptions) {
-		this.server = new SorobanRpc.Server(options.sorobanUrl, {
+		this.server = new rpc.Server(options.sorobanUrl, {
 			allowHttp: options.sorobanUrl.startsWith("http://"),
 		});
 		this.networkPassphrase = options.networkPassphrase ?? Networks.PUBLIC;
@@ -56,24 +56,25 @@ export class SorobanSubscriptionService {
 			.build();
 
 		const sim = await this.server.simulateTransaction(tx);
-		if (SorobanRpc.Api.isSimulationError(sim)) {
+		if (rpc.Api.isSimulationError(sim)) {
 			throw new Error(`Simulation failed: ${sim.error}`);
 		}
 
-		const assembled = SorobanRpc.assembleTransaction(tx, sim).build();
+		const assembled = rpc.assembleTransaction(tx, sim).build();
 		assembled.sign(kp);
 
 		const result = await this.server.sendTransaction(assembled);
 		await this.waitForConfirmation(result.hash);
 
 		const getResult = await this.server.getTransaction(result.hash);
-		if (getResult.status !== SorobanRpc.Api.GetTransactionStatus.SUCCESS) {
+		if (getResult.status !== rpc.Api.GetTransactionStatus.SUCCESS) {
 			throw new Error("createSubscription transaction failed");
 		}
 		if (!getResult.returnValue) {
 			throw new Error("No return value from createSubscription");
 		}
-		return scValToNative(getResult.returnValue) as number;
+		const native = scValToNative(getResult.returnValue);
+		return typeof native === "bigint" ? Number(native) : (native as number);
 	}
 
 	async triggerPayment(params: TriggerPaymentParams): Promise<string> {
@@ -95,11 +96,11 @@ export class SorobanSubscriptionService {
 			.build();
 
 		const sim = await this.server.simulateTransaction(tx);
-		if (SorobanRpc.Api.isSimulationError(sim)) {
+		if (rpc.Api.isSimulationError(sim)) {
 			throw new Error(`Simulation failed: ${sim.error}`);
 		}
 
-		const assembled = SorobanRpc.assembleTransaction(tx, sim).build();
+		const assembled = rpc.assembleTransaction(tx, sim).build();
 		assembled.sign(kp);
 
 		const result = await this.server.sendTransaction(assembled);
@@ -126,11 +127,11 @@ export class SorobanSubscriptionService {
 			.build();
 
 		const sim = await this.server.simulateTransaction(tx);
-		if (SorobanRpc.Api.isSimulationError(sim)) {
+		if (rpc.Api.isSimulationError(sim)) {
 			throw new Error(`Simulation failed: ${sim.error}`);
 		}
 
-		const assembled = SorobanRpc.assembleTransaction(tx, sim).build();
+		const assembled = rpc.assembleTransaction(tx, sim).build();
 		assembled.sign(kp);
 
 		const result = await this.server.sendTransaction(assembled);
@@ -157,7 +158,7 @@ export class SorobanSubscriptionService {
 			.build();
 
 		const sim = await this.server.simulateTransaction(tx);
-		if (SorobanRpc.Api.isSimulationError(sim)) {
+		if (rpc.Api.isSimulationError(sim)) {
 			throw new Error(`Simulation failed: ${sim.error}`);
 		}
 		if (!sim.result?.retval) {
@@ -184,8 +185,8 @@ export class SorobanSubscriptionService {
 		for (let i = 0; i < maxAttempts; i++) {
 			const result = await this.server.getTransaction(hash);
 			if (
-				result.status === SorobanRpc.Api.GetTransactionStatus.SUCCESS ||
-				result.status === SorobanRpc.Api.GetTransactionStatus.FAILED
+				result.status === rpc.Api.GetTransactionStatus.SUCCESS ||
+				result.status === rpc.Api.GetTransactionStatus.FAILED
 			) {
 				return;
 			}
