@@ -15,7 +15,7 @@ Transactions are signed server-side using `STELLAR_SECRET` from `.env`. This is 
 
 ```bash
 git clone https://github.com/muwpay/muwp
-cd MUWP/apps/demo
+cd apps/demo
 cp .env.example .env
 # Fill in STELLAR_SECRET and MAINNET_CONTRACT_ID in .env
 bun install
